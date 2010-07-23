@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Neociclo Accord - Open Source B2B Integration Suite
+    Copyright (C) 2005-2009 Neociclo, http://www.neociclo.com
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id: pom.xml 313 2010-05-07 15:37:28Z rmarins $
+
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <groupId>org.neociclo.accord</groupId>
+    <artifactId>accord-parent</artifactId>
+    <version>4</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.neociclo.accord.odetteftp</groupId>
+  <artifactId>odetteftp-parent</artifactId>
+  <name>Accord OdetteFTP :: Parent</name>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <description>
+      Accord OdetteFTP project
+  </description>
+
+  <licenses>
+    <license>
+      <name>GNU AFFERO GENERAL PUBLIC LICENSE v3</name>
+      <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>rafael.marins</id>
+      <name>Rafael Marins</name>
+      <organization>Neociclo</organization>
+      <timezone>BRST</timezone>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/accord/odetteftp/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/accord/odetteftp/trunk</developerConnection>
+    <url>http://websvn.ow2.org/listing.php?repname=accord&amp;path=/odetteftp/trunk/</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <useFile>false</useFile>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+          <encoding>iso-8859-1</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+      <!--+
+        | ========  Logging dependencies  ========
+        +-->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4j.version}</version>
+        <scope>test</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>com.sun.jdmk</groupId>
+            <artifactId>jmxtools</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jmx</groupId>
+            <artifactId>jmxri</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <!--+
+        | ========  Test-only dependencies  ========
+        +-->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>${easymock.version}</version>
+        <scope>test</scope>
+      </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.neociclo.accord.odetteftp</groupId>
+        <artifactId>core-oftp</artifactId>
+        <version>${accord-oftp-api.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.neociclo.accord.odetteftp</groupId>
+        <artifactId>forby-oftp</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.neociclo.accord.odetteftp</groupId>
+        <artifactId>camel-oftp</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+  </dependencyManagement>
+
+  <modules>
+    <module>core</module>
+    <module>camel-oftp</module>
+    <module>forby-oftp</module>
+    <module>cli-oftp<module>
+  </modules>
+
+  <properties>
+    <accord-oftp-api.version>1.2.0-SNAPSHOT</accord-oftp-api.version>
+
+    <slf4j.version>1.5.8</slf4j.version>
+    <log4j.version>1.2.16</log4j.version>
+    <junit.version>4.8.1</junit.version>
+    <easymock.version>2.5.2</easymock.version>
+  </properties>
+
+</project>

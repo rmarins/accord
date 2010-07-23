@@ -1,0 +1,53 @@
+          Apache Camel Odette FTP Component
+
+1. URI Specification
+
+One can specify an endpoint to connect to a Odette FTP server with this schema:
+
+(oftp|oftps)://[user[:pass]]@server[:port][?params]
+
+The protocol specifies:
+oftp  - default port 3305; SSL Disabled
+oftps - default port 6619; SSL Enabled
+
+The following parameters can be specified:
+
+- datasetName
+- originator
+- destination
+- userData
+- recordSize
+- recordFormat
+- fileDateTime
+- transferMode
+- bufferSize
+- windowSize
+- timeout
+- longFilename
+- initialDelay
+- delay
+- stb
+
+2. Route definition for OFTP transfer modes
+
+	from("direct:outbox")
+	  .to("oftp://user:pass@server:3305?param=value")
+	  .to("direct:inbox");
+
+The OFTP component exchanges an OFTPMessage object, which can contain an incoming/outgoing file or delivery notification, from/to the OFTP Remote Entity.
+
+As consumer, it will get a file or delivery notification as input typed as OFTPMessage, open an OFTP session and send this message. If one wants to send multiple messages in the same OFTP session, it must aggregate these messages into only one exchange (GroupedExchange). All messages will be sent through the same OFTP session in this case.
+
+As producer, it will produce an OFTPMessage for each file/notification received and send this message to the route.
+
+3. OFTPMessage processing
+
+The Camel OFTP Component defines two types of messages to be exchanged.
+
+- OFTPFileMessage         - incoming/outgoing file
+
+  This message identifies a file received or to be sent by an endpoint. If the consumer of an endpoint receives a different type of object, it will try to load the body as a java.io.File and load the virtual file info using parameters specified on the endpoint's URI.
+
+
+- OFTPNotificationMessage - incoming/outgoing delivery notification
+

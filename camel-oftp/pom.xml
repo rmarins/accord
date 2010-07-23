@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Neociclo Accord - Open Source B2B Integration Suite Copyright (c) 2005-2008 
+   Neociclo, http://www.neociclo.com This program is free software: you can redistribute 
+   it and/or modify it under the terms of the GNU General Public License as published 
+   by the Free Software Foundation, either version 3 of the License, or (at your option) 
+   any later version. This program is distributed in the hope that it will be useful, 
+   but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+   FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+   You should have received a copy of the GNU General Public License along with this 
+   program. If not, see <http://www.gnu.org/licenses/>. $Id: pom.xml 267 2010-04-22 
+   14:48:04Z brunoborges $ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+   <parent>
+      <groupId>org.neociclo.accord.components</groupId>
+      <artifactId>components-parent</artifactId>
+      <version>1.0-SNAPSHOT</version>
+   </parent>
+
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.neociclo.accord.components</groupId>
+   <artifactId>accord-camel-oftp</artifactId>
+   <packaging>jar</packaging>
+   <name>Accord Components :: Camel OFTP</name>
+   <description>Accord Odette FTP Component for Apache Camel</description>
+
+   <licenses>
+      <license>
+         <name>GNU GENERAL PUBLIC LICENSE</name>
+         <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+      </license>
+   </licenses>
+
+   <scm>
+      <connection>
+      scm:svn:http://svn.neociclo.org/codebase/accord/components/accord-camel-oftp/trunk
+    </connection>
+      <developerConnection>
+      scm:svn:https://${maven.user}@svn.neociclo.org/codebase/accord/components/accord-camel-oftp/trunk
+    </developerConnection>
+      <url>
+      http://svn.neociclo.org/viewcv/accord/components/accord-camel-oftp/trunk
+    </url>
+   </scm>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.apache.camel</groupId>
+         <artifactId>camel-core</artifactId>
+         <version>${camel.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.apache.camel</groupId>
+         <artifactId>camel-test</artifactId>
+         <version>${camel.version}</version>
+         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+         <groupId>org.neociclo.accord.components</groupId>
+         <artifactId>accord-oftp-api</artifactId>
+      </dependency>
+   </dependencies>
+
+   <properties>
+      <camel.version>2.3-SNAPSHOT</camel.version>
+   </properties>
+</project>

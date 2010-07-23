@@ -1,0 +1,263 @@
+/**
+ * Neociclo Accord, Open Source B2Bi Middleware
+ * Copyright (C) 2005-2009 Neociclo, http://www.neociclo.com
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id$
+ */
+package org.neociclo.odetteftp.util;
+
+import static org.junit.Assert.assertTrue;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createCompressedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createEnvelopedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromCompressedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromEnvelopedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromSignedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createSignedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.openCompressedDataContentStream;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.openEnvelopedDataContentStream;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.openSignedDataContentStream;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.parseEnvelopedData;
+import static org.neociclo.odetteftp.util.OftpTestUtil.getResourceFile;
+import static org.neociclo.odetteftp.util.OftpTestUtil.getTestDataDir;
+import static org.neociclo.odetteftp.util.SecurityUtil.getCertificateEntry;
+import static org.neociclo.odetteftp.util.SecurityUtil.getPrivateKey;
+import static org.neociclo.odetteftp.util.SecurityUtil.openCertificate;
+import static org.neociclo.odetteftp.util.SecurityUtil.openKeyStore;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+
+import org.junit.Test;
+import org.neociclo.odetteftp.protocol.v20.CipherSuite;
+
+/**
+ * @author Rafael Marins
+ * @version $Rev$ $Date$
+ */
+public class EnvelopingUtilTest {
+
+    private static final String TEST_FILE_PATH = "data/BR0307108.REM";
+
+    private static final String MY_CERT_PATH = "certificates/o0055partnera-public.cer";
+
+    private static final String MY_KS_PATH = "keystores/o0055partnera.p12";
+
+    private static final String PARTNER_CERT_PATH = "certificates/o0055partnerb-public.cer";
+
+    private static final String PARTNER_KS_PATH = "keystores/o0055partnerb.p12";
+
+    private static final String TEST_KEYSTORE_PASSWORD = "neociclo";
+
+    private static final CipherSuite CIPHER_SELECTION = CipherSuite.TRIPLEDES_RSA_SHA1;
+
+    public static void compress(File input, File output) throws Exception {
+        createCompressedData(input, output);
+    }
+
+    public static void uncompress(File input, File output) throws Exception {
+        createFileFromCompressedData(input, output);
+    }
+
+    public static void envelope(File input, File output) throws Exception {
+
+        // load public certificate
+        File partnerCertFile = getResourceFile(PARTNER_CERT_PATH);
+        X509Certificate partnerCert = (X509Certificate) openCertificate(partnerCertFile);
+
+        createEnvelopedData(input, output, CIPHER_SELECTION, partnerCert);
+
+    }
+
+    public static void unenvelope(File input, File output) throws Exception {
+
+        char[] pwd = TEST_KEYSTORE_PASSWORD.toCharArray();
+        File recipientKsFile = getResourceFile(PARTNER_KS_PATH);
+        KeyStore recKs = openKeyStore(recipientKsFile, pwd);
+        X509Certificate recCert = getCertificateEntry(recKs);
+        PrivateKey recKey = getPrivateKey(recKs, pwd);
+
+        createFileFromEnvelopedData(input, output, recCert, recKey);
+
+    }
+
+    public static void addSignature(File input, File output) throws Exception {
+
+        // load the keystore and the private-key
+        char[] pwd = TEST_KEYSTORE_PASSWORD.toCharArray();
+        File myKsFile = getResourceFile(MY_KS_PATH);
+        KeyStore myKs = openKeyStore(myKsFile, pwd);
+        PrivateKey myKey = getPrivateKey(myKs, pwd);
+        X509Certificate myCert = getCertificateEntry(myKs);
+
+        createSignedData(input, output, CIPHER_SELECTION, myCert, myKey);
+
+    }
+
+    public static void removeSignature(File input, File output) throws Exception {
+        // load public certificate
+        File myCertFile = getResourceFile(MY_CERT_PATH);
+        X509Certificate myCert = (X509Certificate) openCertificate(myCertFile);
+
+        createFileFromSignedData(input, output, myCert);
+    }
+
+    @Test
+    public void testAuthenticationChallengeEnveloping() throws Exception {
+
+        char[] pwd = TEST_KEYSTORE_PASSWORD.toCharArray();
+        byte[] challenge = OftpUtil.generateRandomChallenge(OdetteFtpConstants.AUTHENTICATION_CHALLENGE_SIZE);
+
+        // load public certificate
+        File pubCert = getResourceFile(PARTNER_CERT_PATH);
+        X509Certificate cert = (X509Certificate) openCertificate(pubCert);
+
+        // generate the CMS EnvelopedData (encrypted) using the public
+        // certificate
+        byte[] encryptedData = createEnvelopedData(challenge, CIPHER_SELECTION, cert);
+
+        // load the keystore and the private-key
+        File ksFile = getResourceFile(PARTNER_KS_PATH);
+        KeyStore ks = openKeyStore(ksFile, pwd);
+        PrivateKey privateKey = getPrivateKey(ks, pwd);
+        X509Certificate myCert = getCertificateEntry(ks);
+
+        // unveil the encrypted value from parsing the CMS EnvelopedData using
+        // the private-key
+        byte[] decrypted = parseEnvelopedData(encryptedData, myCert, privateKey);
+        assertTrue("Challenges are not equals.", Arrays.equals(challenge, decrypted));
+
+        // make sure that a String can accommodate the challenge byte array
+        // without loss
+        String challengeText = new String(decrypted);
+        assertTrue("Challenge lost when converting from String.", Arrays.equals(decrypted, challengeText.getBytes()));
+
+    }
+
+    @Test
+    public void testFullCmsEnvelopingInline() throws Exception {
+
+        File data = getResourceFile(TEST_FILE_PATH);
+        File output = new File(getTestDataDir(), data.getName() + ".fullCms");
+
+        // load public certificate
+        File partnerCertFile = getResourceFile(PARTNER_CERT_PATH);
+        X509Certificate partnerCert = (X509Certificate) openCertificate(partnerCertFile);
+
+        // load the keystore and the private-key
+        char[] pwd = TEST_KEYSTORE_PASSWORD.toCharArray();
+        File myKsFile = getResourceFile(MY_KS_PATH);
+        KeyStore myKs = openKeyStore(myKsFile, pwd);
+        PrivateKey myKey = getPrivateKey(myKs, pwd);
+        X509Certificate myCert = getCertificateEntry(myKs);
+
+        FileOutputStream outStream = new FileOutputStream(output);
+
+        OutputStream signingStream = openSignedDataContentStream(outStream, CIPHER_SELECTION, myCert, myKey);
+        OutputStream envelopingStream = openEnvelopedDataContentStream(signingStream, CIPHER_SELECTION, partnerCert);
+        OutputStream compressingStream = openCompressedDataContentStream(envelopingStream);
+
+        FileInputStream dataStream = new FileInputStream(data);
+        IoUtil.copyStream(dataStream, compressingStream);
+
+        // XXX very important to preserve this order when closing
+
+        compressingStream.flush();
+        compressingStream.close();
+
+        envelopingStream.flush();
+        envelopingStream.close();
+
+        signingStream.flush();
+        signingStream.close();
+
+        outStream.flush();
+        outStream.close();
+
+        assertTrue("File doesn't exists: " + output.getAbsolutePath(), output.exists());
+
+        // FileUtils.deleteQuietly(output);
+
+
+        File unsigned = new File(getTestDataDir(), data.getName() + ".7th");
+        File unenveloped = new File(getTestDataDir(), data.getName() + ".8th");
+        File uncompressed = new File(getTestDataDir(), data.getName() + ".9th");
+
+        removeSignature(output, unsigned);
+        unenvelope(unsigned, unenveloped);
+        uncompress(unenveloped, uncompressed);
+
+    }
+
+    @Test
+    public void testThreeStepsCmsEnveloping() throws Exception {
+
+        // -----------------------------------------------------
+        // Compress, Encrypt and Sign
+        // -----------------------------------------------------
+
+        File inputData = getResourceFile(TEST_FILE_PATH);
+
+        File compressed = new File(getTestDataDir(), inputData.getName() + ".1st");
+        File enveloped = new File(getTestDataDir(), inputData.getName() + ".2nd");
+        File signed = new File(getTestDataDir(), inputData.getName() + ".3rd");
+
+        compress(inputData, compressed);
+        envelope(compressed, enveloped);
+        addSignature(enveloped, signed);
+
+        // -----------------------------------------------------
+        // Remove Signature, Decrypt, Uncompress
+        // -----------------------------------------------------
+
+        File unsigned = new File(getTestDataDir(), inputData.getName() + ".4th");
+        File unenveloped = new File(getTestDataDir(), inputData.getName() + ".5th");
+        File uncompressed = new File(getTestDataDir(), inputData.getName() + ".6th");
+
+        removeSignature(signed, unsigned);
+        unenvelope(unsigned, unenveloped);
+        uncompress(unenveloped, uncompressed);
+
+        // -----------------------------------------------------
+        // ASSERTION
+        // -----------------------------------------------------
+
+    }
+
+    @Test
+    public void testCompressedData() throws Exception {
+        File data = getResourceFile(TEST_FILE_PATH);
+        File output = new File(getTestDataDir(), data.getName() + ".compressedData");
+        createCompressedData(data, output);
+
+        File data2nd = new File(getTestDataDir(), data.getName() + ".2nd");
+        createFileFromCompressedData(output, data2nd);
+
+        byte[] hash1 = SecurityUtil.computeFileHash(data, "MD5");
+        byte[] hash2 = SecurityUtil.computeFileHash(data2nd, "MD5");
+
+        assertTrue("Original file and decompressed data file content are not equal.", Arrays.equals(hash1, hash2));
+
+        output.delete();
+        data2nd.delete();
+    }
+
+}

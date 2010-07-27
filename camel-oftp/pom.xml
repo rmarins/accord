@@ -13,36 +13,23 @@
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
    <parent>
-      <groupId>org.neociclo.accord.components</groupId>
-      <artifactId>components-parent</artifactId>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>odetteftp-parent</artifactId>
       <version>1.0-SNAPSHOT</version>
    </parent>
 
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.neociclo.accord.components</groupId>
-   <artifactId>accord-camel-oftp</artifactId>
+   <artifactId>camel-oftp</artifactId>
    <packaging>jar</packaging>
-   <name>Accord Components :: Camel OFTP</name>
+   <name>Accord OdetteFTP :: Camel OFTP</name>
    <description>Accord Odette FTP Component for Apache Camel</description>
 
    <licenses>
       <license>
-         <name>GNU GENERAL PUBLIC LICENSE</name>
-         <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+         <name>GNU AFERRO GENERAL PUBLIC LICENSE</name>
+         <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
       </license>
    </licenses>
-
-   <scm>
-      <connection>
-      scm:svn:http://svn.neociclo.org/codebase/accord/components/accord-camel-oftp/trunk
-    </connection>
-      <developerConnection>
-      scm:svn:https://${maven.user}@svn.neociclo.org/codebase/accord/components/accord-camel-oftp/trunk
-    </developerConnection>
-      <url>
-      http://svn.neociclo.org/viewcv/accord/components/accord-camel-oftp/trunk
-    </url>
-   </scm>
 
    <dependencies>
       <dependency>
@@ -59,8 +46,8 @@
       </dependency>
 
       <dependency>
-         <groupId>org.neociclo.accord.components</groupId>
-         <artifactId>accord-oftp-api</artifactId>
+         <groupId>org.neociclo.accord.odetteftp</groupId>
+         <artifactId>core-oftp</artifactId>
       </dependency>
    </dependencies>
 

@@ -24,21 +24,20 @@
    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
    <parent>
-      <artifactId>components-parent</artifactId>
-      <groupId>org.neociclo.accord.components</groupId>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>odetteftp-parent</artifactId>
       <version>1.0-SNAPSHOT</version>
    </parent>
 
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.neociclo.accord.components</groupId>
-   <artifactId>accord-oftpcmd</artifactId>
+   <artifactId>cli-oftp</artifactId>
    <version>1.0-SNAPSHOT</version>
-   <name>Accord Components :: OFTP Command-line Interface</name>
+   <name>Accord OdetteFTP :: OFTP Command-line Interface</name>
 
    <dependencies>
       <dependency>
-         <groupId>org.neociclo.accord.components</groupId>
-         <artifactId>accord-filetransfer-oftp</artifactId>
+         <groupId>org.neociclo.accord.odetteftp</groupId>
+         <artifactId>core-oftp</artifactId>
       </dependency>
       <dependency>
          <groupId>commons-cli</groupId>
@@ -46,7 +45,7 @@
          <version>1.2</version>
       </dependency>
       <dependency>
-         <groupId>org.neociclo.tools</groupId>
+         <groupId>org.neociclo.accord.components</groupId>
          <artifactId>gshell-bootstrap</artifactId>
          <version>1.0.1</version>
       </dependency>
@@ -74,7 +73,7 @@
                <descriptors>
                   <descriptor>src/main/assembly/bin.xml</descriptor>
                </descriptors>
-               <finalName>accord-oftpcmd-${version}</finalName>
+               <finalName>accord-cli-oftp-${version}</finalName>
             </configuration>
          </plugin>
 
@@ -83,7 +82,7 @@
             <artifactId>ianal-maven-plugin</artifactId>
             <configuration>
                <searchPaths>
-                  <searchPath>accord-oftpcmd-${version}</searchPath>
+                  <searchPath>accord-cli-oftp-${version}</searchPath>
                </searchPaths>
             </configuration>
          </plugin>

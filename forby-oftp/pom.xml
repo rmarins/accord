@@ -4,26 +4,25 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>components-parent</artifactId>
-    <groupId>org.neociclo.accord.components</groupId>
+    <groupId>org.neociclo.accord.odetteftp</groupId>
+    <artifactId>odetteftp-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.neociclo.accord.components</groupId>
   <artifactId>accord-filetransfer-oftp</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <name>Accord Components :: File Transfer Impl for OFTP</name>
+  <name>Accord OdetteFTP :: Forby Provider</name>
 
   <dependencies>
 
     <dependency>
-      <groupId>org.neociclo.accord.components</groupId>
-      <artifactId>accord-filetransfer</artifactId>
+      <groupId>org.neociclo.accord.forby</groupId>
+      <artifactId>forby-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.neociclo.accord.components</groupId>
-      <artifactId>accord-oftp-api</artifactId>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>core-oftp</artifactId>
     </dependency>
 
   </dependencies>

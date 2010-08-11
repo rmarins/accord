@@ -189,7 +189,7 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
         // properly on shutdown. If the added channel is closed before shutdown,
         // it will be removed from the group automatically.
         if (channelGroup != null) {
-            channelGroup.add(ctx.getChannel());
+            channelGroup.add(e.getChannel());
         }
 
         super.channelOpen(ctx, e);

@@ -147,7 +147,7 @@
       <dependency>
         <groupId>org.neociclo.accord.odetteftp</groupId>
         <artifactId>core-oftp</artifactId>
-        <version>${accord-oftp-api.version}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
@@ -169,11 +169,10 @@
     <module>camel-oftp</module>
     <module>forby-oftp</module>
     <module>cli-oftp</module>
+    <module>examples</module>
   </modules>
 
   <properties>
-    <accord-oftp-api.version>1.2.0-SNAPSHOT</accord-oftp-api.version>
-
     <slf4j.version>1.5.8</slf4j.version>
     <log4j.version>1.2.16</log4j.version>
     <junit.version>4.8.1</junit.version>

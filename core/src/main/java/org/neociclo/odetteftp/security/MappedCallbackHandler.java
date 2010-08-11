@@ -54,8 +54,7 @@ public class MappedCallbackHandler implements CallbackHandler {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Callback> void addHandler(Class<T> type, OneToOneHandler handler) {
+    public <T extends Callback> void addHandler(Class<T> type, OneToOneHandler<Callback> handler) {
         handlers.put(type, handler);
     }
 

@@ -32,6 +32,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.util.Timer;
+import org.jboss.netty.util.internal.ExecutorUtil;
 import org.neociclo.odetteftp.EntityType;
 import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.netty.OdetteFtpPipelineFactory;
@@ -44,6 +45,7 @@ import org.neociclo.odetteftp.oftplet.OftpletFactory;
 public class TcpClient extends Client {
 
     private Executor executor;
+    private boolean instanceManagedExecutor;
 
     private InetSocketAddress remoteAddress;
     private SSLEngine sslEngine;
@@ -71,6 +73,7 @@ public class TcpClient extends Client {
 
         if (executor == null) {
             executor = Executors.newCachedThreadPool();
+            instanceManagedExecutor = true;
         }
 
         ChannelFactory factory = new NioClientSocketChannelFactory(executor, executor);
@@ -109,6 +112,13 @@ public class TcpClient extends Client {
         return executor;
     }
 
+	/**
+	 * The Executor which was specified should be terminated manually by calling
+	 * {@link ExecutorUtil#terminate(Executor...)} when your application shuts
+	 * down.
+	 * 
+	 * @param executor
+	 */
     public void setExecutor(Executor executor) {
         if (getChannel() != null) {
             throw new IllegalStateException("Channel already created. Executor must be set before connect.");
@@ -117,4 +127,11 @@ public class TcpClient extends Client {
         this.executor = executor;
     }
 
+    @Override
+    protected void releaseExternalResources() {
+    	if (instanceManagedExecutor) {
+    		ExecutorUtil.terminate(executor);
+    	}
+    	super.releaseExternalResources();
+    }
 }

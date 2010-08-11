@@ -47,10 +47,11 @@ public abstract class Client {
 
     private Channel channel;
     private Timer timer;
+    private boolean instanceManagedTimer;
 
     private boolean connected;
 
-    private Runnable disconnectListener;
+    protected Runnable disconnectListener;
 
     public Client(OftpletFactory oftpletFactory) {
         this.oftpletFactory = oftpletFactory;
@@ -66,6 +67,7 @@ public abstract class Client {
 
         if (timer == null) {
             timer = new HashedWheelTimer();
+            instanceManagedTimer = true;
         }
 
         ChannelPipelineFactory pipelineFactory = getPipelineFactory(oftpletFactory, timer);
@@ -110,7 +112,7 @@ public abstract class Client {
                 LOGGER.info("Disconnected.");
                 setDisconnected();
                 if (getDisconnectListener() != null) {
-                    getDisconnectListener().run();
+                	getDisconnectListener().run();
                 }
             }
         };
@@ -119,6 +121,7 @@ public abstract class Client {
         // need await disconnect
         if (await) {
             awaitDisconnect();
+            releaseExternalResources();
         }
 
     }
@@ -154,6 +157,8 @@ public abstract class Client {
             throw e;
         }
 
+        releaseExternalResources();
+
     }
 
     protected abstract SocketAddress getRemoteAddress();
@@ -181,8 +186,19 @@ public abstract class Client {
         return timer;
     }
 
+	/**
+	 * The Timer which was specified should be stopped manually by calling
+	 * {@link Timer#stop()} when your application shuts down.
+	 * 
+	 * @param timer
+	 */
     public void setTimer(Timer timer) {
         this.timer = timer;
     }
 
+    protected void releaseExternalResources() {
+    	if (instanceManagedTimer) {
+    		timer.stop();
+    	}
+    }
 }

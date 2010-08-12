@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>accord-filetransfer-oftp</artifactId>
+  <artifactId>forby-oftp</artifactId>
   <name>Accord Odette FTP :: Forby Provider</name>
 
   <dependencies>

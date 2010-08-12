@@ -21,7 +21,7 @@
    <modelVersion>4.0.0</modelVersion>
    <artifactId>camel-oftp</artifactId>
    <packaging>jar</packaging>
-   <name>Accord OdetteFTP :: Camel OFTP</name>
+   <name>Accord Odette FTP :: Camel OFTP</name>
    <description>Accord Odette FTP Component for Apache Camel</description>
 
    <licenses>

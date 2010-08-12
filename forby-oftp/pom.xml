@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>accord-filetransfer-oftp</artifactId>
-  <name>Accord OdetteFTP :: Forby Provider</name>
+  <name>Accord Odette FTP :: Forby Provider</name>
 
   <dependencies>
 

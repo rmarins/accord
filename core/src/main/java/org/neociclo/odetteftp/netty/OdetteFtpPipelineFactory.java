@@ -100,8 +100,8 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
         if (sslHandler != null) {
             if (entityType == EntityType.INITIATOR) {
                 p.addLast("sslHandshaker", new SimpleChannelHandler() {
-                    @Override
-                    public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+                	@Override
+                	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
                         LOGGER.debug("Starting SSL/TLS client (Initiator) handshake.");
                         sslHandler.handshake();
                         p.remove("sslHandshaker");

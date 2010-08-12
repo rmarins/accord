@@ -106,7 +106,7 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
                         sslHandler.handshake();
                         p.remove("sslHandshaker");
                         
-                        super.channelOpen(ctx, e);
+                        super.channelConnected(ctx, e);
                     }
                 });
             }

@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.neociclo.accord</groupId>
     <artifactId>accord-parent</artifactId>
-    <version>1.6</version>
+    <version>1.6-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -43,6 +43,13 @@
       <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <site>
+      <id>ow2-repo</id>
+      <url>scpexe://forge.objectweb.org/var/lib/gforge/chroot/home/groups/accord/htdocs/odetteftp/${project.artifactId}</url>
+    </site>
+  </distributionManagement>
 
   <developers>
     <developer>
@@ -68,6 +75,13 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <useFile>false</useFile>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <configuration>
+            <siteDirectory>site</siteDirectory>
           </configuration>
         </plugin>
       </plugins>
@@ -155,8 +169,10 @@
   <modules>
     <module>core</module>
     <module>camel-oftp</module>
+<!--
     <module>forby-oftp</module>
     <module>cli-oftp</module>
+-->
     <module>examples</module>
   </modules>
 

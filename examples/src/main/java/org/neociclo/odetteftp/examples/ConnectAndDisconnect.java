@@ -51,9 +51,4 @@ public class ConnectAndDisconnect {
 
 	}
 
-	private static void printUsage() {
-		System.out
-				.println("ConnectAndDisconnect <host> <port> <user-code> <user-password>");
-		System.out.println();
-	}
 }

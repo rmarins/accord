@@ -22,6 +22,7 @@ package org.neociclo.odetteftp.examples.support;
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.oftplet.OftpletAdapter;
+import org.neociclo.odetteftp.protocol.EndSessionException;
 import org.neociclo.odetteftp.security.SecurityContext;
 
 /**
@@ -49,4 +50,13 @@ public class DefaultOftplet extends OftpletAdapter {
 		return securityContext;
 	}
 
+	@Override
+	public void onExceptionCaught(Throwable cause) {
+		if (cause instanceof EndSessionException) {
+			EndSessionException es = (EndSessionException) cause;
+			System.err.println("SESSION ERROR: " + es.getReason());
+		} else {
+			System.err.print("GENERAL ERROR - " + cause);
+		}
+	}
 }

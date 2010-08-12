@@ -66,8 +66,8 @@ public class ExternalReceiveFilesTest extends AbstractTcpClientExternal {
 
                 File saveToFile = createIncomingFile(virtualFile);
 
-                virtualFile.setFile(saveToFile);
                 DefaultStartFileResponse response = new DefaultStartFileResponse(true);
+                response.setFile(saveToFile);
 
                 return response;
             }

@@ -19,6 +19,8 @@
  */
 package org.neociclo.odetteftp.oftplet;
 
+import java.io.File;
+
 import org.neociclo.odetteftp.protocol.AnswerReason;
 
 /**
@@ -48,5 +50,10 @@ public interface StartFileResponse {
      * @return
      */
     long getRestartOffset();
+
+	/**
+	 * @return
+	 */
+	File getFile();
 
 }

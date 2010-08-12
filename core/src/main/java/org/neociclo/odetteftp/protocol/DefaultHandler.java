@@ -168,7 +168,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         }
 
-        final VirtualFile virtualFile = buildVirtualFileObject(session, sfid);
+        final DefaultVirtualFile virtualFile = buildVirtualFileObject(session, sfid);
 
         /* Fire exception when file size is over the protocol limit. */
         long fileSize = virtualFile.getSize();
@@ -222,6 +222,8 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
             return;
         }
+
+        virtualFile.setFile(response.getFile());
 
         // Open file channel and keep object in session
         FileChannel fileChannel = null;
@@ -1200,7 +1202,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
     protected abstract CommandExchangeBuffer buildReadyToReceiveCommand();
 
-    protected abstract VirtualFile buildVirtualFileObject(OdetteFtpSession session, CommandExchangeBuffer sfid) throws OdetteFtpException;
+    protected abstract DefaultVirtualFile buildVirtualFileObject(OdetteFtpSession session, CommandExchangeBuffer sfid) throws OdetteFtpException;
 
     protected abstract DeliveryNotification buildEndToEndResponse(CommandExchangeBuffer eerp);
 

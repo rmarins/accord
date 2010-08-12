@@ -19,6 +19,8 @@
  */
 package org.neociclo.odetteftp.protocol;
 
+import java.io.File;
+
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
 
 /**
@@ -33,6 +35,8 @@ public class DefaultStartFileResponse implements StartFileResponse {
     private AnswerReason reason;
     private String reasonText;
     private boolean retryLater;
+
+    private File file;
 
     public DefaultStartFileResponse(boolean accepted) {
         super();
@@ -72,5 +76,13 @@ public class DefaultStartFileResponse implements StartFileResponse {
     public boolean retryLater() {
         return retryLater;
     }
+
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
+	}
 
 }

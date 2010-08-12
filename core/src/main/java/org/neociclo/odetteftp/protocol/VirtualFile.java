@@ -37,6 +37,4 @@ public interface VirtualFile extends OdetteFtpObject {
 
     File getFile();
 
-    void setFile(File payload);
-
 }

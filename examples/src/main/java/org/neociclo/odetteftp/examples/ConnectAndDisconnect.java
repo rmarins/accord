@@ -32,32 +32,28 @@ public class ConnectAndDisconnect {
 
 	public static void main(String[] args) throws Exception {
 
-		if (args.length != 4) {
-			System.err.println("Incorrect number of arguments.");
-			System.err.println();
+		MainSupport ms = new MainSupport(ConnectAndDisconnect.class, "server",
+				"port", "odetteid", "password");
 
-			printUsage();
-			System.exit(-1);
-		}
-
-		String host = args[0];
-		int port = Integer.parseInt(args[1]);
-		String usercode = args[2];
-		String password = args[3];
+		String server = ms.get(0);
+		int port = Integer.parseInt(ms.get(1));
+		String odetteid = ms.get(2);
+		String password = ms.get(3);
 
 		SessionConfig conf = new SessionConfig();
-		conf.setUserCode(usercode);
+		conf.setUserCode(odetteid);
 		conf.setUserPassword(password);
 
 		OftpletFactory factory = new DefaultOftpletFactory(conf);
-		TcpClient oftp = new TcpClient(host, port, factory);
+		TcpClient oftp = new TcpClient(server, port, factory);
 
 		oftp.connect(true);
 
 	}
 
 	private static void printUsage() {
-		System.out.println("ConnectAndDisconnect <host> <port> <user-code> <user-password>");
+		System.out
+				.println("ConnectAndDisconnect <host> <port> <user-code> <user-password>");
 		System.out.println();
 	}
 }

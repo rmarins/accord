@@ -44,7 +44,7 @@ public class MainSupport {
 		int index = 0;
 		for (String p : parameters) {
 			String property = System.getProperty(p, getFileProperty(p));
-			if (args.length > index && property == null) {
+			if (args.length > index && (property == null || property.trim().length() == 0)) {
 				property = args[index];
 			}
 

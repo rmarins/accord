@@ -40,13 +40,9 @@ public class SendFile {
 
 	public static void main(String[] args) throws Exception {
 
-		if (args.length != 5) {
-			System.err.println("Incorrect number of arguments.");
-			System.err.println();
-
-			printUsage();
-			System.exit(-1);
-		}
+		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
+				"payload");
+		args = ms.args();
 
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
@@ -61,8 +57,8 @@ public class SendFile {
 
 		Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
-        DefaultVirtualFile vf = new DefaultVirtualFile();
-        vf.setFile(payload);
+		DefaultVirtualFile vf = new DefaultVirtualFile();
+		vf.setFile(payload);
 
 		filesToSend.offer(vf);
 
@@ -71,11 +67,6 @@ public class SendFile {
 
 		oftp.connect(true);
 
-	}
-
-	private static void printUsage() {
-		System.out.println("SendFile <host> <port> <user-code> <user-password> <file>");
-		System.out.println();
 	}
 
 }

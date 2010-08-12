@@ -47,34 +47,31 @@ public class HandlingSendFileEvents {
 
 	public static void main(String[] args) throws Exception {
 
-		if (args.length != 5) {
-			System.err.println("Incorrect number of arguments.");
-			System.err.println();
+		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
+				"payload");
+		args = ms.args();
 
-			printUsage();
-			System.exit(-1);
-		}
-
-		String host = args[0];
+		String server = args[0];
 		int port = Integer.parseInt(args[1]);
-		String usercode = args[2];
+		String odetteid = args[2];
 		String password = args[3];
 		final File payload = new File(args[4]);
 
 		SessionConfig conf = new SessionConfig();
-		conf.setUserCode(usercode);
+		conf.setUserCode(odetteid);
 		conf.setUserPassword(password);
 		conf.setTransferMode(SENDER_ONLY);
 
 		final Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
-        DefaultVirtualFile vf = new DefaultVirtualFile();
-        vf.setFile(payload);
+		DefaultVirtualFile vf = new DefaultVirtualFile();
+		vf.setFile(payload);
 
 		filesToSend.offer(vf);
 
-		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, filesToSend, null, null);
-		TcpClient oftp = new TcpClient(host, port, factory);
+		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(
+				conf, filesToSend, null, null);
+		TcpClient oftp = new TcpClient(server, port, factory);
 
 		factory.setEventListener(new InOutOftpletEventListenerAdapter() {
 
@@ -95,19 +92,22 @@ public class HandlingSendFileEvents {
 					tempFile = File.createTempFile("oftp-", ".sent");
 					IoUtil.copy(sourceFile, tempFile);
 
-					System.out.println("Copying payload in temporary before sending: " + tempFile);
+					System.out
+							.println("Copying payload in temporary before sending: "
+									+ tempFile);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
 
 			@Override
 			public void onSendFileEnd(VirtualFile virtualFile) {
 				File tempFile = virtualFile.getFile();
 				IoUtil.delete(tempFile);
-				System.out.println("Deleting temporary payload file: " + tempFile);
+				System.out.println("Deleting temporary payload file: "
+						+ tempFile);
 			}
 
 			// send file errors
@@ -119,7 +119,8 @@ public class HandlingSendFileEvents {
 				if (reason.getAnswerReason() == AnswerReason.DUPLICATE_FILE) {
 					DefaultVirtualFile renamedFile = new DefaultVirtualFile();
 					renamedFile.setFile(payload);
-					renamedFile.setDatasetName(payload.getName() + "-" + (new Random()).nextInt(100));
+					renamedFile.setDatasetName(payload.getName() + "-"
+							+ (new Random()).nextInt(100));
 					filesToSend.add(renamedFile);
 				} else {
 					System.out.println("Send File Error: " + reason);
@@ -131,11 +132,6 @@ public class HandlingSendFileEvents {
 		// perform connection and transfer
 		oftp.connect(true);
 
-	}
-
-	private static void printUsage() {
-		System.out.println("SendFile <host> <port> <user-code> <user-password> <file>");
-		System.out.println();
 	}
 
 }

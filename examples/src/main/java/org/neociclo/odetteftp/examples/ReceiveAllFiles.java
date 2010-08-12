@@ -45,22 +45,18 @@ public class ReceiveAllFiles {
 
 	public static void main(String[] args) throws Exception {
 
-		if (args.length != 5) {
-			System.err.println("Incorrect number of arguments.");
-			System.err.println();
+		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
+				"directory");
+		args = ms.args();
 
-			printUsage();
-			System.exit(-1);
-		}
-
-		String host = args[0];
+		String server = args[0];
 		int port = Integer.parseInt(args[1]);
-		String usercode = args[2];
+		String odetteid = args[2];
 		String password = args[3];
 		final File directory = new File(args[4]);
 
 		SessionConfig conf = new SessionConfig();
-		conf.setUserCode(usercode);
+		conf.setUserCode(odetteid);
 		conf.setUserPassword(password);
 
 		conf.setTransferMode(RECEIVER_ONLY);
@@ -68,7 +64,7 @@ public class ReceiveAllFiles {
 		final Queue<OdetteFtpObject> outgoingQueue = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
 		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, outgoingQueue, null, null);
-		TcpClient oftp = new TcpClient(host, port, factory);
+		TcpClient oftp = new TcpClient(server, port, factory);
 
 		// prepare the incoming handler
 		factory.setEventListener(new InOutOftpletEventListenerAdapter() {
@@ -100,9 +96,9 @@ public class ReceiveAllFiles {
 			@Override
 			public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
 
-                // reply with EERP (positive delivery notification)
-                DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
-                outgoingQueue.offer(notif);
+				// reply with EERP (positive delivery notification)
+				DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
+				outgoingQueue.offer(notif);
 
 				System.out.println("Receive file completed: " + virtualFile);
 
@@ -114,11 +110,6 @@ public class ReceiveAllFiles {
 
 		oftp.connect(true);
 
-	}
-
-	private static void printUsage() {
-		System.out.println("SendFile <host> <port> <user-code> <user-password> <directory>");
-		System.out.println();
 	}
 
 }

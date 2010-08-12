@@ -32,8 +32,7 @@ public class ConnectAndDisconnect {
 
 	public static void main(String[] args) throws Exception {
 
-		MainSupport ms = new MainSupport(ConnectAndDisconnect.class, "server",
-				"port", "odetteid", "password");
+		MainSupport ms = new MainSupport(ConnectAndDisconnect.class, args, "server", "port", "odetteid", "password");
 
 		String server = ms.get(0);
 		int port = Integer.parseInt(ms.get(1));

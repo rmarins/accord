@@ -17,8 +17,9 @@
  *
  * $Id$
  */
-package org.neociclo.odetteftp.examples;
+package org.neociclo.odetteftp.examples.client;
 
+import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
 import org.neociclo.odetteftp.examples.support.SessionConfig;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;

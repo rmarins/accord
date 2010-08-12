@@ -17,7 +17,7 @@
  *
  * $Id$
  */
-package org.neociclo.odetteftp.examples;
+package org.neociclo.odetteftp.examples.client;
 
 import static org.neociclo.odetteftp.TransferMode.*;
 
@@ -27,6 +27,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.InOutOftpletEventListenerAdapter;
 import org.neociclo.odetteftp.examples.support.InOutSharedQueueOftpletFactory;
 import org.neociclo.odetteftp.examples.support.SessionConfig;
@@ -41,7 +42,7 @@ import org.neociclo.odetteftp.util.IoUtil;
 
 /**
  * @author Rafael Marins
- * @version $Rev$
+ * @version $Rev$ $Date$
  */
 public class HandlingSendFileEvents {
 

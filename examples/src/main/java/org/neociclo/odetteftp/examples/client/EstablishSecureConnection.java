@@ -17,12 +17,13 @@
  *
  * $Id$
  */
-package org.neociclo.odetteftp.examples;
+package org.neociclo.odetteftp.examples.client;
 
 import java.net.InetSocketAddress;
 
 import javax.net.ssl.SSLEngine;
 
+import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
 import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.examples.support.SessionConfig;
@@ -31,7 +32,7 @@ import org.neociclo.odetteftp.service.TcpClient;
 
 /**
  * @author Rafael Marins
- * @version $Rev$
+ * @version $Rev$ $Date$
  */
 public class EstablishSecureConnection {
 

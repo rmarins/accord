@@ -35,18 +35,19 @@ import javax.security.auth.callback.UnsupportedCallbackException;
  */
 public class MappedCallbackHandler implements CallbackHandler {
 
-    private Map<Class<? extends Callback>, OneToOneHandler<Callback>> handlers;
+    private Map<Class<? extends Callback>, OneToOneHandler<? extends Callback>> handlers;
 
     public MappedCallbackHandler() {
         super();
-        this.handlers = new ConcurrentHashMap<Class<? extends Callback>, OneToOneHandler<Callback>>();
+        this.handlers = new ConcurrentHashMap<Class<? extends Callback>, OneToOneHandler<? extends Callback>>();
     }
 
-    public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+    @SuppressWarnings("unchecked")
+	public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
         for (Callback cb : callbacks) {
             Class<?> clazz = cb.getClass();
             if (handlers.containsKey(clazz)) {
-                OneToOneHandler<Callback> h = handlers.get(clazz);
+                OneToOneHandler<Callback> h = (OneToOneHandler<Callback>) handlers.get(clazz);
                 h.handle(cb);
             } else {
                 throw new UnsupportedCallbackException(cb);
@@ -54,9 +55,8 @@ public class MappedCallbackHandler implements CallbackHandler {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Callback> void addHandler(Class<T> type, OneToOneHandler<T> handler) {
-        handlers.put(type, (OneToOneHandler<Callback>) handler);
+        handlers.put(type, handler);
     }
 
     public <T extends Callback> void removeHandler(Class<Callback> type) {

@@ -146,7 +146,7 @@ public class SessionConfig implements Serializable {
         }
 
         if (transferMode == null) {
-        	s.setTransferMode(TransferMode.BOTH);
+        	s.setTransferMode(TransferMode.SENDER_ONLY);
         } else {
             s.setTransferMode(transferMode);
         }

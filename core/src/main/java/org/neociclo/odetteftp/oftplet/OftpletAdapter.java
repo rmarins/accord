@@ -24,7 +24,6 @@ import static org.neociclo.odetteftp.OdetteFtpVersion.*;
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.OdetteFtpVersion;
-import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.security.SecurityContext;
 
 
@@ -53,9 +52,6 @@ public abstract class OftpletAdapter implements Oftplet {
     }
 
     public void onExceptionCaught(Throwable cause) {
-    }
-
-    public void onSessionEnd(EndSessionReason reason, String reasonText, boolean localIssued) {
     }
 
     public void onSessionStart() {

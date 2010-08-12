@@ -47,6 +47,7 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.group.ChannelGroup;
@@ -372,4 +373,11 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
         return oftpletFactory;
     }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+        OdetteFtpSession session = ChannelContext.SESSION.get(ctx.getChannel());
+        Oftplet oftplet = getSessionOftplet(session);
+
+        oftplet.onExceptionCaught(e.getCause());
+    }
 }

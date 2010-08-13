@@ -22,6 +22,8 @@ package org.neociclo.odetteftp.security;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 
+import org.neociclo.odetteftp.OdetteFtpSession;
+
 /**
  * Convey the received Authentication Challenge request/response with the
  * {@link CallbackHandler}.
@@ -33,15 +35,17 @@ public class AuthenticationChallengeCallback implements Callback {
 
     private byte[] encodedChallenge;
     private byte[] challenge;
+	private OdetteFtpSession session;
     
     /**
      * Constructor.
      * 
      * @param challenge received encoded challenge
      */
-    public AuthenticationChallengeCallback(byte[] challenge) {
+    public AuthenticationChallengeCallback(byte[] challenge, OdetteFtpSession session) {
         super();
         this.encodedChallenge = challenge;
+        this.session = session;
     }
 
     public byte[] getEncodedChallenge() {
@@ -55,5 +59,9 @@ public class AuthenticationChallengeCallback implements Callback {
     public void setChallenge(byte[] plainChallenge) {
         this.challenge = plainChallenge;
     }
+
+	public OdetteFtpSession getSession() {
+		return session;
+	}
 
 }

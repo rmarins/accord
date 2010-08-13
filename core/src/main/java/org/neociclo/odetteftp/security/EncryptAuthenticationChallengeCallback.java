@@ -21,6 +21,8 @@ package org.neociclo.odetteftp.security;
 
 import javax.security.auth.callback.Callback;
 
+import org.neociclo.odetteftp.OdetteFtpSession;
+
 /**
  * @author Rafael Marins
  * @version $Rev$ $Date$
@@ -31,9 +33,12 @@ public class EncryptAuthenticationChallengeCallback implements Callback {
 
     private byte[] encodedChallenge;
 
-    public EncryptAuthenticationChallengeCallback(byte[] plainChallenge) {
+	private OdetteFtpSession session;
+
+    public EncryptAuthenticationChallengeCallback(byte[] plainChallenge, OdetteFtpSession session) {
         super();
         this.challenge = plainChallenge;
+        this.session = session;
     }
 
     public byte[] getEncodedChallenge() {
@@ -47,6 +52,10 @@ public class EncryptAuthenticationChallengeCallback implements Callback {
     public byte[] getChallenge() {
         return challenge;
     }
+
+	public OdetteFtpSession getSession() {
+		return session;
+	}
 
     
 

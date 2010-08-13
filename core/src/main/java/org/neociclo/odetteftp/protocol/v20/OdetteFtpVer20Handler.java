@@ -125,7 +125,7 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         }
         
         EncryptAuthenticationChallengeCallback encryptChallengeCallback = new EncryptAuthenticationChallengeCallback(
-                challenge);
+                challenge, session);
 
         if (!handleCallback(session, encryptChallengeCallback)) {
             // already did logging within handleCallback() method
@@ -153,7 +153,8 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
 
         byte[] encodedChallenge = auch.getByteArrayAttribute(AUCHCHAL_FIELD);
 
-        AuthenticationChallengeCallback challengeCallback = new AuthenticationChallengeCallback(encodedChallenge);
+		AuthenticationChallengeCallback challengeCallback = new AuthenticationChallengeCallback(encodedChallenge,
+				session);
 
         if (!handleCallback(session, challengeCallback)) {
             // already did logging within handleCallback() method

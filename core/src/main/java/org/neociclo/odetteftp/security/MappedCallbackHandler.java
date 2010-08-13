@@ -63,4 +63,8 @@ public class MappedCallbackHandler implements CallbackHandler {
         handlers.remove(type);
     }
 
+	public boolean containsHandler(Class<? extends Callback> type) {
+		return handlers.containsKey(type);
+	}
+
 }

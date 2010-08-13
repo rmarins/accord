@@ -46,9 +46,7 @@ public class BufferUtil {
     }
     
     public static String toHexString(byte[] barray, int max) {
-        if (max <= 0) {
-            max = barray.length;
-        }
+    	max = Math.min(max, barray.length);
         StringBuffer hexArray = new StringBuffer("Hex[");
         for (int i=1; i<=max; i++) {
             byte b = barray[i-1];

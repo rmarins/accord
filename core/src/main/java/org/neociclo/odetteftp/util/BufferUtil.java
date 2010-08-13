@@ -42,7 +42,7 @@ public class BufferUtil {
     }
 
     public static String toHexString(byte[] barray) {
-        return toHexString(barray, -1);
+        return toHexString(barray, barray.length);
     }
     
     public static String toHexString(byte[] barray, int max) {

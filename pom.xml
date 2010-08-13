@@ -168,8 +168,8 @@
 
   <modules>
     <module>core</module>
-    <module>camel-oftp</module>
 <!--
+    <module>camel-oftp</module>
     <module>forby-oftp</module>
     <module>cli-oftp</module>
 -->

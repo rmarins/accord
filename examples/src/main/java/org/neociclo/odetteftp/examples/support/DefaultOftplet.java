@@ -56,7 +56,7 @@ public class DefaultOftplet extends OftpletAdapter {
 			EndSessionException es = (EndSessionException) cause;
 			System.err.println("SESSION ERROR: " + es.getReason());
 		} else {
-			System.err.print("GENERAL ERROR - " + cause);
+			cause.printStackTrace();
 		}
 	}
 }

@@ -40,12 +40,16 @@ public class ConfigBasedSecurityContext implements SecurityContext {
     public ConfigBasedSecurityContext(SessionConfig sessionConfig) {
         super();
         this.config = sessionConfig;
+        this.callbackHandler = config.getMappedCallbackHandler();
     }
 
     public CallbackHandler getCallbackHandler() {
 
         if (callbackHandler == null) {
             callbackHandler = new MappedCallbackHandler();
+        }
+
+        if (!callbackHandler.containsHandler(PasswordCallback.class)) {
 
             // respond callback retrieval with Usercode & Password
             callbackHandler.addHandler(PasswordCallback.class, new OneToOneHandler<PasswordCallback>() {
@@ -54,8 +58,8 @@ public class ConfigBasedSecurityContext implements SecurityContext {
                     cb.setPassword(config.getUserPassword());
                 }
             });
-
         }
+
         return callbackHandler;
     }
 

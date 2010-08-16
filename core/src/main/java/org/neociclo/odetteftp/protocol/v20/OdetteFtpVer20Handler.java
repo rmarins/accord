@@ -72,18 +72,39 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
     protected void responderSendStartSession(OdetteFtpSession session, CommandExchangeBuffer ssid)
             throws OdetteFtpException {
 
-        // Handshaking on ODETTE-FTP v2.0 secure authentication param
+    	if (!checkSecureAuthenticationNegotiation(session, ssid)) {
+    		return;
+    	}
+
+        super.responderSendStartSession(session, ssid);
+    }
+
+	@Override
+    protected void initiatorStartSessionReceived(OdetteFtpSession session, CommandExchangeBuffer ssid)
+    		throws OdetteFtpException {
+
+    	if (!checkSecureAuthenticationNegotiation(session, ssid)) {
+    		return;
+    	}
+
+    	super.initiatorStartSessionReceived(session, ssid);
+
+    }
+
+	private boolean checkSecureAuthenticationNegotiation(OdetteFtpSession session, CommandExchangeBuffer ssid) throws OdetteFtpException {
+
+		// Handshaking on ODETTE-FTP v2.0 secure authentication param
         boolean ssidauth = valueOfYesNo(ssid.getStringAttribute(SSIDAUTH_FIELD));
         boolean secureAuthenticationNegotiation = (ssidauth == session.useSecureAuthentication());
 
         // no negotiation of secure authentication is allowed
         if (!secureAuthenticationNegotiation) {
             abnormalRelease(session, INCOMPATIBLE_SECURE_AUTHENTICATION, "Incompatible secure authentication.");
-            return;
+            return false;
         }
 
-        super.responderSendStartSession(session, ssid);
-    }
+        return true;
+	}
 
     /**
      * Begin the Secure Authentication phase after having exchanged SSIDs. This
@@ -108,9 +129,9 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
             // transmit the Security Change Direction to begin secure auth
             CommandExchangeBuffer secd = buildSecurityChangeDirection();
             session.write(secd);
+        } else {
+        	super.afterStartSession(session);
         }
-
-        super.afterStartSession(session);
     }
 
     public void securityChangeDirectionReceived(OdetteFtpSession session, CommandExchangeBuffer command)

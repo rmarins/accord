@@ -120,7 +120,8 @@ public class PerformSecureAuthentication {
 						try {
 							X509Certificate cert = SecurityUtil.openCertificate(new File(PARTNER_CERTIFICATE_FILE));
 							CipherSuite cipherSel = cb.getSession().getCipherSuiteSelection();
-							EnvelopingUtil.createEnvelopedData(cb.getChallenge(), cipherSel, cert);
+							byte[] encryptedChallenge = EnvelopingUtil.createEnvelopedData(cb.getChallenge(), cipherSel, cert);
+							cb.setEncodedChallenge(encryptedChallenge);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

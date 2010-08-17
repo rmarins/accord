@@ -19,9 +19,23 @@
  */
 package org.neociclo.odetteftp.util;
 
+import static org.neociclo.odetteftp.protocol.v20.SecurityLevel.*;
+import static org.neociclo.odetteftp.protocol.v20.FileEnveloping.*;
+import static org.neociclo.odetteftp.protocol.v20.FileCompression.*;
+import static org.neociclo.odetteftp.protocol.v20.CipherSuite.*;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.neociclo.odetteftp.protocol.DefaultDeliveryNotification;
@@ -29,8 +43,12 @@ import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.NegativeResponseReason;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
+import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 import org.neociclo.odetteftp.protocol.v20.DefaultSignedDeliveryNotification;
 import org.neociclo.odetteftp.protocol.v20.EnvelopedVirtualFile;
+import org.neociclo.odetteftp.protocol.v20.FileCompression;
+import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
+import org.neociclo.odetteftp.protocol.v20.SecurityLevel;
 import org.neociclo.odetteftp.protocol.v20.SignedDeliveryNotification;
 
 /**
@@ -39,108 +57,236 @@ import org.neociclo.odetteftp.protocol.v20.SignedDeliveryNotification;
  */
 public class OdetteFtpSupport {
 
-    public static DeliveryNotification getReplyDeliveryNotification(VirtualFile incomingVirtualFile) {
-        String creator = incomingVirtualFile.getOriginator();
-        return getReplyDeliveryNotification(incomingVirtualFile, creator);
-    }
+	public static void createEnvelopedFile(File input, File output, EnvelopedVirtualFile virtualFile)
+			throws EnvelopingException {
 
-    public static DeliveryNotification getReplyDeliveryNotification(VirtualFile incomingVirtualFile, String creator) {
-        return getReplyDeliveryNotification(incomingVirtualFile, creator, null, null);
-    }
+		createEnvelopedFile(input, output, virtualFile, null, null, null);
+	}
 
-    public static DeliveryNotification getReplyDeliveryNotification(VirtualFile incomingVirtualFile, String creator,
-            NegativeResponseReason reason, String negativeReasonText) {
-        if (incomingVirtualFile == null) {
-            throw new NullPointerException("incomingVirtualFile");
-        }
-        else if (incomingVirtualFile instanceof EnvelopedVirtualFile) {
-            try {
-                return getReplySignedDeliveryNotification((EnvelopedVirtualFile) incomingVirtualFile, creator, reason,
-                        negativeReasonText, null);
-            } catch (Exception e) {
-                return getReplySignedDeliveryNotification((EnvelopedVirtualFile) incomingVirtualFile, creator, reason,
-                        negativeReasonText, null, null);
-            }
-        } else {
-            return replyNormalDeliveryNotification(incomingVirtualFile, creator, reason, negativeReasonText);
-        }
-    }
+	public static void createEnvelopedFile(File input, File output, EnvelopedVirtualFile virtualFile,
+			X509Certificate userCert, PrivateKey userPrivateKey, X509Certificate partnerCert)
+			throws EnvelopingException {
 
-    /**
-     * Prepare the reply Signed Delivery Notification. Set automatically the
-     * computed the Virtual File hash.
-     * 
-     * @param incomingVirtualFile
-     * @param creator
-     * @param reason
-     * @param negativeReasonText
-     * @param signature
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchProviderException
-     * @throws IOException
-     */
-    public static SignedDeliveryNotification getReplySignedDeliveryNotification(EnvelopedVirtualFile incomingVirtualFile, String creator,
-            NegativeResponseReason reason, String negativeReasonText, byte[] signature) throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		SecurityLevel securityLevel = (virtualFile.getSecurityLevel() == null ? NO_SECURITY_SERVICES : virtualFile.getSecurityLevel());
+		CipherSuite cipherSel = (virtualFile.getCipherSuite() == null ? NO_CIPHER_SUITE_SELECTION : virtualFile.getCipherSuite());
+		FileCompression compressionAlgo = (virtualFile.getCompressionAlgorithm() == null ? NO_COMPRESSION : virtualFile.getCompressionAlgorithm());
+		FileEnveloping envelopingFormat = (virtualFile.getEnvelopingFormat() == null ? NO_ENVELOPE : virtualFile.getEnvelopingFormat());
 
-        byte[] virtualFileHash = null;
+		createEnvelopedFile(input, output, securityLevel, cipherSel, compressionAlgo, envelopingFormat, userCert,
+				userPrivateKey, partnerCert);
+	}
 
-        if (incomingVirtualFile.getFile() != null) {
-            String algorithm = EnvelopingUtil.asDigestAlgorithm(incomingVirtualFile.getCipherSuite());
-            if (algorithm != null) {
-                virtualFileHash = SecurityUtil.computeFileHash(incomingVirtualFile.getFile(), algorithm);
-            }
-        }
+	public static void createEnvelopedFile(File input, File output, SecurityLevel securityLevel, CipherSuite cipherSel,
+			FileCompression compressionAlgo, FileEnveloping envelopingFormat, X509Certificate userCert,
+			PrivateKey userPrivateKey, X509Certificate partnerCert) throws EnvelopingException {
 
-        return getReplySignedDeliveryNotification(incomingVirtualFile, creator, reason, negativeReasonText, virtualFileHash, signature);
-    }
-    
-    public static SignedDeliveryNotification getReplySignedDeliveryNotification(EnvelopedVirtualFile incomingVirtualFile, String creator,
-            NegativeResponseReason reason, String negativeReasonText, byte[] virtualFileHash, byte[] signature) {
-        return replySignedDeliveryNotification(incomingVirtualFile, creator, reason, negativeReasonText, virtualFileHash, signature);
-    }
-    
-    private static DeliveryNotification replyNormalDeliveryNotification(VirtualFile vf, String creator,
-            NegativeResponseReason reason, String negativeReasonText) {
+		String[] argNames = { "input", "output", "securityLevel", "cipherSel", "compressionAlgo", "envelopingFormat" };
+		Object[] argValues = { input, output, securityLevel, cipherSel, compressionAlgo, envelopingFormat };
 
-        EndResponseType type = (reason == null ? EndResponseType.END_TO_END_RESPONSE : EndResponseType.NEGATIVE_END_RESPONSE);
+		// check null pointer exception in mandatory args
+		for (int i = 0; i < argValues.length; i++) {
+			if (argValues[i] == null) {
+				throw new NullPointerException(argNames[i]);
+			}
+		}
 
-        DefaultDeliveryNotification notif = new DefaultDeliveryNotification(type);
-        setNotifBasicInfo(notif, vf, creator, reason, negativeReasonText);
+		if (envelopingFormat == NO_ENVELOPE) {
+			throw new EnvelopingException("No envelope required (file enveloping format).");
+		}
 
-        return notif;
-    }
+		boolean addSignature = (securityLevel == SIGNED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean doEncryption = (securityLevel == ENCRYPTED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean doCompression = (compressionAlgo != NO_COMPRESSION);
 
-    private static SignedDeliveryNotification replySignedDeliveryNotification(EnvelopedVirtualFile vf, String creator,
-            NegativeResponseReason reason, String negativeReasonText, byte[] virtualFileHash, byte[] notifSignature) {
+		if (addSignature) {
+			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
+				throw new EnvelopingException("No signature algorithm specified (no cipher suite selection).");
+			}
 
-        EndResponseType type = (reason == null ? EndResponseType.END_TO_END_RESPONSE : EndResponseType.NEGATIVE_END_RESPONSE);
+			if (userCert == null) {
+				throw new NullPointerException("userCert");
+			}
 
-        DefaultSignedDeliveryNotification notif = new DefaultSignedDeliveryNotification(type);
-        setNotifBasicInfo(notif, vf, creator, reason, negativeReasonText);
+			if (userPrivateKey == null) {
+				throw new NullPointerException("userKey");
+			}
+		}
 
-        notif.setVirtualFileHash(virtualFileHash);
-        notif.setNotificationSignature(notifSignature);
+		if (doEncryption) {
+			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
+				throw new EnvelopingException("No encryption algorithm specified (no cipher suite selection).");
+			}
 
-        return null;
-    }
+			if (partnerCert == null) {
+				throw new NullPointerException("partnerCert");
+			}
+		}
 
-    private static void setNotifBasicInfo(DefaultDeliveryNotification notif, VirtualFile vf, String creator,
-            NegativeResponseReason reason, String negativeReasonText) {
+		/*
+		 * Enchain output streams in the correct full-cms order. Also prepare a
+		 * list to flush & close streams in the correct sequence. 
+		 */
+		OutputStream outStream = null;
+		try {
+			outStream = new FileOutputStream(output, false);
+		} catch (FileNotFoundException ouputNotFound) {
+			throw new EnvelopingException("Failed to create enveloped file. Cannot open output file: " + output,
+					ouputNotFound);
+		}
 
-        notif.setDatasetName(vf.getDatasetName());
-        notif.setDateTime(new Date(vf.getDateTime().getTime()));
-        notif.setOriginator(vf.getOriginator());
-        notif.setDestination(vf.getDestination());
-        notif.setUserData(vf.getUserData());
+		ArrayList<OutputStream> toClose = new ArrayList<OutputStream>();
+		toClose.add(outStream);
 
-        notif.setCreator(creator);
-        notif.setReason(reason);
-        notif.setReasonText(negativeReasonText);
-        
-    }
+		try {
+			if (doEncryption) {
+				outStream = openEnvelopedDataContentStream(outStream, cipherSel, partnerCert);
+				toClose.add(0, outStream);
+			}
+			if (doCompression) {
+				outStream = openCompressedDataContentStream(outStream);
+				toClose.add(0, outStream);
+			}
+			if (addSignature) {
+				outStream = openSignedDataContentStream(outStream, cipherSel, userCert, userPrivateKey);
+				toClose.add(0, outStream);
+			}
+		} catch (Exception e) {
+			throw new EnvelopingException("Failed to create enveloped file. Cannot open CMS output processings.", e);
+		}
 
-    private OdetteFtpSupport() {
-    }
+		// copy data from the input
+        FileInputStream inStream = null;
+		try {
+			inStream = new FileInputStream(input);
+	        IoUtil.copyStream(inStream, outStream);
+		} catch (FileNotFoundException notFound) {
+			throw new EnvelopingException("Failed to create enveloped file. Source file doesn't exist: " + input,
+					notFound);
+		} catch (IOException e) {
+			throw new EnvelopingException("Failed to generate output enveloped file (IO copying error).", e);
+		}
+
+        // perform flush & closings
+        try {
+			inStream.close();
+			for (OutputStream stream : toClose) {
+				stream.flush();
+				stream.close();
+			}
+		} catch (IOException e) {
+			throw new EnvelopingException("Failed to close enveloped output stream: " + output, e);
+		}
+
+	}
+
+	public static DeliveryNotification getReplyDeliveryNotification(VirtualFile incomingVirtualFile) {
+		String creator = incomingVirtualFile.getOriginator();
+		return getReplyDeliveryNotification(incomingVirtualFile, creator);
+	}
+
+	public static DeliveryNotification getReplyDeliveryNotification(VirtualFile incomingVirtualFile, String creator) {
+		return getReplyDeliveryNotification(incomingVirtualFile, creator, null, null);
+	}
+
+	public static DeliveryNotification getReplyDeliveryNotification(VirtualFile incomingVirtualFile, String creator,
+			NegativeResponseReason reason, String negativeReasonText) {
+		if (incomingVirtualFile == null) {
+			throw new NullPointerException("incomingVirtualFile");
+		} else if (incomingVirtualFile instanceof EnvelopedVirtualFile) {
+			try {
+				return getReplySignedDeliveryNotification((EnvelopedVirtualFile) incomingVirtualFile, creator, reason,
+						negativeReasonText, null);
+			} catch (Exception e) {
+				return getReplySignedDeliveryNotification((EnvelopedVirtualFile) incomingVirtualFile, creator, reason,
+						negativeReasonText, null, null);
+			}
+		} else {
+			return replyNormalDeliveryNotification(incomingVirtualFile, creator, reason, negativeReasonText);
+		}
+	}
+
+	/**
+	 * Prepare the reply Signed Delivery Notification. Set automatically the
+	 * computed the Virtual File hash.
+	 * 
+	 * @param incomingVirtualFile
+	 * @param creator
+	 * @param reason
+	 * @param negativeReasonText
+	 * @param signature
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 * @throws IOException
+	 */
+	public static SignedDeliveryNotification getReplySignedDeliveryNotification(
+			EnvelopedVirtualFile incomingVirtualFile, String creator, NegativeResponseReason reason,
+			String negativeReasonText, byte[] signature) throws NoSuchAlgorithmException, NoSuchProviderException,
+			IOException {
+
+		byte[] virtualFileHash = null;
+
+		if (incomingVirtualFile.getFile() != null) {
+			String algorithm = EnvelopingUtil.asDigestAlgorithm(incomingVirtualFile.getCipherSuite());
+			if (algorithm != null) {
+				virtualFileHash = SecurityUtil.computeFileHash(incomingVirtualFile.getFile(), algorithm);
+			}
+		}
+
+		return getReplySignedDeliveryNotification(incomingVirtualFile, creator, reason, negativeReasonText,
+				virtualFileHash, signature);
+	}
+
+	public static SignedDeliveryNotification getReplySignedDeliveryNotification(
+			EnvelopedVirtualFile incomingVirtualFile, String creator, NegativeResponseReason reason,
+			String negativeReasonText, byte[] virtualFileHash, byte[] signature) {
+		return replySignedDeliveryNotification(incomingVirtualFile, creator, reason, negativeReasonText,
+				virtualFileHash, signature);
+	}
+
+	private static DeliveryNotification replyNormalDeliveryNotification(VirtualFile vf, String creator,
+			NegativeResponseReason reason, String negativeReasonText) {
+
+		EndResponseType type = (reason == null ? EndResponseType.END_TO_END_RESPONSE
+				: EndResponseType.NEGATIVE_END_RESPONSE);
+
+		DefaultDeliveryNotification notif = new DefaultDeliveryNotification(type);
+		setNotifBasicInfo(notif, vf, creator, reason, negativeReasonText);
+
+		return notif;
+	}
+
+	private static SignedDeliveryNotification replySignedDeliveryNotification(EnvelopedVirtualFile vf, String creator,
+			NegativeResponseReason reason, String negativeReasonText, byte[] virtualFileHash, byte[] notifSignature) {
+
+		EndResponseType type = (reason == null ? EndResponseType.END_TO_END_RESPONSE
+				: EndResponseType.NEGATIVE_END_RESPONSE);
+
+		DefaultSignedDeliveryNotification notif = new DefaultSignedDeliveryNotification(type);
+		setNotifBasicInfo(notif, vf, creator, reason, negativeReasonText);
+
+		notif.setVirtualFileHash(virtualFileHash);
+		notif.setNotificationSignature(notifSignature);
+
+		return null;
+	}
+
+	private static void setNotifBasicInfo(DefaultDeliveryNotification notif, VirtualFile vf, String creator,
+			NegativeResponseReason reason, String negativeReasonText) {
+
+		notif.setDatasetName(vf.getDatasetName());
+		notif.setDateTime(new Date(vf.getDateTime().getTime()));
+		notif.setOriginator(vf.getOriginator());
+		notif.setDestination(vf.getDestination());
+		notif.setUserData(vf.getUserData());
+
+		notif.setCreator(creator);
+		notif.setReason(reason);
+		notif.setReasonText(negativeReasonText);
+
+	}
+
+	private OdetteFtpSupport() {
+	}
 
 }

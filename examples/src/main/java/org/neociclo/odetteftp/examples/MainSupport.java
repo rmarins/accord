@@ -109,7 +109,7 @@ public class MainSupport {
 	}
 
 	public String[] args() {
-		return null;
+		return indexedArgs;
 	}
 
 }

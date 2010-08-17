@@ -1,0 +1,93 @@
+Quick Start
+
+ Reading the Javadocs won't get you started exchanging files through the OFTP protocol. So follow these instructions on how to start developing your own OFTP-enabled Java program. This is a library that implements the OFTP protocol so from here, you have to develop your own GUI interface, either console or desktop.
+
+ [[2]] Check-out the Odette FTP library
+
++------------------------------------------+
+$ svn co svn checkout svn://svn.forge.objectweb.org/svnroot/accord/odetteftp/trunk odetteftp
++------------------------------------------+
+
+ [[3]] Build and install the Core API on your local repository
+
++------------------------------------------+
+$ cd odetteftp/core
+$ mvn install
++------------------------------------------+
+
+ [[4]] Create a Maven quickstart project
+
++------------------------------------------+
+$ cd ~/
+$ mvn archetype:generate -B -DarchetypeGroupId=org.apache.maven.archetypes 
+\ -DarchetypeArtifactId=maven-archetype-quickstart 
+\ -DgroupId=com.mycompany -DartifactId=myproject 
++------------------------------------------+
+
+ [[5]] Edit the file <<myproject/pom.xml>> and add the following dependency:
+
++------------------------------------------+
+    <dependency>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>core-oftp</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
++------------------------------------------+
+
+ [[6]] Configure the project for your IDE
+
+   [[a]] Eclipse: 
+
++------------------------------------------+
+$ cd myproject
+$ mvn eclipse:eclipse
++------------------------------------------+
+
+ [[7]] Import the project to your IDE's workspace
+
+ [[8]] Edit <<src/main/java/com/mycompany/App.java>> and start coding!
+
+Examples
+
+ These are snippets of examples found on the {{{./examples-oftp/index.html}examples}} module. You may look the source code for more details. Although the Accord OFTP has server feature, these examples were coded to validate the library by sending commands to a remote server running (probably) some other implementation. You must know one OFTP server up and running to run these tests.
+
+* Connect and Disconnect
+
+ This gives you a "Hello Odette!" snippet that connects and then disconnects from the remote OFTP server.
+
++------------------------------------------+
+String server = "10.0.0.1";
+int port = 33005;
+String odetteid = "MYODETTEID";
+String password = "MYODETTEPWS";
+
+SessionConfig conf = new SessionConfig();
+conf.setUserCode(odetteid);
+conf.setUserPassword(password);
+
+OftpletFactory factory = new DefaultOftpletFactory(conf);
+TcpClient oftp = new TcpClient(server, port, factory);
+
+oftp.connect(true);
++------------------------------------------+
+
+* Sending File
+
+ Sending a file is the most important task the API must accomplish, right? See how it goes:
+
++------------------------------------------+
+conf.setTransferMode(SENDER_ONLY);
+
+File payload = new File(args[4]);
+DefaultVirtualFile vf = new DefaultVirtualFile();
+vf.setFile(payload);
+
+Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
+filesToSend.offer(vf);
+
+OftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, filesToSend, null, null);
+TcpClient oftp = new TcpClient(host, port, factory);
+
+oftp.connect(true);
++------------------------------------------+
+

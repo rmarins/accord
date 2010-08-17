@@ -64,7 +64,13 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
         int length = field.getSize();
 
         if (type == Field.ALPHANUMERIC_TYPE) {
-            result = ProtocolUtil.padd(value, length, false, ' ');
+        	if (value != null && value.length() > length) {
+        		// truncate
+        		result = value.substring(0, length);
+        	} else {
+        		// padd with whitespace
+        		result = ProtocolUtil.padd(value, length, false, ' ');
+        	}
         } else if (type == Field.NUMERIC_TYPE) {
             result = ProtocolUtil.padd(value, length, true, '0');
         } else if (type == Field.ENCODED_TYPE) {

@@ -52,6 +52,7 @@ import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
 import org.neociclo.odetteftp.protocol.data.AbstractMapping;
+import org.neociclo.odetteftp.protocol.v13.ReleaseFormatVer13;
 import org.neociclo.odetteftp.security.SecurityContext;
 import org.neociclo.odetteftp.security.PasswordAuthenticationCallback;
 import org.neociclo.odetteftp.security.PasswordCallback;
@@ -544,6 +545,11 @@ public abstract class DefaultHandler implements ProtocolHandler {
             throw new NullPointerException("Virtual File object has null Dataset Name");
         } else if (dateTime == null) {
             throw new NullPointerException("Virtual File object has null Date/Time");
+        }
+
+        int dsnLength = ReleaseFormatVer13.SFID_V13.getField(SFIDDSN_FIELD).getSize();
+        if (dsn.length() > dsnLength) {
+        	dsn = dsn.substring(0, dsnLength);
         }
 
         String orig = (vf.getOriginator() == null ? session.getUserCode() : vf.getOriginator());

@@ -385,6 +385,11 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
             throw new NullPointerException("Enveloped Virtual File object has null Date/Time");
         }
 
+        int dsnLength = ReleaseFormatVer20.SFID_V20.getField(SFIDDSN_FIELD).getSize();
+        if (dsn.length() > dsnLength) {
+        	dsn = dsn.substring(0, dsnLength);
+        }
+
         String orig = (vf.getOriginator() == null ? session.getUserCode() : vf.getOriginator());
         String dest = (vf.getDestination() == null ? session.getUserCode() : vf.getDestination());
 

@@ -25,9 +25,11 @@ import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
 
 import static org.junit.Assert.*;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.*;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.startFile;
 import static org.neociclo.odetteftp.protocol.v20.ReleaseFormatVer20.*;
 import static org.neociclo.odetteftp.protocol.v14.ReleaseFormatVer14.*;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -36,8 +38,11 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 import org.neociclo.odetteftp.netty.codec.CommandExchangeBufferBuilder;
 import org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13;
-import org.neociclo.odetteftp.protocol.v14.CommandBuilderVer14;
+import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 import org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20;
+import org.neociclo.odetteftp.protocol.v20.FileCompression;
+import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
+import org.neociclo.odetteftp.protocol.v20.SecurityLevel;
 import org.neociclo.odetteftp.util.ProtocolUtil;
 
 /**
@@ -243,6 +248,24 @@ public class CommandExchangeBufferTest {
         byte[] buffer = sfid.getRawBuffer().array();
 
         assertTrue(Arrays.equals(expected, buffer));
+
+    }
+
+    @Test
+    public void testStartFileVer20GetRawData() throws Exception {
+
+    	Calendar c = Calendar.getInstance();
+    	c.set(2010, 7, 17, 10, 16, 34);
+    	c.set(Calendar.MILLISECOND, 0);
+
+    	CommandExchangeBuffer sfid = startFile("compressed-7104544892109052014-AGPLV3", c.getTime(), null, "DINET",
+    			"DINET", RecordFormat.UNSTRUCTURED, 0, 12, 34,
+                0, SecurityLevel.NO_SECURITY_SERVICES, CipherSuite.NO_CIPHER_SUITE_SELECTION, FileCompression.ZLIB,
+                FileEnveloping.CMS, false, null);
+
+    	ByteBuffer buffer = sfid.getRawBuffer();
+
+    	assertNotNull(buffer);
 
     }
 

@@ -44,11 +44,27 @@ import org.neociclo.odetteftp.oftplet.OftpletFactory;
  */
 public class TcpClient extends Client {
 
-    private Executor executor;
+    private static final int DEFAULT_NON_SSL_PORT = 3305;
+	private static final int DEFAULT_SSL_PORT = 6619;
+
+	private Executor executor;
     private boolean instanceManagedExecutor;
 
     private InetSocketAddress remoteAddress;
     private SSLEngine sslEngine;
+
+    public TcpClient(String host, OftpletFactory oftpletFactory) {
+        super(oftpletFactory);
+
+        this.remoteAddress = new InetSocketAddress(host, DEFAULT_NON_SSL_PORT);
+    }
+
+    public TcpClient(String host, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
+        super(oftpletFactory);
+
+        this.remoteAddress = new InetSocketAddress(host, DEFAULT_SSL_PORT);
+        this.sslEngine = sslEngine;
+    }
 
     public TcpClient(String host, int port, OftpletFactory oftpletFactory) {
         this(host, port, null, oftpletFactory);
@@ -64,6 +80,7 @@ public class TcpClient extends Client {
 
     public TcpClient(InetSocketAddress remoteAddress, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
         super(oftpletFactory);
+
         this.remoteAddress = remoteAddress;
         this.sslEngine = sslEngine;
     }

@@ -54,6 +54,9 @@ public abstract class Client {
     protected Runnable disconnectListener;
 
     public Client(OftpletFactory oftpletFactory) {
+    	if (oftpletFactory == null) {
+    		throw new IllegalArgumentException("OftpletFactory cannot be null");
+    	}
         this.oftpletFactory = oftpletFactory;
     }
 

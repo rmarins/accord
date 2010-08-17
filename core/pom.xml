@@ -45,8 +45,8 @@
           </descriptorRefs>
           <archive>
             <manifestEntries>
-              <Implementation-Url>${pom.url}</Implementation-Url>
-              <Implementation-Vendor-Url>${pom.organization.url}</Implementation-Vendor-Url>
+              <Implementation-Url>${project.url}</Implementation-Url>
+              <Implementation-Vendor-Url>${project.organization.url}</Implementation-Vendor-Url>
             </manifestEntries>
           </archive>
         </configuration>

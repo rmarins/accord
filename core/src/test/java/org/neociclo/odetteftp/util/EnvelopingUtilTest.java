@@ -171,14 +171,17 @@ public class EnvelopingUtilTest {
 
         FileOutputStream outStream = new FileOutputStream(output);
 
-        OutputStream signingStream = openSignedDataContentStream(outStream, CIPHER_SELECTION, myCert, myKey);
-        OutputStream envelopingStream = openEnvelopedDataContentStream(signingStream, CIPHER_SELECTION, partnerCert);
+        OutputStream envelopingStream = openEnvelopedDataContentStream(outStream, CIPHER_SELECTION, partnerCert);
         OutputStream compressingStream = openCompressedDataContentStream(envelopingStream);
+        OutputStream signingStream = openSignedDataContentStream(compressingStream, CIPHER_SELECTION, myCert, myKey);
 
         FileInputStream dataStream = new FileInputStream(data);
-        IoUtil.copyStream(dataStream, compressingStream);
+        IoUtil.copyStream(dataStream, signingStream);
 
         // XXX very important to preserve this order when closing
+
+        signingStream.flush();
+        signingStream.close();
 
         compressingStream.flush();
         compressingStream.close();
@@ -186,24 +189,29 @@ public class EnvelopingUtilTest {
         envelopingStream.flush();
         envelopingStream.close();
 
-        signingStream.flush();
-        signingStream.close();
-
         outStream.flush();
         outStream.close();
 
         assertTrue("File doesn't exists: " + output.getAbsolutePath(), output.exists());
 
-        // FileUtils.deleteQuietly(output);
+        File unenveloped = new File(getTestDataDir(), data.getName() + ".7th");
+        File uncompressed = new File(getTestDataDir(), data.getName() + ".8th");
+        File unsigned = new File(getTestDataDir(), data.getName() + ".9th");
 
-
-        File unsigned = new File(getTestDataDir(), data.getName() + ".7th");
-        File unenveloped = new File(getTestDataDir(), data.getName() + ".8th");
-        File uncompressed = new File(getTestDataDir(), data.getName() + ".9th");
-
-        removeSignature(output, unsigned);
-        unenvelope(unsigned, unenveloped);
+        unenvelope(output, unenveloped);
         uncompress(unenveloped, uncompressed);
+        removeSignature(uncompressed, unsigned);
+
+        byte[] hashOriginal = SecurityUtil.computeFileHash(data, "SHA-1");
+        byte[] hashProcessed = SecurityUtil.computeFileHash(unsigned, "SHA-1");
+
+        output.delete();
+        unenveloped.delete();
+        uncompressed.delete();
+        unsigned.delete();
+
+		assertTrue("Original file and the processed (full cms signed/compressed/encrypted and reverse) are not equal.",
+				Arrays.equals(hashOriginal, hashProcessed));         
 
     }
 

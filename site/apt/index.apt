@@ -25,6 +25,12 @@ Accord Odette FTP
 
  * File compression
 
+ * File restart
+
+ * Push and pull operations
+
+ * Support for sending End-to-End response (EERP) also know as file delivery receipt
+
  * Digital signatures 
 
  * Certificates

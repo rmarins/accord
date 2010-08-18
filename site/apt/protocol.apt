@@ -1,0 +1,52 @@
+ -----
+ Protocol Overview
+ -----
+ Bruno Borges
+ -----
+ 2010-08-18
+ -----
+
+OFTP2 Protocol Overview
+
+ The Odette File Transfer Protocol was originally designed by the Odette International organization, formed by the automotive industry, aimed to set a standard on EDI exchange between business partners. The first version was specified to support file transfer over X.25 networks and later over ISDN. Now the OFTP2 specification adds, among other features, support for transport over TCP/IP, TLS for session encryption,  file encryption and authentication based on digital signature.
+
+ One might put OFTP side-by-side with FTP or SFTP, but these are pure file transfers, without any business model applied on the file transfer process. What developers accomplish by writting many scripts to achieve file receipt, OFTP has this in its core.
+
+ The main difference between OFTP and S/FTP is that OFTP leverages the B2B scenario over file transfers. Also, from the OFTP user's perspective, there's no client/server nor folders to access, files to list. A partner basically connects to another and notifies it of a file delivery request or is notified about an incoming file request. The protocol does not specify where files should be put or where they should come from to be sent. The application implementing the protocol is responsible for that.
+
+ A key benefit of the protocol is that it has file delivery receipt. This is important, again, on the B2B scenario. Today system admins and developers have to define on both sides of a B2B integrated solution a way to inform that transfered files were correctly processed. This is defined as <End to End Response> and is described on {{{./rfc5024.html#section-3.3.5}section 3.3.5}} of the {{{./rfc5024.html}RFC 5024}}. 
+
+ Below you will find diagrams and better explanations that might help you to understand how OFTP works.
+
+* The first big picture
+
+[oftp-file-transfer-scheme.png] First big picture
+
+ Here, two partners have estabilished a 2-way connection (explained later), to both receive and send files. Usually, applications implementing OFTP offer a way to specify inbox and outbox folders. These are represented here. The protocol does not access these folders. It is applications' responsibility to pull the outbox folder to send files, and to write incoming data to a file in the inbox. The sender has no control on how or where its sent files will be placed. 
+
+ One important thing: before any transfer, both partners must agree with it. Before a file transfer beggins, one might check the file name and if it is invalid, sends to the other partner a command rejecting the file transfer. This works on both sides, when the partner is receiving a file.
+
+* Virtual File
+
+[oftp-virtual-file.png] Virtual File Diagram
+
+ As OFTP does not specify a file system to navigate through remote files, these have to be mapped to <<Virtual Files>>. There's no virtual folder too. On the Core API of the Odette FTP Library, you will find a class with that name to map between <<java.io.File>> and a <<VirtualFile>> object.
+ The reason OFTP specifies a virtual file is to make it possible to have a different file name. It also has a list of options to set, for example, the partner who will receive that file. This works this way because sometimes the remote partner is not the one who must process it, but he will only forward the file to the destination.
+
+* Peer-to-peer Transfers
+
+[oftp-peer-to-peer.png] Peer-to-peer
+
+ The first and obvious scenario is a peer-to-peer, or in better words, partner-to-partner. For any file sent from partner A to partner B, the second must send an {{{./rfc5024.html#section-3.3.5}End-to-End Response}}. If something goes wrong, it will send a {{{./rfc5024.html#section-3.3.6}Nevagite End Response}}. This feature is one of the most important of the Odette FTP. If partner A gets a NERP, it might schedule the file to be send again in a later time.
+
+ Partner B has the control of which files will accept coming from Partner A. The application must acknowledge incoming files before they are transfered by replying an {{{./rfc5024.html#section-5.3.3}SFID}}.
+
+* The Huge Picture
+
+[oftp-huge-picture.png] The Huge Picture
+
+ Now this is the <<huge>> picture. The {{{http://en.wikipedia.org/wiki/Value-added_network}Value-added Network (VAN)}} in the middle is what's more important to note here. In the same session between partner A and the VAN, two or more files can be sent to different partners. This is where the <<Virtual File>> is so important. In it, partner A can set for file Ba that the destination is partner B and do the same thing for Ca. The VAN will look at that information and forward those files correctly to their end destinations. Also, the VAN will forward back to partner A an EERP only when partner B/C send their receipts.
+
+* Looking for more?
+
+ If you have any doubts on the Odette File Transfer Protocol, please contact the Accord project's {{{./mail-lists.html}mailing list}}. Also, feel free to contribute to this webpage.

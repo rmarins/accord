@@ -43,15 +43,17 @@
 
 	<menu name="Odette FTP Library">
 		<item name="Overview" href="/index.html" />
+		<item name="Protocol" href="/protocol.html" />
 		<item name="Quick Start" href="/quickstart.html" />
 		<item name="RFC 5024" href="/rfc5024.html" />
 	</menu>
 
-	<menu name="External Links">
-		<item name="Odette International" href="http://www.odette.org" />			
+	<menu name="Accord MFT Suite">
+		<item name="Home" href="../index.html" />
+		<item name="Odette International" href="http://www.odette.org" />
 	</menu>
 
-	<menu ref="modules" />
+<!--	<menu ref="modules" /> -->
 	<menu ref="reports" />
   </body>
 </project>

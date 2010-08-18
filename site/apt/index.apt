@@ -1,8 +1,17 @@
+            ------
+            Overview
+            ------
+            Bruno Borges
+            ------
+            2010-08-18
+
 Accord Odette FTP
 
- The Accord Odette FTP library implements both {{{./rfc5024.html}RFC 2204}} and {{{http://ietfdocs.potaroo.net/idref/rfc2204}RFC 5024}} giving users and developers support for exchanging files with partners either running with OFTP server version 1.3, 1.4 or the new 2.0 version. This and many other features can be only found in Accord Odette FTP library. It is implemented under Java 5 and based on JBoss Netty.
+ The Accord Odette FTP is an open sourced - AGPL - Java library API that implements both {{{./rfc5024.html}RFC 5024}} and {{{http://ietfdocs.potaroo.net/idref/rfc2204}RFC 2204}} giving users and developers support for exchanging files with partners either running with OFTP server version 1.3, 1.4 or the new 2.0 version. This and many other features can be only found in Accord Odette FTP library. It is implemented under Java 5 and based on JBoss Netty.
+
 
 [accord-oftp-1.png] Accord Architecture
+
 
 * Key Benefits
 
@@ -30,7 +39,7 @@ Accord Odette FTP
 
  * Open Sourced through the Affero GPL 3.0
 
-** Java Integration
+* Java Integration
 
  Because it is a Java library, it can be easily embedded within any Java software. This gives customers freedom and flexibility on how to build their own B2B solutions.
 
@@ -38,13 +47,13 @@ Accord Odette FTP
 
  * Generified API
 
- * Deployed on Sonatype repository through Apache Maven
+ * Deployed on {{{http://oss.sonatype.org}Sonatype}}'s {{{http://maven.apache.org}Apache Maven}} repository
 
  * Designed for developers and software architects
 
- * Based on JBoss Netty
+ * Based on {{{http://www.jboss.org/netty}JBoss Netty}}
 
-** Encryption and signatures
+* Encryption and signatures
 
  The Accord Odette FTP library supports the following encryption/hash algorithms, required by the Odette International organization:
 
@@ -56,11 +65,11 @@ Accord Odette FTP
 
  Other algorithms might be supported as well, through the {{{http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136007.html}Java Cryptography Extension (JCE) layer}}.
 
-* Comparison to {{{http://oftp2.mendelson-e-c.com/}mendelson OFTP2}}
+* Comparison to 
 
- The <<mendelson OFTP2>> project is an open source tool that supports OFTP2 specification. Although it is written in Java, the project itself is not delivered as a Java library. So it cannot be easily embedded to third-party software. Also it does not support older versions of the Odette FTP (1.3 nor 1.4).
+ The {{{http://oftp2.mendelson-e-c.com/}mendelson OFTP2}} project is an open source tool that supports OFTP2 specification. Although it is written in Java, the project itself is not delivered as a Java library. So it cannot be easily embedded to third-party software. Also it does not support older versions of the Odette FTP (1.3 nor 1.4).
 
-** Graphical User Interface for Accord Odette FTP
+* Graphical User Interface for Accord Odette FTP
 
  If you are looking for an end-user GUI for your desktop to connect to your b2B partners, go to the {{{../wire/index.html}Accord Wire}} project.
 

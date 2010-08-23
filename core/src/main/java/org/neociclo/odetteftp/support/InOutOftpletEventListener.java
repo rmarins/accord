@@ -17,7 +17,7 @@
  *
  * $Id$
  */
-package org.neociclo.odetteftp.examples.support;
+package org.neociclo.odetteftp.support;
 
 import java.util.EventListener;
 

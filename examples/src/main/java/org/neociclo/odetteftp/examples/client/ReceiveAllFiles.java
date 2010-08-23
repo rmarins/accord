@@ -28,15 +28,15 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.neociclo.odetteftp.examples.MainSupport;
-import org.neociclo.odetteftp.examples.support.InOutOftpletEventListenerAdapter;
-import org.neociclo.odetteftp.examples.support.InOutSharedQueueOftpletFactory;
-import org.neociclo.odetteftp.examples.support.SessionConfig;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.service.TcpClient;
+import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.SessionConfig;
 
 /**
  * @author Rafael Marins

@@ -2,20 +2,9 @@ package org.neociclo.accord.camel.odette;
 
 import java.io.File;
 
-import org.neociclo.odetteftp.client.ClientException;
-import org.neociclo.odetteftp.client.ClientParameters;
-import org.neociclo.odetteftp.client.OftpFile;
-import org.neociclo.odetteftp.client.events.DeliveryNotificationEvent;
-import org.neociclo.odetteftp.client.events.FileTransferEndEvent;
-import org.neociclo.odetteftp.client.events.IOdetteFtpListener;
-import org.neociclo.odetteftp.client.events.OdetteFtpEvent;
-import org.neociclo.odetteftp.client.transfer.TransientClient;
-import org.neociclo.odetteftp.protocol.DeliveryNotificationInfo;
-import org.neociclo.odetteftp.protocol.VirtualFileInfo;
-import org.neociclo.odetteftp.security.Callback;
-import org.neociclo.odetteftp.security.CallbackException;
-import org.neociclo.odetteftp.security.CallbackHandler;
-import org.neociclo.odetteftp.security.ISecurityContext;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+
 import org.neociclo.odetteftp.security.PasswordCallback;
 
 public class OdetteOperations {

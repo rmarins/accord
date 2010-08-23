@@ -28,9 +28,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.neociclo.odetteftp.examples.MainSupport;
-import org.neociclo.odetteftp.examples.support.InOutOftpletEventListenerAdapter;
-import org.neociclo.odetteftp.examples.support.InOutSharedQueueOftpletFactory;
-import org.neociclo.odetteftp.examples.support.SessionConfig;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
 import org.neociclo.odetteftp.protocol.AnswerReason;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
@@ -38,6 +35,9 @@ import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.service.TcpClient;
+import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.SessionConfig;
 import org.neociclo.odetteftp.util.IoUtil;
 
 /**

@@ -17,7 +17,7 @@
  *
  * $Id$
  */
-package org.neociclo.odetteftp.examples.support;
+package org.neociclo.odetteftp.support;
 
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;

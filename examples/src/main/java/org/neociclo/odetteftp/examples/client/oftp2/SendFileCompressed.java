@@ -31,15 +31,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.net.ssl.SSLEngine;
 
 import org.neociclo.odetteftp.examples.MainSupport;
-import org.neociclo.odetteftp.examples.support.InOutSharedQueueOftpletFactory;
-import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
-import org.neociclo.odetteftp.examples.support.SessionConfig;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.v20.DefaultEnvelopedVirtualFile;
 import org.neociclo.odetteftp.protocol.v20.FileCompression;
 import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
 import org.neociclo.odetteftp.service.TcpClient;
+import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.SampleOftpSslContextFactory;
+import org.neociclo.odetteftp.support.SessionConfig;
 import org.neociclo.odetteftp.util.OftpUtil;
 
 /**

@@ -7,8 +7,6 @@ import org.apache.camel.Processor;
 import org.apache.camel.ShutdownRunningTask;
 import org.apache.camel.impl.ScheduledPollConsumer;
 import org.apache.camel.spi.ShutdownAware;
-import org.neociclo.odetteftp.client.OftpFile;
-import org.neociclo.odetteftp.protocol.DeliveryNotificationInfo;
 
 /**
  * <p>

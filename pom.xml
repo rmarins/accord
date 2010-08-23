@@ -29,12 +29,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.neociclo.accord.odetteftp</groupId>
   <artifactId>odetteftp-parent</artifactId>
-  <name>Accord Odette FTP :: Parent</name>
+  <name>Accord Odette FTP Library</name>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <description>
-      Accord OdetteFTP project
+      Accord Odette FTP Library is a Java API for developing OFTP2-enabled applications, supporting OFTP 1.3, 1.4 and 2.0 protocol versions.
   </description>
 
   <licenses>

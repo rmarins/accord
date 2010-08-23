@@ -29,9 +29,6 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLEngine;
 
 import org.neociclo.odetteftp.examples.MainSupport;
-import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
-import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
-import org.neociclo.odetteftp.examples.support.SessionConfig;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 import org.neociclo.odetteftp.security.AuthenticationChallengeCallback;
@@ -39,6 +36,9 @@ import org.neociclo.odetteftp.security.EncryptAuthenticationChallengeCallback;
 import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.OneToOneHandler;
 import org.neociclo.odetteftp.service.TcpClient;
+import org.neociclo.odetteftp.support.DefaultOftpletFactory;
+import org.neociclo.odetteftp.support.SampleOftpSslContextFactory;
+import org.neociclo.odetteftp.support.SessionConfig;
 import org.neociclo.odetteftp.util.EnvelopingUtil;
 import org.neociclo.odetteftp.util.SecurityUtil;
 

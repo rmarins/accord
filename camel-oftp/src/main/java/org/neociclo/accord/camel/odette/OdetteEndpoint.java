@@ -14,9 +14,8 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 			OdetteConfiguration configuration) {
 		super(uri, component);
 
-		operations = new OdetteOperations(this);
-
 		this.configuration = configuration;
+		this.operations = new OdetteOperations(this);
 	}
 
 	public OdetteConfiguration getConfiguration() {

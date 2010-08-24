@@ -1,17 +1,17 @@
 package org.neociclo.accord.camel.odette;
 
-import org.neociclo.odetteftp.client.OftpFile;
+import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 
-public class OdetteFileMessage extends OdetteMessage<OftpFile> {
+public class OdetteFileMessage extends OdetteMessage<DefaultVirtualFile> {
 
-	private OftpFile file;
+	private DefaultVirtualFile file;
 
-	public OdetteFileMessage(OftpFile file) {
+	public OdetteFileMessage(DefaultVirtualFile file) {
 		this.file = file;
 	}
 
 	@Override
-	public OftpFile getOdetteObject() {
+	public DefaultVirtualFile getOdetteObject() {
 		return file;
 	}
 

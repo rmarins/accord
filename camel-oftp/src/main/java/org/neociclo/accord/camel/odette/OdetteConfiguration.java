@@ -77,7 +77,7 @@ public class OdetteConfiguration implements Cloneable {
 	private File tmpDir;
 
 	public OdetteConfiguration() {
-		tmpDir = new File(System.getProperty("java.tmp.dir"));
+		tmpDir = new File(System.getProperty("java.io.tmpdir"));
 	}
 
 	public OdetteConfiguration(URI uri) {
@@ -204,7 +204,7 @@ public class OdetteConfiguration implements Cloneable {
 	 * </p>
 	 * 
 	 */
-	protected void configure(URI uri) {
+	public void configure(URI uri) {
 		String scheme = uri.getScheme();
 
 		OdetteTransport transport = validateTransport(scheme);
@@ -234,8 +234,7 @@ public class OdetteConfiguration implements Cloneable {
 		}
 
 		try {
-			return OdetteTransport.valueOf(scheme.substring(indexOfPlus)
-					.toUpperCase());
+			return OdetteTransport.valueOf(scheme.substring(indexOfPlus).toUpperCase());
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeCamelException("Unsupported protocol: " + protocol);
 		}

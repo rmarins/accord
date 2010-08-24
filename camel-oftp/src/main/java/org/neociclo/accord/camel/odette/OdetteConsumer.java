@@ -1,7 +1,5 @@
 package org.neociclo.accord.camel.odette;
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ShutdownRunningTask;
@@ -19,32 +17,19 @@ import org.apache.camel.spi.ShutdownAware;
  * @author bruno
  * 
  */
-public class OdetteConsumer extends ScheduledPollConsumer implements
-		ShutdownAware {
+public class OdetteConsumer extends ScheduledPollConsumer implements ShutdownAware {
 
 	private OdetteOperations operations;
 
-	public OdetteConsumer(OdetteEndpoint endpoint, Processor processor,
-			OdetteOperations operations) {
+	public OdetteConsumer(OdetteEndpoint endpoint, Processor processor, OdetteOperations operations) {
 		super(endpoint, processor);
 
 		setPollStrategy(new DefaultOdettePollingStrategy());
 		setDelay(endpoint.getConfiguration().getDelay());
 		setInitialDelay(endpoint.getConfiguration().getInitialDelay());
-		setTimeUnit(TimeUnit.SECONDS);
 		setUseFixedDelay(true);
 
 		this.operations = operations;
-		this.operations
-				.addIncomingTaskListener(new OdetteIncomingTaskListener() {
-					public void incoming(OftpFile file) {
-						processOdetteMessage(new OdetteFileMessage(file));
-					}
-
-					public void incoming(DeliveryNotificationInfo notInfo) {
-						processOdetteMessage(new OdetteDeliveryMessage(notInfo));
-					}
-				});
 	}
 
 	public boolean deferShutdown(ShutdownRunningTask shutdownRunningTask) {
@@ -62,6 +47,7 @@ public class OdetteConsumer extends ScheduledPollConsumer implements
 	 * 
 	 * @param om
 	 */
+	@SuppressWarnings("unused")
 	private void processOdetteMessage(OdetteMessage<?> om) {
 		Exchange e = getEndpoint().createExchange();
 
@@ -76,7 +62,7 @@ public class OdetteConsumer extends ScheduledPollConsumer implements
 
 	@Override
 	protected void poll() throws Exception {
-		operations.startSession();
+		operations.pollServer();
 	}
 
 }

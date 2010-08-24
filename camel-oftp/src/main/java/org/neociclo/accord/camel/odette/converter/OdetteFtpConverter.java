@@ -25,8 +25,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import org.apache.camel.Converter;
-import org.neociclo.odetteftp.support.DefaultVirtualFile;
-import org.neociclo.odetteftp.support.VirtualFile;
+import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
+import org.neociclo.odetteftp.protocol.VirtualFile;
 
 /**
  * @author Rafael Marins

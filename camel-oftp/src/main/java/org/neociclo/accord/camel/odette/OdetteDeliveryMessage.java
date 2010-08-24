@@ -1,17 +1,16 @@
 package org.neociclo.accord.camel.odette;
 
-import org.neociclo.odetteftp.protocol.DeliveryNotificationInfo;
+import org.neociclo.odetteftp.protocol.DeliveryNotification;
 
-public class OdetteDeliveryMessage extends
-		OdetteMessage<DeliveryNotificationInfo> {
+public class OdetteDeliveryMessage extends OdetteMessage<DeliveryNotification> {
 
-	private DeliveryNotificationInfo notificationInfo;
+	private DeliveryNotification notificationInfo;
 
-	public OdetteDeliveryMessage(DeliveryNotificationInfo dni) {
+	public OdetteDeliveryMessage(DeliveryNotification dni) {
 		this.notificationInfo = dni;
 	}
 
-	public DeliveryNotificationInfo getOdetteObject() {
+	public DeliveryNotification getOdetteObject() {
 		return notificationInfo;
 	}
 

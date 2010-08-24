@@ -11,16 +11,15 @@ public class OdetteProducer extends DefaultProducer {
 
 	private OdetteOperations operations;
 
-	protected OdetteProducer(OdetteEndpoint endpoint,
-			OdetteOperations operations) {
+	protected OdetteProducer(OdetteEndpoint endpoint, OdetteOperations operations) {
 		super(endpoint);
 
 		this.operations = operations;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void process(Exchange exchange) throws Exception {
-		List<Exchange> grouped = exchange.getProperty(
-				Exchange.GROUPED_EXCHANGE, List.class);
+		List<Exchange> grouped = exchange.getProperty(Exchange.GROUPED_EXCHANGE, List.class);
 
 		if (grouped != null) {
 			for (Exchange e : grouped) {
@@ -30,19 +29,11 @@ public class OdetteProducer extends DefaultProducer {
 			prepareExchange(exchange);
 		}
 
-		operations.startSession();
+		operations.pollServer();
 	}
 
 	private void prepareExchange(Exchange e) {
 		Message message = e.getIn();
 		ObjectHelper.isAssignableFrom(OdetteMessage.class, message.getClass());
-
-		if (message instanceof OdetteDeliveryMessage) {
-			OdetteDeliveryMessage odm = (OdetteDeliveryMessage) message;
-			operations.sendDeliveryNotification(odm.getOdetteObject());
-		} else if (message instanceof OdetteFileMessage) {
-			OdetteFileMessage odm = (OdetteFileMessage) message;
-			operations.sendOftpFile(odm.getOdetteObject());
-		}
 	}
 }

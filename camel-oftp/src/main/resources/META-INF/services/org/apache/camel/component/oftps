@@ -17,4 +17,5 @@
 # 
 # $Id$
 #
-class=org.neociclo.accord.camel.odette.OdetteFtpComponent
+
+class=org.neociclo.accord.camel.odette.OdetteComponent

@@ -5,19 +5,21 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.spi.PollingConsumerPollStrategy;
 import org.neociclo.odetteftp.protocol.EndSessionException;
 
-public class DefaultOdettePollingStrategy implements
-		PollingConsumerPollStrategy {
+public class DefaultOdettePollingStrategy implements PollingConsumerPollStrategy {
 
 	public boolean begin(Consumer consumer, Endpoint endpoint) {
 		OdetteEndpoint odette = (OdetteEndpoint) endpoint;
 
 		// is session working? if true, skip polling this time
-		if (odette.getOdetteOperations().isWorking()) {
+		if (odette.getOdetteOperations().isConnected()) {
 			return false;
 		}
 
 		// let listener be aware of polling
-		odette.getConfiguration().getListener().sessionStarted();
+		OdetteAuditListener listener = odette.getConfiguration().getListener();
+		if (listener != null) {
+			listener.sessionStarted();
+		}
 
 		return true;
 	}
@@ -26,11 +28,13 @@ public class DefaultOdettePollingStrategy implements
 		OdetteEndpoint odette = (OdetteEndpoint) endpoint;
 
 		// let listener be aware of polling
-		odette.getConfiguration().getListener().sessionEnded();
+		OdetteAuditListener listener = odette.getConfiguration().getListener();
+		if (listener != null) {
+			listener.sessionEnded();
+		}
 	}
 
-	public boolean rollback(Consumer consumer, Endpoint endpoint,
-			int retryCounter, Exception cause) throws Exception {
+	public boolean rollback(Consumer consumer, Endpoint endpoint, int retryCounter, Exception cause) throws Exception {
 
 		// only retry under theses error codes: 08, 09, 99
 		if (cause instanceof EndSessionException) {

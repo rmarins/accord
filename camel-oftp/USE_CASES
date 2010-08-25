@@ -1,0 +1,5 @@
+Automatic End Response
+pois o arquivo pode precisar ser roteado para outro ponto, via JMS por exemplo, e aí vc cria o EERP quando obtiver a notificação...
+Permitir retornar EERP ou NERP somente depois que o arquivo foi processado.
+
+

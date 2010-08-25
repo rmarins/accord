@@ -26,7 +26,7 @@ public class OdetteComponent extends DefaultComponent {
 		resultConfig.configure(new URI(uri));
 		setProperties(resultConfig, parameters);
 
-		OdetteEndpoint endpoint = new OdetteEndpoint(uri, this, configuration);
+		OdetteEndpoint endpoint = new OdetteEndpoint(uri, this, resultConfig);
 
 		return endpoint;
 	}

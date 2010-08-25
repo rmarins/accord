@@ -37,58 +37,66 @@ import org.neociclo.odetteftp.security.SecurityContext;
  */
 public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 
-    private SessionConfig config;
-    private SecurityContext securityContext;
-    private SharedQueueOftpletListener listener;
-    private SharedQueueOftpletSpeaker speaker;
+	private SessionConfig config;
+	private SecurityContext securityContext;
+	private SharedQueueOftpletListener listener;
+	private SharedQueueOftpletSpeaker speaker;
 
-    public InOutSharedQueueOftplet(SessionConfig sessionConfig, Queue<OdetteFtpObject> outgoing,
-            Queue<OdetteFtpObject> outgoingDone, Queue<OdetteFtpObject> incoming) {
-        super();
-        this.config = sessionConfig;
-        this.securityContext = new ConfigBasedSecurityContext(sessionConfig);
-    	this.listener = new SharedQueueOftpletListener(incoming);
-        if (outgoing != null) {
-        	this.speaker = new SharedQueueOftpletSpeaker(outgoing, outgoingDone);
-        }
-    }
+	public InOutSharedQueueOftplet(SessionConfig sessionConfig, Queue<OdetteFtpObject> outgoing,
+			Queue<OdetteFtpObject> outgoingDone, Queue<OdetteFtpObject> incoming) {
+		super();
+		this.config = sessionConfig;
+		this.securityContext = new ConfigBasedSecurityContext(sessionConfig);
 
-    @Override
-    public SecurityContext getSecurityContext() {
-        return securityContext;
-    }
+		if (incoming != null) {
+			this.listener = new SharedQueueOftpletListener(incoming);
+		}
 
-    @Override
-    public void init(OdetteFtpSession s) throws OdetteFtpException {
-        config.setup(s);
-    }
+		if (outgoing != null) {
+			this.speaker = new SharedQueueOftpletSpeaker(outgoing, outgoingDone);
+		}
 
-    @Override
-    public boolean isProtocolVersionSupported(OdetteFtpVersion version) {
-        if (config.getVersion() != null) {
-            return config.getVersion().equals(version);
-        } else {
-            return super.isProtocolVersionSupported(version);
-        }
-    }
+		if (speaker == null && listener == null) {
+			throw new IllegalArgumentException("Listener and Speaker cannot be null");
+		}
+	}
 
-    @Override
-    public OftpletListener getListener() {
-        return listener;
-    }
+	@Override
+	public SecurityContext getSecurityContext() {
+		return securityContext;
+	}
 
-    @Override
-    public OftpletSpeaker getSpeaker() {
-        return speaker;
-    }
+	@Override
+	public void init(OdetteFtpSession s) throws OdetteFtpException {
+		config.setup(s);
+	}
 
-    public void setEventListener(InOutOftpletEventListener eventListener) {
-    	if (speaker != null) {
-    		speaker.setEventListenet(eventListener);
-    	}
-    	if (listener != null) {
-    		listener.setEventListener(eventListener);
-    	}
-    }
+	@Override
+	public boolean isProtocolVersionSupported(OdetteFtpVersion version) {
+		if (config.getVersion() != null) {
+			return config.getVersion().equals(version);
+		} else {
+			return super.isProtocolVersionSupported(version);
+		}
+	}
+
+	@Override
+	public OftpletListener getListener() {
+		return listener;
+	}
+
+	@Override
+	public OftpletSpeaker getSpeaker() {
+		return speaker;
+	}
+
+	public void setEventListener(InOutOftpletEventListener eventListener) {
+		if (speaker != null) {
+			speaker.setEventListenet(eventListener);
+		}
+		if (listener != null) {
+			listener.setEventListener(eventListener);
+		}
+	}
 
 }

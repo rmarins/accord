@@ -20,11 +20,11 @@
 package org.neociclo.accord.camel.odette;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.util.ObjectHelper;
-import org.neociclo.odetteftp.TransferMode;
 
 /**
  * @author Rafael Marins
@@ -47,7 +47,6 @@ public class OdetteConfiguration implements Cloneable {
 	private long timeout = 90000;
 
 	private boolean longFilename = false;
-	private TransferMode transferMode = TransferMode.BOTH;
 
 	private int maxRetry = 0;
 
@@ -59,14 +58,6 @@ public class OdetteConfiguration implements Cloneable {
 		this.maxRetry = maxRetry;
 	}
 
-	public TransferMode getTransferMode() {
-		return transferMode;
-	}
-
-	public void setTransferMode(TransferMode transferMode) {
-		this.transferMode = transferMode;
-	}
-
 	// ScheduledPollConsumer properties (workaround defined)
 	private long initialDelay = 10;
 	private long delay = 300;
@@ -75,6 +66,8 @@ public class OdetteConfiguration implements Cloneable {
 	private OdetteTransport transport;
 
 	private File tmpDir;
+
+	private FileRenameBean fileRenameBean = new FileRenameBean();
 
 	public OdetteConfiguration() {
 		tmpDir = new File(System.getProperty("java.io.tmpdir"));
@@ -261,8 +254,12 @@ public class OdetteConfiguration implements Cloneable {
 		clone.setPassword(password);
 		clone.setProtocol(protocol);
 		clone.setOid(oid);
-		clone.setTransferMode(transferMode);
-		clone.setTmpDir(tmpDir);
+
+		try {
+			clone.setTmpDir(tmpDir);
+		} catch (IOException e) {
+		}
+
 		clone.setTransport(transport);
 		clone.setBufferSize(bufferSize);
 		clone.setDelay(delay);
@@ -282,8 +279,7 @@ public class OdetteConfiguration implements Cloneable {
 		sb.append("+").append(getTransport().name().toLowerCase());
 		sb.append("://").append(getOid()).append("@");
 		sb.append(getHost()).append(":").append(getPort());
-		sb.append("?transferMode=").append(getTransferMode());
-		sb.append("&listener=#").append(getListener());
+		sb.append("?listener=#").append(getListener());
 
 		return sb.toString();
 	}
@@ -301,8 +297,20 @@ public class OdetteConfiguration implements Cloneable {
 		return tmpDir;
 	}
 
-	protected void setTmpDir(File tmpDir) {
+	public void setTmpDir(File tmpDir) throws IOException {
 		this.tmpDir = tmpDir;
+
+		if (tmpDir != null && !tmpDir.exists()) {
+			tmpDir.mkdir();
+		}
+	}
+
+	public FileRenameBean getFileRenameBean() {
+		return fileRenameBean;
+	}
+
+	public void setFileRenameBean(FileRenameBean bean) {
+		this.fileRenameBean = bean;
 	}
 
 }

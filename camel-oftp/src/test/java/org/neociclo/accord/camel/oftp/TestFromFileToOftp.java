@@ -1,15 +1,10 @@
 package org.neociclo.accord.camel.oftp;
 
-import java.net.URI;
-
 import org.apache.camel.EndpointInject;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
-import org.neociclo.accord.camel.odette.OdetteComponent;
-import org.neociclo.accord.camel.odette.OdetteConfiguration;
-import org.neociclo.accord.camel.odette.OdetteEndpoint;
 
 /**
  * Neociclo Accord - Open Source B2B Integration Suite Copyright (C) 2005-2008
@@ -29,14 +24,6 @@ import org.neociclo.accord.camel.odette.OdetteEndpoint;
  * this program. If not, see <http://www.gnu.org/licenses/>.
  * 
  * $Id: FromFileToOftpTest.java 482 2010-07-23
- * 21:1org.neociclo.accord.camel.oftpe org.neociclo.accord.camel.oftp;
- * org.neociclo.accord.camel.oftporg.apache.camel.EndpointInject; import
- * org.apache.camel.builder.RouteBuilder; import
- * org.apache.camel.component.mock.MockEndpoint; import
- * org.apache.camel.test.junit4.CamelTestSupport; import org.junit.Test; import
- * org.neociclo.accord.camel.odette.OdetteComponent; import
- * org.neociclo.accord.camel.odette.OdetteConfiguration; import
- * org.neociclo.accord.camel.odette.OdetteEndpoint;
  * 
  * /**
  * 
@@ -48,7 +35,7 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	@EndpointInject(uri = "mock:result")
 	private MockEndpoint resultEndpoint;
 
-	private String oftpFromUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001";
+	private String oftpFromUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/tmp/odette";
 
 	@Test(timeout = 60000)
 	public void testFromFileToFtp() throws Exception {
@@ -59,13 +46,7 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
-				OdetteConfiguration configuration = new OdetteConfiguration();
-				configuration.configure(new URI(oftpFromUrl));
-				OdetteComponent component = new OdetteComponent();
-				component.setCamelContext(getContext());
-				OdetteEndpoint endpoint = new OdetteEndpoint(oftpFromUrl, component, configuration);
-				endpoint.setCamelContext(getContext());
-				from(endpoint).to("mock:result");
+				from(oftpFromUrl).to("mock:result");
 			}
 		};
 	}

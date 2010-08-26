@@ -47,8 +47,7 @@ public class OdetteConsumer extends ScheduledPollConsumer implements ShutdownAwa
 	 * 
 	 * @param om
 	 */
-	@SuppressWarnings("unused")
-	private void processOdetteMessage(OdetteMessage<?> om) {
+	public void processOdetteMessage(OdetteMessage<?> om) {
 		Exchange e = getEndpoint().createExchange();
 
 		om.bind(e);

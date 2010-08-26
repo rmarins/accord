@@ -10,8 +10,7 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 	private OdetteOperations operations;
 	private OdetteConfiguration configuration;
 
-	public OdetteEndpoint(String uri, OdetteComponent component,
-			OdetteConfiguration configuration) {
+	public OdetteEndpoint(String uri, OdetteComponent component, OdetteConfiguration configuration) {
 		super(uri, component);
 
 		this.configuration = configuration;
@@ -23,10 +22,12 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 	}
 
 	public Consumer createConsumer(Processor processor) throws Exception {
+		operations.setHasInQueue();
 		return new OdetteConsumer(this, processor, operations);
 	}
 
 	public Producer createProducer() throws Exception {
+		operations.setHasOutQueue();
 		return new OdetteProducer(this, operations);
 	}
 

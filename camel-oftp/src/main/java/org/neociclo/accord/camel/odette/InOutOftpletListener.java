@@ -14,16 +14,17 @@ import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
 public class InOutOftpletListener extends InOutOftpletEventListenerAdapter {
 
 	private OdetteEndpoint endpoint;
+	private FileRenameBean fileRename;
 
 	public InOutOftpletListener(OdetteEndpoint endpoint) {
 		this.endpoint = endpoint;
+		this.fileRename = endpoint.getConfiguration().getFileRenameBean();
 	}
 
 	@Override
 	public StartFileResponse acceptStartFile(VirtualFile incomingFile) {
-
 		File tmpDir = endpoint.getConfiguration().getTmpDir();
-		File saveToFile = new File(tmpDir, incomingFile.getDatasetName());
+		File saveToFile = new File(tmpDir, fileRename.renameFile(incomingFile));
 
 		// handle duplicate file
 		if (saveToFile.exists()) {
@@ -45,12 +46,9 @@ public class InOutOftpletListener extends InOutOftpletEventListenerAdapter {
 
 	@Override
 	public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
-
 		// reply with EERP (positive delivery notification)
 		DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
 		endpoint.getOdetteOperations().offer(notif);
-
-		System.out.println("Receive file completed: " + virtualFile);
 
 		// send the EERP back - request change direction (true)
 		return true;

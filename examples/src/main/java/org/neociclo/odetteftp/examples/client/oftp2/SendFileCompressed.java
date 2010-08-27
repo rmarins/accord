@@ -74,11 +74,12 @@ public class SendFileCompressed {
 		vf.setEnvelopingFormat(FileEnveloping.CMS);
 		vf.setCompressionAlgorithm(FileCompression.ZLIB);
 
-		vf.setOriginalFileSize(getFileSize(payloadFile));
-		vf.setSize(getFileSize(compressedFile));
-
 		// create the compressed file
 		createEnvelopedFile(payloadFile, compressedFile, vf);
+
+		// set file size after compression
+		vf.setOriginalFileSize(getFileSize(payloadFile));
+		vf.setSize(getFileSize(compressedFile));
 
 		filesToSend.offer(vf);
 

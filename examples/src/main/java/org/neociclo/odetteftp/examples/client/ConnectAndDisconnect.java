@@ -20,9 +20,9 @@
 package org.neociclo.odetteftp.examples.client;
 
 import org.neociclo.odetteftp.examples.MainSupport;
+import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.DefaultOftpletFactory;
 import org.neociclo.odetteftp.support.SessionConfig;
 
 /**

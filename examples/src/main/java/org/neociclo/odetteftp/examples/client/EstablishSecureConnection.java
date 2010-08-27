@@ -24,10 +24,10 @@ import java.net.InetSocketAddress;
 import javax.net.ssl.SSLEngine;
 
 import org.neociclo.odetteftp.examples.MainSupport;
+import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
+import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.DefaultOftpletFactory;
-import org.neociclo.odetteftp.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.support.SessionConfig;
 
 /**

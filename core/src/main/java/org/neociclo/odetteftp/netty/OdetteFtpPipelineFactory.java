@@ -138,7 +138,6 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
 
         p.addLast("logging", new ProtocolLoggingHandler(null));
         LOGGER.debug("Added Odette FTP protocol logging handler to channel pipeline.");
-//        p.addLast("logging", new LoggingHandler(OdetteFtpPipelineFactory.class, InternalLogLevel.INFO));
 
         // add odette-ftp handler
         p.addLast("OdetteFtp-HANDLER", new OdetteFtpChannelHandler(entityType, oftpletFactory, timer, channelGroup));

@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.net.ssl.SSLEngine;
 
+import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
@@ -70,7 +71,10 @@ public class SendFileEncrypted {
 		SessionConfig conf = new SessionConfig();
 		conf.setUserCode(usercode);
 		conf.setUserPassword(password);
+
 		conf.setTransferMode(SENDER_ONLY);
+		// require an OFTP2 connection
+		conf.setVersion(OdetteFtpVersion.OFTP_V20);
 
 		Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
 

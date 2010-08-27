@@ -28,6 +28,8 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLEngine;
 
+import org.neociclo.odetteftp.OdetteFtpVersion;
+import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
 import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
@@ -65,6 +67,10 @@ public class PerformSecureAuthentication {
 		SessionConfig conf = new SessionConfig();
 		conf.setUserCode(oid);
 		conf.setUserPassword(password);
+
+		conf.setTransferMode(TransferMode.SENDER_ONLY);
+		// require an OFTP2 connection
+		conf.setVersion(OdetteFtpVersion.OFTP_V20);
 
 		// setup secure authentication options
 		conf.setUseSecureAuthentication(true);

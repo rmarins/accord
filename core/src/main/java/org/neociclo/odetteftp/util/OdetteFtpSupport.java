@@ -105,8 +105,12 @@ public class OdetteFtpSupport {
 						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
 			}
 
-			if (partnerCert == null) {
-				throw new NullPointerException("partnerCert");
+			if (userCert == null) {
+				throw new NullPointerException("userCert");
+			}
+
+			if (userPrivateKey == null) {
+				throw new NullPointerException("userKey");
 			}
 		}
 
@@ -116,12 +120,8 @@ public class OdetteFtpSupport {
 						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
 			}
 
-			if (userCert == null) {
-				throw new NullPointerException("userCert");
-			}
-
-			if (userPrivateKey == null) {
-				throw new NullPointerException("userKey");
+			if (partnerCert == null) {
+				throw new NullPointerException("partnerCert");
 			}
 		}
 
@@ -201,13 +201,24 @@ public class OdetteFtpSupport {
 					"envelopingFormat=NO_ENVELOPE.");
 		}
 
-		boolean addSignature = (securityLevel == SIGNED || securityLevel == ENCRYPTED_AND_SIGNED);
-		boolean doEncryption = (securityLevel == ENCRYPTED || securityLevel == ENCRYPTED_AND_SIGNED);
-		boolean doCompression = (compressionAlgo != NO_COMPRESSION);
+		boolean isSigned = (securityLevel == SIGNED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean isEncrypted = (securityLevel == ENCRYPTED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean isCompressed = (compressionAlgo != NO_COMPRESSION);
 
-		if (addSignature) {
+		if (isSigned) {
 			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
 				throw new EnvelopingException("Cannot create enveloped file. No signature algorithm specified " +
+						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
+			}
+
+			if (partnerCert == null) {
+				throw new NullPointerException("partnerCert");
+			}
+		}
+
+		if (isEncrypted) {
+			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
+				throw new EnvelopingException("Cannot create enveloped file. No encryption algorithm specified " +
 						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
 			}
 
@@ -217,17 +228,6 @@ public class OdetteFtpSupport {
 
 			if (userPrivateKey == null) {
 				throw new NullPointerException("userKey");
-			}
-		}
-
-		if (doEncryption) {
-			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
-				throw new EnvelopingException("Cannot create enveloped file. No encryption algorithm specified " +
-						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
-			}
-
-			if (partnerCert == null) {
-				throw new NullPointerException("partnerCert");
 			}
 		}
 		

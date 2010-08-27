@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.net.ssl.SSLEngine;
 
 import org.neociclo.odetteftp.examples.MainSupport;
+import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.v20.DefaultEnvelopedVirtualFile;
@@ -38,9 +39,7 @@ import org.neociclo.odetteftp.protocol.v20.FileCompression;
 import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
 import org.neociclo.odetteftp.service.TcpClient;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
-import org.neociclo.odetteftp.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.support.SessionConfig;
-import org.neociclo.odetteftp.util.OftpUtil;
 
 /**
  * @author Rafael Marins
@@ -52,13 +51,12 @@ public class SendFileCompressed {
 
 		MainSupport ms = new MainSupport(SendFileCompressed.class, args, "server", "port", "oid", "password",
 				"payload");
-//		args = ms.args();
 
-		String host = args[0];
-		int port = Integer.parseInt(args[1]);
-		String usercode = args[2];
-		String password = args[3];
-		File payloadFile = new File(args[4]);
+		String host = ms.get(0);
+		int port = Integer.parseInt(ms.get(1));
+		String usercode = ms.get(2);
+		String password = ms.get(3);
+		File payloadFile = new File(ms.get(4));
 
 		File compressedFile = File.createTempFile("compressed-", "-" + payloadFile.getName(),
 				payloadFile.getParentFile());

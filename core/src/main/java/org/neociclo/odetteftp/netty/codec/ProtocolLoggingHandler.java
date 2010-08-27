@@ -124,7 +124,7 @@ public class ProtocolLoggingHandler extends SimpleChannelHandler {
         for (String name : fieldNames) {
             Object value = cmd.getAttribute(name);
             if (value instanceof byte[]) {
-                LOGGER.trace(marker, "              {} = {}", padd(name, 9, false), toHexString((byte[]) value, 10));
+                LOGGER.trace(marker, "              {} = {}", padd(name, 9, false), toHexString((byte[]) value, 30));
             } else {
                 LOGGER.trace(marker, "              {} = {}", padd(name, 9, false), value);
             }

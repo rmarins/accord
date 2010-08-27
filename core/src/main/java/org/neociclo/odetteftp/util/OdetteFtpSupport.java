@@ -72,13 +72,13 @@ public class OdetteFtpSupport {
 		FileCompression compressionAlgo = (virtualFile.getCompressionAlgorithm() == null ? NO_COMPRESSION : virtualFile.getCompressionAlgorithm());
 		FileEnveloping envelopingFormat = (virtualFile.getEnvelopingFormat() == null ? NO_ENVELOPE : virtualFile.getEnvelopingFormat());
 
-		createEnvelopedFile(input, output, securityLevel, cipherSel, compressionAlgo, envelopingFormat, userCert,
-				userPrivateKey, partnerCert);
+		createEnvelopedFile(input, output, securityLevel, cipherSel, compressionAlgo, envelopingFormat, partnerCert,
+				userCert, userPrivateKey);
 	}
 
 	public static void createEnvelopedFile(File input, File output, SecurityLevel securityLevel, CipherSuite cipherSel,
-			FileCompression compressionAlgo, FileEnveloping envelopingFormat, X509Certificate userCert,
-			PrivateKey userPrivateKey, X509Certificate partnerCert) throws EnvelopingException {
+			FileCompression compressionAlgo, FileEnveloping envelopingFormat, X509Certificate partnerCert,
+			X509Certificate userCert, PrivateKey userPrivateKey) throws EnvelopingException {
 
 		String[] argNames = { "input", "output", "securityLevel", "cipherSel", "compressionAlgo", "envelopingFormat" };
 		Object[] argValues = { input, output, securityLevel, cipherSel, compressionAlgo, envelopingFormat };
@@ -91,16 +91,29 @@ public class OdetteFtpSupport {
 		}
 
 		if (envelopingFormat == NO_ENVELOPE) {
-			throw new EnvelopingException("No envelope required (file enveloping format).");
+			throw new EnvelopingException("Cannot parse enveloped file. Incompatible parameter: " +
+					"envelopingFormat=NO_ENVELOPE.");
 		}
 
-		boolean addSignature = (securityLevel == SIGNED || securityLevel == ENCRYPTED_AND_SIGNED);
-		boolean doEncryption = (securityLevel == ENCRYPTED || securityLevel == ENCRYPTED_AND_SIGNED);
-		boolean doCompression = (compressionAlgo != NO_COMPRESSION);
+		boolean isSigned = (securityLevel == SIGNED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean isEncrypted = (securityLevel == ENCRYPTED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean isCompressed = (compressionAlgo != NO_COMPRESSION);
 
-		if (addSignature) {
+		if (isSigned) {
 			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
-				throw new EnvelopingException("No signature algorithm specified (no cipher suite selection).");
+				throw new EnvelopingException("Cannot parse enveloped file. No signature algorithm specified " +
+						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
+			}
+
+			if (partnerCert == null) {
+				throw new NullPointerException("partnerCert");
+			}
+		}
+
+		if (isEncrypted) {
+			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
+				throw new EnvelopingException("Cannot parse enveloped file. No encryption algorithm specified " +
+						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
 			}
 
 			if (userCert == null) {
@@ -112,25 +125,15 @@ public class OdetteFtpSupport {
 			}
 		}
 
-		if (doEncryption) {
-			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
-				throw new EnvelopingException("No encryption algorithm specified (no cipher suite selection).");
-			}
-
-			if (partnerCert == null) {
-				throw new NullPointerException("partnerCert");
-			}
-		}
-
 		/*
-		 * Enchain output streams in the correct full-cms order. Also prepare a
+		 * Enchain output streams in the reverse full-cms order. Also prepare a
 		 * list to flush & close streams in the correct sequence. 
 		 */
 		OutputStream outStream = null;
 		try {
 			outStream = new FileOutputStream(output, false);
 		} catch (FileNotFoundException ouputNotFound) {
-			throw new EnvelopingException("Failed to create enveloped file. Cannot open output file: " + output,
+			throw new EnvelopingException("Failed to parse enveloped file. Cannot open output file: " + output,
 					ouputNotFound);
 		}
 
@@ -138,15 +141,15 @@ public class OdetteFtpSupport {
 		toClose.add(outStream);
 
 		try {
-			if (doEncryption) {
+			if (isEncrypted) {
 				outStream = openEnvelopedDataContentStream(outStream, cipherSel, partnerCert);
 				toClose.add(0, outStream);
 			}
-			if (doCompression) {
+			if (isCompressed) {
 				outStream = openCompressedDataContentStream(outStream);
 				toClose.add(0, outStream);
 			}
-			if (addSignature) {
+			if (isSigned) {
 				outStream = openSignedDataContentStream(outStream, cipherSel, userCert, userPrivateKey);
 				toClose.add(0, outStream);
 			}
@@ -163,7 +166,7 @@ public class OdetteFtpSupport {
 			throw new EnvelopingException("Failed to create enveloped file. Source file doesn't exist: " + input,
 					notFound);
 		} catch (IOException e) {
-			throw new EnvelopingException("Failed to generate output enveloped file (IO copying error).", e);
+			throw new EnvelopingException("Failed to create enveloped file. Buffer copying error.", e);
 		}
 
         // perform flush & closings
@@ -177,6 +180,57 @@ public class OdetteFtpSupport {
 			throw new EnvelopingException("Failed to close enveloped output stream: " + output, e);
 		}
 
+	}
+
+	public static void parseEnvelopedFile(File input, File output, SecurityLevel securityLevel, CipherSuite cipherSel,
+			FileCompression compressionAlgo, FileEnveloping envelopingFormat, X509Certificate userCert,
+			PrivateKey userPrivateKey, X509Certificate partnerCert) throws EnvelopingException {
+		
+		String[] argNames = { "input", "output", "securityLevel", "cipherSel", "compressionAlgo", "envelopingFormat" };
+		Object[] argValues = { input, output, securityLevel, cipherSel, compressionAlgo, envelopingFormat };
+
+		// check null pointer exception in mandatory args
+		for (int i = 0; i < argValues.length; i++) {
+			if (argValues[i] == null) {
+				throw new NullPointerException(argNames[i]);
+			}
+		}
+
+		if (envelopingFormat == NO_ENVELOPE) {
+			throw new EnvelopingException("Cannot create enveloped file. Incompatible parameter: " +
+					"envelopingFormat=NO_ENVELOPE.");
+		}
+
+		boolean addSignature = (securityLevel == SIGNED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean doEncryption = (securityLevel == ENCRYPTED || securityLevel == ENCRYPTED_AND_SIGNED);
+		boolean doCompression = (compressionAlgo != NO_COMPRESSION);
+
+		if (addSignature) {
+			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
+				throw new EnvelopingException("Cannot create enveloped file. No signature algorithm specified " +
+						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
+			}
+
+			if (userCert == null) {
+				throw new NullPointerException("userCert");
+			}
+
+			if (userPrivateKey == null) {
+				throw new NullPointerException("userKey");
+			}
+		}
+
+		if (doEncryption) {
+			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
+				throw new EnvelopingException("Cannot create enveloped file. No encryption algorithm specified " +
+						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
+			}
+
+			if (partnerCert == null) {
+				throw new NullPointerException("partnerCert");
+			}
+		}
+		
 	}
 
 	public static DeliveryNotification getReplyDeliveryNotification(VirtualFile incomingVirtualFile) {

@@ -46,7 +46,7 @@ public class ReceiveAllFiles {
 
 	public static void main(String[] args) throws Exception {
 
-		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
+		MainSupport ms = new MainSupport(ReceiveAllFiles.class, args, "server", "port", "odetteid", "password",
 				"directory");
 		args = ms.args();
 

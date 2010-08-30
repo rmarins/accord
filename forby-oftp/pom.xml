@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.neociclo.accord.odetteftp</groupId>
     <artifactId>odetteftp-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>forby-oftp</artifactId>
@@ -22,7 +22,8 @@
 
     <dependency>
       <groupId>org.neociclo.accord.odetteftp</groupId>
-      <artifactId>core-oftp</artifactId>
+      <artifactId>oftp-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
   </dependencies>

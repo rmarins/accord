@@ -25,6 +25,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.MessageEvent;
 import org.neociclo.odetteftp.OdetteFtpSession;
+import org.neociclo.odetteftp.netty.ChannelContext;
 
 /**
  * In/Out network stream handler that sets the Odette FTP Session object on
@@ -69,7 +70,7 @@ class OftpSessionSetterHandler implements ChannelUpstreamHandler, ChannelDownstr
         if (upstream == null) {
             ctx.sendUpstream(event);
         } else {
-            ctx.setAttachment(session);
+            ChannelContext.SESSION.set(event.getChannel(), session);
             upstream.handleUpstream(ctx, event);
         }
         
@@ -85,7 +86,7 @@ class OftpSessionSetterHandler implements ChannelUpstreamHandler, ChannelDownstr
         if (downstream == null) {
             ctx.sendDownstream(event);
         } else {
-            ctx.setAttachment(session);
+            ChannelContext.SESSION.set(event.getChannel(), session);
             downstream.handleDownstream(ctx, event);
         }
         

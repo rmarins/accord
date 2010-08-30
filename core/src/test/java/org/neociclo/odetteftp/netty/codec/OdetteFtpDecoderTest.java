@@ -70,7 +70,7 @@ public class OdetteFtpDecoderTest {
             CommandExchangeBuffer cdt = (CommandExchangeBuffer) d.poll();
 
             assertEquals(CommandIdentifier.CDT, cdt.getIdentifier());
-            assertNull(cdt.getStringAttribute(CDTRSV1_FIELD));
+            assertEquals("", cdt.getStringAttribute(CDTRSV1_FIELD));
 
             assertEquals(CommandBuilder.setCredit(), cdt);
         }

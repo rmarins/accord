@@ -33,7 +33,25 @@
   <artifactId>oftp-examples</artifactId>
   <packaging>jar</packaging>
   <name>Accord Odette FTP :: Examples</name>
-  <description>Sample code showcase on using the Accord Odette FTP Library.</description>
+  <description>Code showcase on using the Accord Odette FTP Library.</description>
+
+  <properties>
+    <!-- DON'T deploy oftp-examples artifacts. -->
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>src</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <dependencies>
     <dependency>

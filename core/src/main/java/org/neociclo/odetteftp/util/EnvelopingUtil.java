@@ -60,8 +60,12 @@ import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
+import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 import org.neociclo.odetteftp.protocol.v20.DefaultSignedDeliveryNotification;
+import org.neociclo.odetteftp.protocol.v20.SignedDeliveryNotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,12 +118,12 @@ public class EnvelopingUtil {
     public static void createEnvelopedData(InputStream dataStream, OutputStream outStream, CipherSuite cipherSel,
             X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
 
-        OutputStream enveloped = openEnvelopedDataContentStream(outStream, cipherSel, cert);
+        OutputStream enveloped = openEnvelopedDataStreamGenerator(outStream, cipherSel, cert);
         IoUtil.copyStream(dataStream, enveloped);
 
     }
 
-    public static OutputStream openEnvelopedDataContentStream(OutputStream outStream, CipherSuite cipherSel,
+    public static OutputStream openEnvelopedDataStreamGenerator(OutputStream outStream, CipherSuite cipherSel,
             X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
 
         installBouncyCastleProviderIfNecessary();
@@ -136,6 +140,174 @@ public class EnvelopingUtil {
 
         return enveloped;
     }
+
+	/**
+	 * 
+	 * @param cryptData
+	 *            InputStream of encapsulated encrypted data
+	 * @param cert
+	 *            user secure certificate used to match the recipient identifier
+	 * @param key
+	 *            user private key used to decrypt the encapsulated data
+	 * @return InputStream the original data stream (decrypted)
+	 * @throws CMSException
+	 * @throws IOException
+	 * @throws NoSuchProviderException
+	 */
+	public static InputStream openEnvelopedDataParser(InputStream cryptData, X509Certificate cert, PrivateKey key)
+			throws CMSException, IOException, NoSuchProviderException {
+
+        installBouncyCastleProviderIfNecessary();
+
+        // set up the parser
+        CMSEnvelopedDataParser ep = new CMSEnvelopedDataParser(cryptData);
+
+        // TODO validate the receiving enveloped-data against supported
+        // algorithms
+
+        // look for our recipient identifier
+        RecipientId recId = new RecipientId();
+
+        recId.setSerialNumber(cert.getSerialNumber());
+        recId.setIssuer(cert.getIssuerX500Principal().getEncoded());
+
+        RecipientInformationStore recipients = ep.getRecipientInfos();
+        RecipientInformation recipient = recipients.get(recId);
+
+        if (recipient != null) {
+            // return the decrypting parser InputStream
+            InputStream parserStream = recipient.getContentStream(key, BC_PROVIDER).getContentStream();
+            return parserStream;
+        }
+
+        // TODO raise a kind of invalid certificate exception instead of null
+        // or recipient not found
+
+        return null;
+
+    }
+
+	/**
+	 * 
+	 * @param compressedData
+	 *            InputStream of encapsulated compressed data
+	 * @return InputStream the original (uncompressed) readable data stream
+	 * @throws CMSException
+	 */
+	public static InputStream openCompressedDataParser(InputStream compressedData) throws CMSException {
+
+		// set up the parser and retrieve the original data stream
+		CMSCompressedDataParser cp = new CMSCompressedDataParser(compressedData);
+		InputStream contentStream = cp.getContent().getContentStream();
+
+		return contentStream;
+	}
+
+	public static InputStream openSignedDataParser(InputStream sigData, final X509Certificate checkCert)
+			throws CMSException {
+		return openSignedDataParser(sigData, checkCert, null);
+	}
+
+	public static InputStream openSignedDataParser(InputStream sigData, final X509Certificate checkCert,
+			final SignatureVerifyResult checkResult) throws CMSException {
+
+        installBouncyCastleProviderIfNecessary();
+
+        // set up the parser
+        final CMSSignedDataParser sp = new CMSSignedDataParser(sigData);
+
+		// TODO what to do? the validity of the certificate isn't verified here
+
+        //
+        // Perform signature verification.
+        //
+        // Create a runnable block which is executed after the returned
+        // input stream is completely read (end of stream is reached). This is
+        // strictly important, because we are in a streaming mode the order of
+        // the operations is important.
+        // 
+
+        final Runnable signatureChecker = new Runnable() {
+			public void run() {
+				try {
+					SignerInformationStore signers = sp.getSignerInfos();
+
+					// lookup signer by matching with the given certificate
+
+					SignerId sigId = new SignerId();
+			        sigId.setSerialNumber(checkCert.getSerialNumber());
+			        sigId.setIssuer(checkCert.getIssuerX500Principal().getEncoded());
+
+			        SignerInformation signer = signers.get(sigId);
+
+			        // perform signature verification
+			        if (signer != null) {
+
+			        	//
+						// verify that the signature is correct and that it was generated
+						// when the certificate was current
+						//
+						if (signer.verify(checkCert, BC_PROVIDER)) {
+							// signature verified
+							if (checkResult != null) {
+								checkResult.setSuccess();
+							}
+						} else {
+							// signature failed!!!
+							if (checkResult != null) {
+								checkResult.setFailure();
+							}
+						}
+			        	
+			        } else {
+
+			        	// signer not found
+						if (checkResult != null) {
+							checkResult.setError(new Exception("Provided check certificate doesn't match."));
+						}
+			        }
+
+				} catch (Exception e) {
+					if (checkResult != null) {
+						checkResult.setError(e);
+					}
+				}
+
+			}
+		};
+
+		//
+		// Return content stream from the encapsulated data.
+		//
+		// A simple input stream is returned, where readable bytes represents
+		// the original content data (without signatures) from the encapsulated
+		// signed envelope. But a wrapping InputStream is created to execute the
+		// signature verification after the buffer is completely read.
+		//
+        
+        final InputStream contentStream =  sp.getSignedContent().getContentStream();
+
+        InputStream endOfStreamSignatureCheckInputStream = new InputStream() {
+
+        	/**
+        	 * Used to avoid running the signature checker above multiple times. 
+        	 */
+			private boolean alreadyReachedEof = false;
+
+			@Override
+			public int read() throws IOException {
+				int b = contentStream.read();
+				if (b == -1 && !alreadyReachedEof ) {
+					alreadyReachedEof = true;
+					signatureChecker.run();
+				}
+				return b;
+			}
+		};
+
+		return endOfStreamSignatureCheckInputStream;
+
+	}
 
     public static void createSignedData(File data, File output, CipherSuite cipherSuite, X509Certificate cert, PrivateKey key)
             throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
@@ -176,12 +348,12 @@ public class EnvelopingUtil {
             PrivateKey key) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
             CMSException, IOException {
 
-        OutputStream signed = openSignedDataContentStream(outStream, cipherSuite, cert, key);
+        OutputStream signed = openSignedDataStreamGenerator(outStream, cipherSuite, cert, key);
         IoUtil.copyStream(dataStream, signed);
 
     }
 
-    public static OutputStream openSignedDataContentStream(OutputStream outStream, CipherSuite cipherSuite, X509Certificate cert, PrivateKey key)
+    public static OutputStream openSignedDataStreamGenerator(OutputStream outStream, CipherSuite cipherSuite, X509Certificate cert, PrivateKey key)
             throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, InvalidKeyException {
 
         installBouncyCastleProviderIfNecessary();
@@ -440,12 +612,12 @@ public class EnvelopingUtil {
 
     public static void createCompressedData(InputStream dataStream, OutputStream outStream) throws IOException {
 
-        OutputStream compressed = openCompressedDataContentStream(outStream);
+        OutputStream compressed = openCompressedDataStreamGenerator(outStream);
         IoUtil.copyStream(dataStream, compressed);
 
     }
 
-    public static OutputStream openCompressedDataContentStream(OutputStream outStream) throws IOException {
+    public static OutputStream openCompressedDataStreamGenerator(OutputStream outStream) throws IOException {
 
         CMSCompressedDataStreamGenerator gen = new CMSCompressedDataStreamGenerator();
 
@@ -595,29 +767,25 @@ public class EnvelopingUtil {
 
     }
 
-    public static void addSignatureEndResponse(DefaultSignedDeliveryNotification notif, File payload,
-            CipherSuite cipherSuite, X509Certificate userCert, PrivateKey userKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, CMSException {
+    public static void addNotifSignature(DefaultSignedDeliveryNotification notif, CipherSuite cipherSuite,
+            X509Certificate userCert, PrivateKey userPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, CMSException {
 
-        if (notif == null) throw new IllegalArgumentException("Acknowledge object is null.");
-        if (notif.getDatasetName() == null) throw new IllegalArgumentException("Acknowledge object's DatasetName is null.");
-        if (notif.getDateTime() == null) throw new IllegalArgumentException("Acknowledge object's DateTime is null.");
-        if (notif.getDestination() == null) throw new IllegalArgumentException("Acknowledge object's Destination is null.");
-        if (notif.getOriginator() == null) throw new IllegalArgumentException("Acknowledge object's Originator is null.");
-        if (notif.getCreator() == null) throw new IllegalArgumentException("Acknowledge object's Creator is null.");
-        if (payload == null) throw new IllegalArgumentException("Payload file.");
-        if (cipherSuite == null) throw new IllegalArgumentException("Cipher Suite selection.");
-        if (userCert == null) throw new IllegalArgumentException("User certificate.");
-        if (userKey == null) throw new IllegalArgumentException("User private key.");
-
-        // calculate Virtual File digest and set into the acknowledge object
-        byte[] hash = computeFileHash(payload, asDigestAlgorithm(cipherSuite));
-        notif.setVirtualFileHash(hash);
+        if (notif == null) throw new NullPointerException("notif");
+        if (notif.getDatasetName() == null) throw new IllegalArgumentException("Delivery Notification object's DatasetName is null.");
+        if (notif.getDateTime() == null) throw new IllegalArgumentException("Delivery Notification object's DateTime is null.");
+        if (notif.getDestination() == null) throw new IllegalArgumentException("Delivery Notification object's Destination is null.");
+        if (notif.getOriginator() == null) throw new IllegalArgumentException("Delivery Notification object's Originator is null.");
+        if (notif.getCreator() == null) throw new IllegalArgumentException("Delivery Notification object's Creator is null.");
+        if (notif.getVirtualFileHash() == null) throw new IllegalArgumentException("Delivery Notification object's Virtual File Hash is null.");
+        if (cipherSuite == null) throw new NullPointerException("cipherSuite");
+        if (userCert == null) throw new NullPointerException("userCert");
+        if (userPrivateKey == null) throw new NullPointerException("userPrivateKey");
 
         // prepare the signing data
-        byte[] data = getEndResponseSigningData(notif);
+        byte[] data = getNotifSigningData(notif);
 
         // perform signing and set into the acknowledge object
-        byte[] signature = createSignedData(data, cipherSuite, userCert, userKey);
+        byte[] signature = createSignedData(data, cipherSuite, userCert, userPrivateKey);
         notif.setNotificationSignature(signature);
 
     }
@@ -629,7 +797,7 @@ public class EnvelopingUtil {
      * @return
      * @throws UnsupportedEncodingException
      */
-    public static byte[] getEndResponseSigningData(DefaultSignedDeliveryNotification info)
+    public static byte[] getNotifSigningData(SignedDeliveryNotification info)
             throws UnsupportedEncodingException {
 
         // use EERP_V20 fields as properties are the same for NERP formatting

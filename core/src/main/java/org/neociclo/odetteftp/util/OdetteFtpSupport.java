@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -133,7 +134,7 @@ public class OdetteFtpSupport {
 		try {
 			outStream = new FileOutputStream(output, false);
 		} catch (FileNotFoundException ouputNotFound) {
-			throw new EnvelopingException("Failed to parse enveloped file. Cannot open output file: " + output,
+			throw new EnvelopingException("Failed to create enveloped file. Cannot open output file: " + output,
 					ouputNotFound);
 		}
 
@@ -142,15 +143,15 @@ public class OdetteFtpSupport {
 
 		try {
 			if (isEncrypted) {
-				outStream = openEnvelopedDataContentStream(outStream, cipherSel, partnerCert);
+				outStream = openEnvelopedDataStreamGenerator(outStream, cipherSel, partnerCert);
 				toClose.add(0, outStream);
 			}
 			if (isCompressed) {
-				outStream = openCompressedDataContentStream(outStream);
+				outStream = openCompressedDataStreamGenerator(outStream);
 				toClose.add(0, outStream);
 			}
 			if (isSigned) {
-				outStream = openSignedDataContentStream(outStream, cipherSel, userCert, userPrivateKey);
+				outStream = openSignedDataStreamGenerator(outStream, cipherSel, userCert, userPrivateKey);
 				toClose.add(0, outStream);
 			}
 		} catch (Exception e) {
@@ -160,6 +161,9 @@ public class OdetteFtpSupport {
 		// copy data from the input
         FileInputStream inStream = null;
 		try {
+
+			// TODO shouldn't use a BufferedInputStream?
+
 			inStream = new FileInputStream(input);
 	        IoUtil.copyStream(inStream, outStream);
 		} catch (FileNotFoundException notFound) {
@@ -182,6 +186,31 @@ public class OdetteFtpSupport {
 
 	}
 
+	public static void parseEnvelopedFile(File input, File output, EnvelopedVirtualFile virtualFile,
+			X509Certificate userCert, PrivateKey userPrivateKey, X509Certificate partnerCert)
+			throws EnvelopingException {
+
+		parseEnvelopedFile(input, output, virtualFile.getSecurityLevel(), virtualFile.getCipherSuite(),
+				virtualFile.getCompressionAlgorithm(), virtualFile.getEnvelopingFormat(), userCert, userPrivateKey,
+				partnerCert);
+
+	}
+
+	/**
+	 * Maybe output file is generated even when an exception is thrown.
+	 *
+	 * @param input
+	 * @param output
+	 * @param securityLevel
+	 * @param cipherSel
+	 * @param compressionAlgo
+	 * @param envelopingFormat
+	 * @param userCert
+	 * @param userPrivateKey
+	 * @param partnerCert
+	 * @throws EnvelopingException
+	 * @throws SignatureCheckException
+	 */
 	public static void parseEnvelopedFile(File input, File output, SecurityLevel securityLevel, CipherSuite cipherSel,
 			FileCompression compressionAlgo, FileEnveloping envelopingFormat, X509Certificate userCert,
 			PrivateKey userPrivateKey, X509Certificate partnerCert) throws EnvelopingException {
@@ -197,7 +226,7 @@ public class OdetteFtpSupport {
 		}
 
 		if (envelopingFormat == NO_ENVELOPE) {
-			throw new EnvelopingException("Cannot create enveloped file. Incompatible parameter: " +
+			throw new EnvelopingException("Cannot create unenveloped file. Incompatible parameter: " +
 					"envelopingFormat=NO_ENVELOPE.");
 		}
 
@@ -207,7 +236,7 @@ public class OdetteFtpSupport {
 
 		if (isSigned) {
 			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
-				throw new EnvelopingException("Cannot create enveloped file. No signature algorithm specified " +
+				throw new EnvelopingException("Cannot create unenveloped file. No signature algorithm specified " +
 						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
 			}
 
@@ -218,7 +247,7 @@ public class OdetteFtpSupport {
 
 		if (isEncrypted) {
 			if (cipherSel == NO_CIPHER_SUITE_SELECTION) {
-				throw new EnvelopingException("Cannot create enveloped file. No encryption algorithm specified " +
+				throw new EnvelopingException("Cannot create unenveloped file. No encryption algorithm specified " +
 						"(cipherSel=NO_CIPHER_SUITE_SELECTION).");
 			}
 
@@ -229,6 +258,70 @@ public class OdetteFtpSupport {
 			if (userPrivateKey == null) {
 				throw new NullPointerException("userKey");
 			}
+		}
+
+		/*
+		 * Enchain input streams in the reverse full-cms order. Also prepare a
+		 * list to close streams in the correct sequence. 
+		 */
+		InputStream inStream = null;
+		try {
+			// TODO shouldn't use a BufferedInputStream too?
+			inStream = new FileInputStream(input);
+		} catch (FileNotFoundException inputNotFound) {
+			throw new EnvelopingException("Failed to parse unenveloped file. Cannot open input file: " + input,
+					inputNotFound);
+		}
+
+		ArrayList<InputStream> toClose = new ArrayList<InputStream>();
+		toClose.add(inStream);
+
+		SignatureVerifyResult signatureVerification = new SignatureVerifyResult();
+
+		try {
+			if (isEncrypted) {
+				inStream = openEnvelopedDataParser(inStream, userCert, userPrivateKey);
+				toClose.add(0, inStream);
+			}
+			if (isCompressed) {
+				inStream = openCompressedDataParser(inStream);
+				toClose.add(0, inStream);
+			}
+			if (isSigned) {
+				inStream = openSignedDataParser(inStream, partnerCert, signatureVerification);
+				toClose.add(0, inStream);
+			}
+		} catch (Exception e) {
+			throw new EnvelopingException("Failed to create unenveloped file. Cannot open CMS input processings.", e);
+		}
+
+		// copy data to the output
+        FileOutputStream outStream = null;
+		try {
+			outStream = new FileOutputStream(output);
+	        IoUtil.copyStream(inStream, outStream);
+		} catch (FileNotFoundException notFound) {
+			throw new EnvelopingException("Failed to create unenveloped file. Cannot create output file: " + output,
+					notFound);
+		} catch (IOException e) {
+			throw new EnvelopingException("Failed to create unenveloped file. Buffer copying error.", e);
+		}
+
+        // perform flush & closings
+        try {
+        	outStream.flush();
+			outStream.close();
+			for (InputStream stream : toClose) {
+				stream.close();
+			}
+		} catch (IOException e) {
+			throw new EnvelopingException("Failed to close stream.", e);
+		}
+
+		// evaluate the signature verification result
+		if (signatureVerification.hasFailed()) {
+			throw new SignatureCheckException("An error occurred on signature verify.",
+					signatureVerification.getExceptionCaught());
 		}
 		
 	}

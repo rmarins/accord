@@ -20,26 +20,14 @@
 package org.neociclo.odetteftp.util;
 
 import static org.junit.Assert.assertTrue;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createCompressedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createEnvelopedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromCompressedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromEnvelopedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromSignedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createSignedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.openCompressedDataContentStream;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.openEnvelopedDataContentStream;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.openSignedDataContentStream;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.parseEnvelopedData;
-import static org.neociclo.odetteftp.util.OftpTestUtil.getResourceFile;
-import static org.neociclo.odetteftp.util.OftpTestUtil.getTestDataDir;
-import static org.neociclo.odetteftp.util.SecurityUtil.getCertificateEntry;
-import static org.neociclo.odetteftp.util.SecurityUtil.getPrivateKey;
-import static org.neociclo.odetteftp.util.SecurityUtil.openCertificate;
-import static org.neociclo.odetteftp.util.SecurityUtil.openKeyStore;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.*;
+import static org.neociclo.odetteftp.util.OftpTestUtil.*;
+import static org.neociclo.odetteftp.util.SecurityUtil.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -153,7 +141,7 @@ public class EnvelopingUtilTest {
     }
 
     @Test
-    public void testFullCmsEnvelopingInline() throws Exception {
+    public void testFullCmsStreamGenerator() throws Exception {
 
         File data = getResourceFile(TEST_FILE_PATH);
         File output = new File(getTestDataDir(), data.getName() + ".fullCms");
@@ -171,10 +159,15 @@ public class EnvelopingUtilTest {
 
         FileOutputStream outStream = new FileOutputStream(output);
 
-        OutputStream envelopingStream = openEnvelopedDataContentStream(outStream, CIPHER_SELECTION, partnerCert);
-        OutputStream compressingStream = openCompressedDataContentStream(envelopingStream);
-        OutputStream signingStream = openSignedDataContentStream(compressingStream, CIPHER_SELECTION, myCert, myKey);
+        //
+        // Enchain full cms Stream Generators
+        //
+        
+        OutputStream envelopingStream = openEnvelopedDataStreamGenerator(outStream, CIPHER_SELECTION, partnerCert);
+        OutputStream compressingStream = openCompressedDataStreamGenerator(envelopingStream);
+        OutputStream signingStream = openSignedDataStreamGenerator(compressingStream, CIPHER_SELECTION, myCert, myKey);
 
+        // copy from input file to the stream chain
         FileInputStream dataStream = new FileInputStream(data);
         IoUtil.copyStream(dataStream, signingStream);
 
@@ -244,9 +237,76 @@ public class EnvelopingUtilTest {
         unenvelope(unsigned, unenveloped);
         uncompress(unenveloped, uncompressed);
 
+        compressed.delete();
+        enveloped.delete();
+        signed.delete();
+        unenveloped.delete();
+        uncompressed.delete();
+        unsigned.delete();
+
         // -----------------------------------------------------
         // ASSERTION
         // -----------------------------------------------------
+
+    }
+
+    @Test
+    public void testStreamVerifyAndRemoveSignature() throws Exception {
+
+        //
+        // Add Signature
+        //
+
+        File payloadFile = getResourceFile(TEST_FILE_PATH);
+
+        String prefix = payloadFile.getName() + "-";
+
+        File signedFile = File.createTempFile(prefix, ".signed", getTestDataDir());
+
+        // generate a test keystore on the fly
+        KeyStore ks = OnTheFlyHelper.createCredentials();
+        PrivateKey pk = getPrivateKey(ks, OnTheFlyHelper.KEY_PASSWD);
+        X509Certificate cert = getCertificateEntry(ks);
+
+        // create the signed output file
+        createSignedData(payloadFile, signedFile, CIPHER_SELECTION, cert, pk);
+
+        //
+        // Open Signature Stream Parser
+        //
+
+        SignatureVerifyResult signatureCheck = new SignatureVerifyResult();
+
+        FileInputStream signedData = new FileInputStream(signedFile);
+        InputStream unsignedData = openSignedDataParser(signedData, cert, signatureCheck);
+
+        // create an ouput file and copy the unsigned data stream
+        File outputFile = File.createTempFile(prefix, ".unsigned", getTestDataDir());
+        FileOutputStream outputData = new FileOutputStream(outputFile);
+
+        IoUtil.copyStream(unsignedData, outputData);
+
+        unsignedData.close();
+        signedData.close();
+        outputData.close();
+
+        //
+        // Compare original Payload and resulting Output File
+        //
+
+        byte[] hash1 = SecurityUtil.computeFileHash(payloadFile, "MD5");
+        byte[] hash2 = SecurityUtil.computeFileHash(outputFile, "MD5");
+
+        signedFile.delete();	// remove files after all
+        outputFile.delete();
+
+        assertTrue("Invalid signature removed file: " + outputFile, Arrays.equals(hash1, hash2));
+
+        //
+        // Make sure the signature were correctly verified
+        //
+
+        assertTrue("Signature check failed: " + signatureCheck.getExceptionCaught(), signatureCheck.hasSucceed());
 
     }
 
@@ -262,10 +322,10 @@ public class EnvelopingUtilTest {
         byte[] hash1 = SecurityUtil.computeFileHash(data, "MD5");
         byte[] hash2 = SecurityUtil.computeFileHash(data2nd, "MD5");
 
-        assertTrue("Original file and decompressed data file content are not equal.", Arrays.equals(hash1, hash2));
-
         output.delete();
         data2nd.delete();
+
+        assertTrue("Original file and decompressed data file content are not equal.", Arrays.equals(hash1, hash2));
     }
 
 }

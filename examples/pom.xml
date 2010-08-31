@@ -33,11 +33,6 @@
   <name>Accord Odette FTP :: Examples</name>
   <description>Code showcase on using the Accord Odette FTP Library.</description>
 
-  <properties>
-    <!-- DON'T deploy oftp-examples artifacts. -->
-    <maven.deploy.skip>true</maven.deploy.skip>
-  </properties>
-
   <build>
     <plugins>
       <plugin>

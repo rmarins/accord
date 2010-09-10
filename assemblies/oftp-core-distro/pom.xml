@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Neociclo Accord, Open Source Managed File Transfer
+    Copyright (c) 2005-2010 Neociclo, http://www.neociclo.com
+  
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses />.
+
+    $Id$
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <parent>
+    <groupId>org.neociclo.accord.odetteftp.assemblies</groupId>
+    <artifactId>assemblies-parent</artifactId>
+    <version>1.2.0-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>oftp-core-distro</artifactId>
+  <packaging>jar</packaging>
+  <name>Accord Odette FTP :: Assemblies :: Core API Distro</name>
+  <description>Odette FTP Library distribution packaging module.</description>
+
+  <properties>
+    <!-- DON'T deploy oftp-core-distro artifacts. -->
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>${basedir}/jdk15-assembly.xml</descriptor>
+            <descriptor>${basedir}/jdk16-assembly.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>oftp-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>oftp-core</artifactId>
+      <version>${project.version}</version>
+      <classifier>javadoc</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>oftp-core</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>oftp-examples</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcmail-jdk15</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcmail-jdk16</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
+
+  </dependencies>
+
+</project>

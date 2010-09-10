@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Neociclo Accord, Open Source Managed File Transfer
+    Neociclo Accord, Open Source B2Bi Middleware
     Copyright (c) 2005-2010 Neociclo, http://www.neociclo.com
   
     This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
     $Id$
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/pom/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <parent>
     <groupId>org.neociclo.accord.odetteftp</groupId>
@@ -28,22 +28,20 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>oftp-examples</artifactId>
-  <packaging>jar</packaging>
-  <name>Accord Odette FTP :: Examples</name>
-  <description>Code showcase on using the Accord Odette FTP Library.</description>
+  <groupId>org.neociclo.accord.odetteftp.assemblies</groupId>
+  <artifactId>assemblies-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Accord Odette FTP :: Assemblies Parent</name>
+  <description>Accord Odette FTP Library</description>
 
   <properties>
-    <!-- DON'T deploy oftp-examples artifacts. -->
+    <!-- DON'T deploy oftp assemblies-parent artifacts. -->
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.neociclo.accord.odetteftp</groupId>
-      <artifactId>oftp-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
+
+  <modules>
+    <module>oftp-core-distro</module>
+  </modules>
 
 </project>

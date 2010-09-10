@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Neociclo Accord, Open Source B2Bi Middleware
+    Copyright (c) 2005-2010 Neociclo, http://www.neociclo.com
+  
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses />.
+
+    $Id$
+-->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1 http://maven.apache.org/xsd/assembly-1.1.1.xsd">
+  <id>with-jdk16-libs</id>
+
+  <formats>
+    <format>tar.gz</format>
+    <format>zip</format>
+  </formats>
+
+  <includeBaseDirectory>true</includeBaseDirectory>
+
+  <fileSets>
+    <!-- ======================== -->
+    <!--    License and Infos     -->
+    <!-- ======================== -->
+    <fileSet>
+      <directory>${basedir}/../../core</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>*.txt</include>
+      </includes>
+    </fileSet>
+
+    <!-- ======================== -->
+    <!--  Dependencies licensing  -->
+    <!-- ======================== -->
+    <fileSet>
+      <directory>${basedir}/../../core/license</directory>
+      <outputDirectory>licenses</outputDirectory>
+    </fileSet>
+
+    <!-- ======================== -->
+    <!--         Examples         -->
+    <!-- ======================== -->
+    <fileSet>
+      <directory>${basedir}/../../examples/src/main/java</directory>
+      <outputDirectory>examples/src</outputDirectory>
+    </fileSet>
+
+  </fileSets>
+
+  <dependencySets>
+    <!-- ======================== -->
+    <!--  LIB in the main folder  -->
+    <!-- ======================== -->
+	<dependencySet>
+	  <outputDirectory>/</outputDirectory>
+	  <includes>
+	    <include>org.neociclo.accord.odetteftp:oftp-core:*:jar:*</include>
+	  </includes>
+	  <excludes>
+	    <exclude>org.neociclo.accord.odetteftp:oftp-core:*:jar:javadoc</exclude>
+	    <exclude>org.neociclo.accord.odetteftp:oftp-core:*:jar:sources</exclude>
+	  </excludes>
+	</dependencySet>
+
+    <!-- ======================== -->
+    <!--   Dependencies in /lib   -->
+    <!-- ======================== -->
+    <dependencySet>
+      <outputDirectory>lib/</outputDirectory>
+      <excludes>
+        <exclude>org.neociclo.accord.odetteftp:*:jar:*</exclude>
+        <exclude>org.neociclo.accord.odetteftp.assemblies:*:jar:*</exclude>
+	    <exclude>*:*-jdk15:jar:*</exclude>
+      </excludes>
+    </dependencySet>
+
+    <!-- ======================== -->
+    <!--         JavaDocs         -->
+    <!-- ======================== -->
+	<dependencySet>
+	  <outputDirectory>docs/</outputDirectory>
+	  <unpack>true</unpack>
+	  <includes>
+	    <include>org.neociclo.accord.odetteftp:oftp-core:*:jar:javadoc</include>
+	  </includes>
+	</dependencySet>
+
+    <!-- ======================== -->
+    <!--          Sources         -->
+    <!-- ======================== -->
+	<dependencySet>
+	  <outputDirectory>src/</outputDirectory>
+	  <unpack>true</unpack>
+	  <includes>
+	    <include>org.neociclo.accord.odetteftp:oftp-core:*:jar:sources</include>
+	  </includes>
+	</dependencySet>
+  </dependencySets>
+</assembly>

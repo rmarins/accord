@@ -42,20 +42,6 @@
 
     <plugins>
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-          <archive>
-            <manifestEntries>
-              <Implementation-Url>${project.url}</Implementation-Url>
-              <Implementation-Vendor-Url>${project.organization.url}</Implementation-Vendor-Url>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <configuration>
           <encoding>UTF-8</encoding>
@@ -149,10 +135,5 @@
       <version>${netty.version}</version>
     </dependency>
   </dependencies>
-
-  <properties>
-    <netty.version>3.2.2.Final</netty.version>
-    <bouncycastle.version>1.45</bouncycastle.version>
-  </properties>
 
 </project>

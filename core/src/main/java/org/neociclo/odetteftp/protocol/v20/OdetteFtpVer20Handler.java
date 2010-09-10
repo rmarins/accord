@@ -370,10 +370,6 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
     @Override
     protected VirtualFile normalizeVirtualFile(OdetteFtpSession session, VirtualFile vf) {
 
-        if (!(vf instanceof EnvelopedVirtualFile)) {
-            throw new IllegalArgumentException("IEnvelopedVirtualFile argument type required");
-        }
-
         String dsn = (vf.getDatasetName() == null ? (vf.getFile() == null ? null : vf.getFile().getName()) : vf
                 .getDatasetName());
         Date dateTime = (vf.getDateTime() == null ? (vf.getFile() == null ? null
@@ -401,16 +397,33 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         long unitCount = (vf.getFile() == null ? 0 : vf.getFile().length());
         long fileSize = Math.max(vf.getSize(), ProtocolUtil.computeVirtualFileSize(unitCount, recordFormat, recordSize));
 
+        //
+        // Default OFTP2 start file values when a simple VirtualFile object
+        // used to send the payload instead of an EnvelopedVirtualFile
+        //
 
-        EnvelopedVirtualFile env = (EnvelopedVirtualFile) vf;
+        FileCompression compressionAlgorithm = NO_COMPRESSION;
+        long originalFileSize = fileSize;
+        SecurityLevel securityLevel = NO_SECURITY_SERVICES;
+        CipherSuite cipherSuite = NO_CIPHER_SUITE_SELECTION;
+        FileEnveloping enveloping = NO_ENVELOPE;
+        boolean signedNotifRequest = false;
+        String fileDescription = null;
 
-        FileCompression compressionAlgorithm = (env.getCompressionAlgorithm() == null ? NO_COMPRESSION : env
-                .getCompressionAlgorithm());
-        long originalFileSize = Math.max(env.getOriginalFileSize(), fileSize);
-        SecurityLevel securityLevel = (env.getSecurityLevel() == null ? NO_SECURITY_SERVICES : env.getSecurityLevel());
-        CipherSuite cipherSuite = (env.getCipherSuite() == null ? NO_CIPHER_SUITE_SELECTION : env.getCipherSuite());
-        FileEnveloping enveloping = (env.getEnvelopingFormat() == null ? NO_ENVELOPE : env.getEnvelopingFormat());
 
+        if (vf instanceof EnvelopedVirtualFile) {
+            EnvelopedVirtualFile env = (EnvelopedVirtualFile) vf;
+
+            compressionAlgorithm = (env.getCompressionAlgorithm() == null ? NO_COMPRESSION : env
+                    .getCompressionAlgorithm());
+            originalFileSize = Math.max(env.getOriginalFileSize(), fileSize);
+            securityLevel = (env.getSecurityLevel() == null ? NO_SECURITY_SERVICES : env.getSecurityLevel());
+            cipherSuite = (env.getCipherSuite() == null ? NO_CIPHER_SUITE_SELECTION : env.getCipherSuite());
+            enveloping = (env.getEnvelopingFormat() == null ? NO_ENVELOPE : env.getEnvelopingFormat());
+            signedNotifRequest = env.isSignedNotificationRequest();
+            fileDescription = env.getFileDescription();
+
+        }
 
         // return the normalized virtual file
         DefaultEnvelopedVirtualFile n = new DefaultEnvelopedVirtualFile();
@@ -423,7 +436,7 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         n.setSize(fileSize);
         n.setRestartOffset(restartOffset);
 
-        n.setFile(env.getFile());
+        n.setFile(vf.getFile());
 
         n.setEnvelopingFormat(enveloping);
         n.setCipherSuite(cipherSuite);
@@ -431,8 +444,8 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         n.setOriginalFileSize(originalFileSize);
         n.setCompressionAlgorithm(compressionAlgorithm);
 
-        n.setSignedNotificationRequest(env.isSignedNotificationRequest());
-        n.setFileDescription(env.getFileDescription());
+        n.setSignedNotificationRequest(signedNotifRequest);
+        n.setFileDescription(fileDescription);
 
         return n;
 

@@ -1,5 +1,8 @@
 package org.neociclo.accord.camel.odette;
 
+import java.util.Queue;
+
+import org.apache.camel.BatchConsumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ShutdownRunningTask;
@@ -17,7 +20,7 @@ import org.apache.camel.spi.ShutdownAware;
  * @author bruno
  * 
  */
-public class OdetteConsumer extends ScheduledPollConsumer implements ShutdownAware {
+public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsumer, ShutdownAware {
 
 	private OdetteOperations operations;
 
@@ -61,7 +64,21 @@ public class OdetteConsumer extends ScheduledPollConsumer implements ShutdownAwa
 
 	@Override
 	protected void poll() throws Exception {
-		operations.pollServer();
+		try {
+			operations.pollServer();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public boolean isBatchAllowed() {
+		return false;
+	}
+
+	public void processBatch(Queue<Object> arg0) throws Exception {
+	}
+
+	public void setMaxMessagesPerPoll(int arg0) {
 	}
 
 }

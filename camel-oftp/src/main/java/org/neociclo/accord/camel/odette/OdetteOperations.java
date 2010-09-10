@@ -3,6 +3,8 @@ package org.neociclo.accord.camel.odette;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
@@ -12,6 +14,7 @@ import org.neociclo.odetteftp.support.SessionConfig;
 
 public class OdetteOperations {
 
+	protected final transient Log log = LogFactory.getLog(getClass());
 	private OdetteEndpoint endpoint;
 	private TcpClient client;
 	private Queue<OdetteFtpObject> outgoingQueue = new ConcurrentLinkedQueue<OdetteFtpObject>();
@@ -21,6 +24,25 @@ public class OdetteOperations {
 
 	public OdetteOperations(OdetteEndpoint odetteEndpoint) {
 		this.endpoint = odetteEndpoint;
+
+		final OdetteConfiguration cfg = endpoint.getConfiguration();
+
+		TransferMode identifyTransferMode = identifyTransferMode();
+
+		SessionConfig session = new SessionConfig();
+		session.setUserCode(cfg.getOid());
+		session.setUserPassword(cfg.getPassword());
+		session.setTransferMode(identifyTransferMode);
+		session.setDataExchangeBufferSize(cfg.getBufferSize());
+		session.setWindowSize(cfg.getWindowSize());
+
+		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null,
+				incomingQueue);
+
+		// prepare the incoming handler
+		factory.setEventListener(new InOutOftplet(endpoint));
+
+		client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
 	}
 
 	public boolean isConnected() {
@@ -42,25 +64,9 @@ public class OdetteOperations {
 	 * @throws ClientException
 	 */
 	public void pollServer() throws Exception {
-		final OdetteConfiguration cfg = endpoint.getConfiguration();
-
-		TransferMode identifyTransferMode = identifyTransferMode();
-
-		SessionConfig session = new SessionConfig();
-		session.setUserCode(cfg.getOid());
-		session.setUserPassword(cfg.getPassword());
-		session.setTransferMode(identifyTransferMode);
-		session.setDataExchangeBufferSize(cfg.getBufferSize());
-		session.setWindowSize(cfg.getWindowSize());
-
-		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null,
-				incomingQueue);
-
-		// prepare the incoming handler
-		factory.setEventListener(new InOutOftpletListener(endpoint));
-
-		client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
-		client.connect(true);
+		if (client.isConnected() == false) {
+			client.connect(true);
+		}
 	}
 
 	private TransferMode identifyTransferMode() {
@@ -78,9 +84,13 @@ public class OdetteOperations {
 		outgoingQueue.offer(notif);
 	}
 
-	public void disconnect() throws Exception {
+	public void disconnect() {
 		if (client != null) {
-			client.disconnect();
+			try {
+				client.disconnect();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

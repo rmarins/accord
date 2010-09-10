@@ -69,6 +69,8 @@ public class OdetteConfiguration implements Cloneable {
 
 	private FileRenameBean fileRenameBean = new FileRenameBean();
 
+	private OdetteHandler handler;
+
 	public OdetteConfiguration() {
 		tmpDir = new File(System.getProperty("java.io.tmpdir"));
 	}
@@ -311,6 +313,14 @@ public class OdetteConfiguration implements Cloneable {
 
 	public void setFileRenameBean(FileRenameBean bean) {
 		this.fileRenameBean = bean;
+	}
+
+	public OdetteHandler getHandler() {
+		return this.handler;
+	}
+
+	public void setHandler(OdetteHandler handler) {
+		this.handler = handler;
 	}
 
 }

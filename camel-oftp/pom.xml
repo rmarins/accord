@@ -48,10 +48,12 @@
       <dependency>
          <groupId>org.neociclo.accord.odetteftp</groupId>
          <artifactId>oftp-core</artifactId>
+         <version>${project.version}</version>
       </dependency>
    </dependencies>
 
    <properties>
       <camel.version>2.4.0</camel.version>
    </properties>
+
 </project>

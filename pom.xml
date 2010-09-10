@@ -53,8 +53,15 @@
 
   <developers>
     <developer>
-      <id>rafael.marins</id>
+      <id>rmarins</id>
       <name>Rafael Marins</name>
+      <organization>Neociclo</organization>
+      <timezone>BRST</timezone>
+    </developer>
+
+    <developer>
+      <id>brunoborges</id>
+      <name>Bruno Borges</name>
       <organization>Neociclo</organization>
       <timezone>BRST</timezone>
     </developer>

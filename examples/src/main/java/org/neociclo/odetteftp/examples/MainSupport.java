@@ -22,7 +22,11 @@ package org.neociclo.odetteftp.examples;
 import static java.lang.System.out;
 import static java.lang.System.err;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -76,8 +80,16 @@ public class MainSupport {
 
 		fileProperties = new Properties();
 		try {
-			fileProperties.load(MainSupport.class.getResourceAsStream("/odette.properties"));
+			URL res = MainSupport.class.getResource("/odette.properties");
+			if (res != null) {
+				File file = new File(res.toURI());
+				if (file.exists()) {
+					fileProperties.load(new FileInputStream(file));
+				}
+			}
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}

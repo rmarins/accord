@@ -41,6 +41,7 @@ public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 	private SecurityContext securityContext;
 	private SharedQueueOftpletListener listener;
 	private SharedQueueOftpletSpeaker speaker;
+	private InOutOftpletEventListener wrappedListener;
 
 	public InOutSharedQueueOftplet(SessionConfig sessionConfig, Queue<OdetteFtpObject> outgoing,
 			Queue<OdetteFtpObject> outgoingDone, Queue<OdetteFtpObject> incoming) {
@@ -97,6 +98,12 @@ public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 		if (listener != null) {
 			listener.setEventListener(eventListener);
 		}
+		this.wrappedListener = eventListener;
+	}
+
+	@Override
+	public void onExceptionCaught(Throwable cause) {
+		wrappedListener.onExceptionCaught(cause);
 	}
 
 }

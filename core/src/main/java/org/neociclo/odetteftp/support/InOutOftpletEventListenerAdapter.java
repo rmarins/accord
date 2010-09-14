@@ -70,4 +70,7 @@ public class InOutOftpletEventListenerAdapter implements InOutOftpletEventListen
     public void onReceiveFileStart(VirtualFile virtualFile, long answerCount) {
     }
 
+	public void onExceptionCaught(Throwable cause) {
+	}
+
 }

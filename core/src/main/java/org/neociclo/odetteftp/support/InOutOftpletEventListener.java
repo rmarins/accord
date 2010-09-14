@@ -30,4 +30,6 @@ import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
  */
 public interface InOutOftpletEventListener extends OftpletSpeaker, OftpletListener, EventListener {
 
+    void onExceptionCaught(Throwable cause);
+
 }

@@ -18,4 +18,4 @@
 # $Id$
 #
 
-class=org.neociclo.accord.camel.odette.OdetteComponent
+class=org.neociclo.accord.odetteftp.camel.OdetteComponent

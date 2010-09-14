@@ -29,53 +29,64 @@ import org.neociclo.odetteftp.oftplet.StartFileResponse;
  */
 public class DefaultStartFileResponse implements StartFileResponse {
 
-    private boolean accepted;
-    private long restartOffset;
+	private boolean accepted;
+	private long restartOffset;
 
-    private AnswerReason reason;
-    private String reasonText;
-    private boolean retryLater;
+	private AnswerReason reason;
+	private String reasonText;
+	private boolean retryLater;
 
-    private File file;
+	private File file;
 
-    public DefaultStartFileResponse(boolean accepted) {
-        super();
-        this.accepted = accepted;
-    }
+	public static DefaultStartFileResponse positiveAnswer() {
+		return positiveAnswer(0);
+	}
 
-    public DefaultStartFileResponse(boolean accepted, long restartOffset) {
-        super();
-        this.accepted = accepted;
-        this.restartOffset = restartOffset;
-    }
+	public static DefaultStartFileResponse positiveAnswer(long restartOffset) {
+		return new DefaultStartFileResponse(true, restartOffset);
+	}
 
-    public DefaultStartFileResponse(boolean accepted, AnswerReason reason, String reasonText, boolean retryLater) {
-        super();
-        this.accepted = accepted;
-        this.reason = reason;
-        this.reasonText = reasonText;
-        this.retryLater = retryLater;
-    }
+	public static DefaultStartFileResponse negativeAnswer() {
+		return negativeAnswer(AnswerReason.UNSPECIFIED, null, true);
+	}
 
-    public boolean accepted() {
-        return accepted;
-    }
+	public static DefaultStartFileResponse negativeAnswer(AnswerReason reason, String reasonText, boolean retryLater) {
+		return new DefaultStartFileResponse(false, reason, reasonText, retryLater);
+	}
 
-    public AnswerReason getReason() {
-        return reason;
-    }
+	protected DefaultStartFileResponse(boolean accepted, long restartOffset) {
+		super();
+		this.accepted = accepted;
+		this.restartOffset = restartOffset;
+	}
 
-    public String getReasonText() {
-        return reasonText;
-    }
+	protected DefaultStartFileResponse(boolean accepted, AnswerReason reason, String reasonText, boolean retryLater) {
+		super();
+		this.accepted = accepted;
+		this.reason = reason;
+		this.reasonText = reasonText;
+		this.retryLater = retryLater;
+	}
 
-    public long getRestartOffset() {
-        return restartOffset;
-    }
+	public boolean accepted() {
+		return accepted;
+	}
 
-    public boolean retryLater() {
-        return retryLater;
-    }
+	public AnswerReason getReason() {
+		return reason;
+	}
+
+	public String getReasonText() {
+		return reasonText;
+	}
+
+	public long getRestartOffset() {
+		return restartOffset;
+	}
+
+	public boolean retryLater() {
+		return retryLater;
+	}
 
 	public File getFile() {
 		return file;

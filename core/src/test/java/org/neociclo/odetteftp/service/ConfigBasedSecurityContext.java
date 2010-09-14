@@ -24,9 +24,10 @@ import java.io.IOException;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.neociclo.odetteftp.security.MappedCallbackHandler;
-import org.neociclo.odetteftp.security.SecurityContext;
 import org.neociclo.odetteftp.security.OneToOneHandler;
 import org.neociclo.odetteftp.security.PasswordCallback;
+import org.neociclo.odetteftp.security.SecurityContext;
+import org.neociclo.odetteftp.support.SessionConfig;
 
 /**
  * @author Rafael Marins

@@ -19,9 +19,10 @@
  */
 package org.neociclo.odetteftp.service;
 
-import static org.junit.Assert.*;
-import static org.neociclo.odetteftp.util.OftpTestUtil.*;
-import static org.neociclo.odetteftp.util.OdetteFtpSupport.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.neociclo.odetteftp.util.OdetteFtpSupport.getReplyDeliveryNotification;
+import static org.neociclo.odetteftp.util.OftpTestUtil.getOutputDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +33,8 @@ import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

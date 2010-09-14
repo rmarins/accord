@@ -22,7 +22,9 @@ package org.neociclo.odetteftp.service;
 import static org.neociclo.odetteftp.protocol.RecordFormat.FIXED;
 import static org.neociclo.odetteftp.protocol.RecordFormat.UNSTRUCTURED;
 import static org.neociclo.odetteftp.protocol.RecordFormat.VARIABLE;
-import static org.neociclo.odetteftp.util.OdetteFtpConstants.*;
+import static org.neociclo.odetteftp.util.OdetteFtpConstants.DEFAULT_OFTP_PORT;
+import static org.neociclo.odetteftp.util.OdetteFtpConstants.DEFAULT_RECORD_SIZE;
+import static org.neociclo.odetteftp.util.OdetteFtpConstants.DEFAULT_SECURE_OFTP_PORT;
 
 import java.io.File;
 import java.util.Calendar;
@@ -39,8 +41,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
-import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.RecordFormat;
+import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.SessionConfig;
 import org.neociclo.odetteftp.util.ProtocolUtil;
 
 /**

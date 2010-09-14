@@ -104,12 +104,12 @@ public class ReceiveEnvelopedFiles {
 
 				// handle duplicate file
 				if (saveToFile.exists()) {
-					DefaultStartFileResponse duplicateFile = new DefaultStartFileResponse(false, DUPLICATE_FILE,
+					DefaultStartFileResponse duplicateFile = DefaultStartFileResponse.negativeAnswer(DUPLICATE_FILE,
 							"File already exist in local system.", true);
 					return duplicateFile;
 				}
 
-				DefaultStartFileResponse acceptedFile = new DefaultStartFileResponse(true);
+				DefaultStartFileResponse acceptedFile = DefaultStartFileResponse.positiveAnswer();
 				acceptedFile.setFile(saveToFile);
 
 				return acceptedFile;

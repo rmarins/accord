@@ -19,9 +19,9 @@
  */
 package org.neociclo.odetteftp.examples.client.oftp2;
 
-import static org.neociclo.odetteftp.TransferMode.*;
-import static org.neociclo.odetteftp.util.OdetteFtpSupport.*;
-import static org.neociclo.odetteftp.util.OftpUtil.*;
+import static org.neociclo.odetteftp.TransferMode.SENDER_ONLY;
+import static org.neociclo.odetteftp.util.OdetteFtpSupport.createEnvelopedFile;
+import static org.neociclo.odetteftp.util.OftpUtil.getFileSize;
 
 import java.io.File;
 import java.net.InetSocketAddress;
@@ -38,7 +38,6 @@ import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 import org.neociclo.odetteftp.protocol.v20.DefaultEnvelopedVirtualFile;
-import org.neociclo.odetteftp.protocol.v20.FileCompression;
 import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
 import org.neociclo.odetteftp.protocol.v20.SecurityLevel;
 import org.neociclo.odetteftp.service.TcpClient;

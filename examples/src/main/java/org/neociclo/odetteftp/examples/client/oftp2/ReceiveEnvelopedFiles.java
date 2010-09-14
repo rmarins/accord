@@ -109,8 +109,7 @@ public class ReceiveEnvelopedFiles {
 					return duplicateFile;
 				}
 
-				DefaultStartFileResponse acceptedFile = DefaultStartFileResponse.positiveAnswer();
-				acceptedFile.setFile(saveToFile);
+				DefaultStartFileResponse acceptedFile = DefaultStartFileResponse.positiveAnswer(saveToFile);
 
 				return acceptedFile;
 			}

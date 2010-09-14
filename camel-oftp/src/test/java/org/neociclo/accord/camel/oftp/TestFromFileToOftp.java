@@ -35,7 +35,7 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	@EndpointInject(uri = "mock:result")
 	private MockEndpoint resultEndpoint;
 
-	private String oftpFromUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/tmp/odette";
+	private String oftpFromUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/tmp/odette&delay=5000";
 
 	@Test(timeout = 60000)
 	public void testFromFileToFtp() throws Exception {

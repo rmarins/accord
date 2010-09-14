@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;

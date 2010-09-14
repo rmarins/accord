@@ -1,15 +1,17 @@
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
+import java.io.File;
 import java.util.Queue;
 
 import org.apache.camel.BatchConsumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ShutdownRunningTask;
+import org.apache.camel.component.file.FileConsumer;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.ScheduledPollConsumer;
 import org.apache.camel.spi.ShutdownAware;
-import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
+import org.neociclo.odetteftp.protocol.VirtualFile;
 
 /**
  * <p>
@@ -50,17 +52,23 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 	 * Consumes data from the Odette server
 	 * </p>
 	 * 
+	 * @param incomingFile
+	 * 
 	 * @param om
 	 */
-	public void processOdetteMessage(GenericFile<DefaultVirtualFile> odetteFile) {
+	public void processOdetteMessage(VirtualFile incomingFile) {
 		OdetteEndpoint odetteEndpoint = (OdetteEndpoint) getEndpoint();
-		Exchange e = odetteEndpoint.createExchange(odetteFile);
 
-		odetteEndpoint.configureMessage(odetteFile, e.getIn());
+		OdetteConfiguration configuration = ((OdetteEndpoint) getEndpoint()).getConfiguration();
+		String absolutePath = configuration.getTmpDir().getAbsolutePath();
+		GenericFile<File> file = FileConsumer.asGenericFile(absolutePath, incomingFile.getFile());
 
 		try {
+			Exchange e = odetteEndpoint.createExchange(file);
+			odetteEndpoint.configureMessage(file, incomingFile, e.getIn());
 			getProcessor().process(e);
 		} catch (Exception e1) {
+			e1.printStackTrace();
 			getExceptionHandler().handleException(e1);
 		}
 	}

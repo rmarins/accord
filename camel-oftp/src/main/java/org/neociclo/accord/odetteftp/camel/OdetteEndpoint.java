@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
 import java.io.File;
 import java.util.HashSet;
@@ -13,11 +13,14 @@ import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.ScheduledPollEndpoint;
 import org.apache.camel.util.ObjectHelper;
-import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
 public class OdetteEndpoint extends ScheduledPollEndpoint {
 
+	private static final String ODETTE_VIRTUAL_FILE = "OdetteVirtualFile";
+	private static final String ODETTE_ORIGINATOR = "OdetteOriginator";
+	private static final String ODETTE_DESTINATION = "OdetteDestination";
+	private static final String ODETTE_DATASET_NAME = "OdetteDatasetName";
 	private OdetteOperations operations;
 	private OdetteConfiguration configuration;
 	private Set<OdetteConsumer> consumers = new HashSet<OdetteConsumer>();
@@ -50,7 +53,7 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 		return null;// odetteProducer;
 	}
 
-	public Exchange createExchange(GenericFile<DefaultVirtualFile> file) {
+	public Exchange createExchange(GenericFile<File> file) {
 		Exchange exchange = new DefaultExchange(this);
 		if (file != null) {
 			file.bindToExchange(exchange);
@@ -67,21 +70,18 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 	}
 
 	public void notifyConsumersOfIncomingFile(VirtualFile incomingFile) {
-		GenericFile<DefaultVirtualFile> file = new GenericFile<DefaultVirtualFile>();
-		file.setBody(incomingFile);
-		file.setFileLength(incomingFile.getSize());
-		file.setFileName(incomingFile.getFile().getName());
-
 		for (OdetteConsumer c : consumers) {
-			c.processOdetteMessage(file);
+			c.processOdetteMessage(incomingFile);
 		}
 	}
 
 	/**
 	 * Configures the given message with the file which sets the body to the
 	 * file object.
+	 * 
+	 * @param incomingFile
 	 */
-	public void configureMessage(GenericFile<DefaultVirtualFile> file, Message message) {
+	public void configureMessage(GenericFile<File> file, VirtualFile incomingFile, Message message) {
 		message.setBody(file);
 
 		// compute name to set on header that should be relative to starting
@@ -96,6 +96,16 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 
 		// adjust filename
 		message.setHeader(Exchange.FILE_NAME, name);
+
+		// associate VirtualFile to message header
+		configureOdetteMessage(message, incomingFile);
+	}
+
+	private void configureOdetteMessage(Message message, VirtualFile virtualFile) {
+		message.setHeader(ODETTE_VIRTUAL_FILE, virtualFile);
+		message.setHeader(ODETTE_ORIGINATOR, virtualFile.getOriginator());
+		message.setHeader(ODETTE_DESTINATION, virtualFile.getDestination());
+		message.setHeader(ODETTE_DATASET_NAME, virtualFile.getDatasetName());
 	}
 
 	private char getFileSeparator() {

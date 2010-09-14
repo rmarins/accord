@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
 public interface OdetteAuditListener {
 

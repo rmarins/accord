@@ -17,7 +17,7 @@
  *
  *  $Id$
  */
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
 import java.io.File;
 import java.io.IOException;

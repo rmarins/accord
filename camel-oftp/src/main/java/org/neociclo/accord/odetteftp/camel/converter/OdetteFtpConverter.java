@@ -17,7 +17,7 @@
  *
  *  $Id$
  */
-package org.neociclo.accord.camel.odette.converter;
+package org.neociclo.accord.odetteftp.camel.converter;
 
 import java.io.File;
 import java.io.FileInputStream;

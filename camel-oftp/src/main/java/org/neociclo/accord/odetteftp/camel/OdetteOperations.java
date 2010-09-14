@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -25,22 +25,6 @@ public class OdetteOperations {
 
 	public OdetteOperations(OdetteEndpoint odetteEndpoint) {
 		this.endpoint = odetteEndpoint;
-
-		final OdetteConfiguration cfg = endpoint.getConfiguration();
-
-		TransferMode identifyTransferMode = identifyTransferMode();
-
-		SessionConfig session = new SessionConfig();
-		session.setUserCode(cfg.getOid());
-		session.setUserPassword(cfg.getPassword());
-		session.setTransferMode(identifyTransferMode);
-		session.setDataExchangeBufferSize(cfg.getBufferSize());
-		session.setWindowSize(cfg.getWindowSize());
-
-		factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null, incomingQueue);
-
-		// prepare the incoming handler
-		factory.setEventListener(new InOutOftpletListener(endpoint));
 	}
 
 	public boolean isConnected() {
@@ -63,10 +47,28 @@ public class OdetteOperations {
 	 */
 	public void pollServer() throws Exception {
 		if (client == null || !client.isConnected()) {
+			initClient();
+
 			final OdetteConfiguration cfg = endpoint.getConfiguration();
 			client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
 			client.connect(true);
 		}
+	}
+
+	private void initClient() {
+		final OdetteConfiguration cfg = endpoint.getConfiguration();
+
+		TransferMode identifyTransferMode = identifyTransferMode();
+
+		SessionConfig session = new SessionConfig();
+		session.setUserCode(cfg.getOid());
+		session.setUserPassword(cfg.getPassword());
+		session.setTransferMode(identifyTransferMode);
+		session.setDataExchangeBufferSize(cfg.getBufferSize());
+		session.setWindowSize(cfg.getWindowSize());
+
+		factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null, incomingQueue);
+		factory.setEventListener(new InOutOftpletListener(endpoint));
 	}
 
 	private TransferMode identifyTransferMode() {

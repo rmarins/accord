@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
 import java.io.File;
 
@@ -24,6 +24,10 @@ public class IncomingFileResponse {
 		this.renameBean = fileRenameBean;
 		this.config = config;
 		this.override = config.getOverride();
+	}
+
+	public VirtualFile getVirtualFile() {
+		return incomingFile;
 	}
 
 	public void setOverride(boolean override) {

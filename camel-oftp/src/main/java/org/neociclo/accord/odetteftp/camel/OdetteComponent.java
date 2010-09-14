@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.odette;
+package org.neociclo.accord.odetteftp.camel;
 
 import java.net.URI;
 import java.util.Map;
@@ -23,8 +23,8 @@ public class OdetteComponent extends DefaultComponent {
 			Map<String, Object> parameters) throws Exception {
 
 		OdetteConfiguration resultConfig = configuration.clone();
-		resultConfig.configure(new URI(uri));
 		setProperties(resultConfig, parameters);
+		resultConfig.configure(new URI(uri));
 
 		OdetteEndpoint endpoint = new OdetteEndpoint(uri, this, resultConfig);
 

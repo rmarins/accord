@@ -78,7 +78,7 @@ public abstract class Client {
         ClientBootstrap bootstrap = new ClientBootstrap(factory);
         bootstrap.setPipelineFactory(pipelineFactory);
 
-        LOGGER.info("Connecting to ODETTE-FTP service...");
+        LOGGER.info("Connecting to ODETTE-FTP service on {}...", getRemoteAddress());
 
         ChannelFuture connectFuture = bootstrap.connect(getRemoteAddress(), getLocalAddress());
 

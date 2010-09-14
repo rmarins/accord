@@ -38,12 +38,14 @@ public class DefaultStartFileResponse implements StartFileResponse {
 
 	private File file;
 
-	public static DefaultStartFileResponse positiveAnswer() {
-		return positiveAnswer(0);
+	public static DefaultStartFileResponse positiveAnswer(File saveTo) {
+		return positiveAnswer(saveTo, 0);
 	}
 
-	public static DefaultStartFileResponse positiveAnswer(long restartOffset) {
-		return new DefaultStartFileResponse(true, restartOffset);
+	public static DefaultStartFileResponse positiveAnswer(File saveTo, long restartOffset) {
+		DefaultStartFileResponse response = new DefaultStartFileResponse(true, restartOffset);
+		response.file = saveTo;
+		return response;
 	}
 
 	public static DefaultStartFileResponse negativeAnswer() {
@@ -90,10 +92,6 @@ public class DefaultStartFileResponse implements StartFileResponse {
 
 	public File getFile() {
 		return file;
-	}
-
-	public void setFile(File file) {
-		this.file = file;
 	}
 
 }

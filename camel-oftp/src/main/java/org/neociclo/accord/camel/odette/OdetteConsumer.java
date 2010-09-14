@@ -6,8 +6,10 @@ import org.apache.camel.BatchConsumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ShutdownRunningTask;
+import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.ScheduledPollConsumer;
 import org.apache.camel.spi.ShutdownAware;
+import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 
 /**
  * <p>
@@ -50,10 +52,11 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 	 * 
 	 * @param om
 	 */
-	public void processOdetteMessage(OdetteMessage<?> om) {
-		Exchange e = getEndpoint().createExchange();
+	public void processOdetteMessage(GenericFile<DefaultVirtualFile> odetteFile) {
+		OdetteEndpoint odetteEndpoint = (OdetteEndpoint) getEndpoint();
+		Exchange e = odetteEndpoint.createExchange(odetteFile);
 
-		om.bind(e);
+		odetteEndpoint.configureMessage(odetteFile, e.getIn());
 
 		try {
 			getProcessor().process(e);

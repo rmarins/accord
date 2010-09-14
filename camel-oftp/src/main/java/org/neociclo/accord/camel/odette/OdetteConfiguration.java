@@ -47,16 +47,7 @@ public class OdetteConfiguration implements Cloneable {
 	private long timeout = 90000;
 
 	private boolean longFilename = false;
-
 	private int maxRetry = 0;
-
-	protected int getMaxRetry() {
-		return maxRetry;
-	}
-
-	protected void setMaxRetry(int maxRetry) {
-		this.maxRetry = maxRetry;
-	}
 
 	// ScheduledPollConsumer properties (workaround defined)
 	private long initialDelay = 10;
@@ -64,15 +55,15 @@ public class OdetteConfiguration implements Cloneable {
 	private boolean useFixedDelay;
 
 	private OdetteTransport transport;
-
-	private File tmpDir;
-
+	private File tmpDir = new File(System.getProperty("java.io.tmpdir"));;
 	private FileRenameBean fileRenameBean = new FileRenameBean();
+	private OdetteHandler handler = new OdetteHandlerAdapter();
+	private boolean autoResume = true;
+	private boolean override = true;
 
-	private OdetteHandler handler;
+	private long maxFileSize;
 
 	public OdetteConfiguration() {
-		tmpDir = new File(System.getProperty("java.io.tmpdir"));
 	}
 
 	public OdetteConfiguration(URI uri) {
@@ -80,8 +71,13 @@ public class OdetteConfiguration implements Cloneable {
 		configure(uri);
 	}
 
-	// Properties
-	// -------------------------------------------------------------------------
+	public int getMaxRetry() {
+		return maxRetry;
+	}
+
+	public void setMaxRetry(int maxRetry) {
+		this.maxRetry = maxRetry;
+	}
 
 	public String getProtocol() {
 		return protocol;
@@ -321,6 +317,30 @@ public class OdetteConfiguration implements Cloneable {
 
 	public void setHandler(OdetteHandler handler) {
 		this.handler = handler;
+	}
+
+	public boolean getAutoResume() {
+		return this.autoResume;
+	}
+
+	public void setAutoResume(boolean autoResume) {
+		this.autoResume = autoResume;
+	}
+
+	public boolean getOverride() {
+		return override;
+	}
+
+	public void setOverride(boolean value) {
+		this.override = value;
+	}
+
+	public long getMaxFileSize() {
+		return maxFileSize;
+	}
+
+	public void setMaxFileSize(long maxFileSize) {
+		this.maxFileSize = maxFileSize;
 	}
 
 }

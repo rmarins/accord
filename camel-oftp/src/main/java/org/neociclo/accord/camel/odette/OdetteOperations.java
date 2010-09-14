@@ -21,6 +21,7 @@ public class OdetteOperations {
 	private Queue<OdetteFtpObject> incomingQueue = new ConcurrentLinkedQueue<OdetteFtpObject>();
 	private boolean hasOut;
 	private boolean hasIn;
+	private InOutSharedQueueOftpletFactory factory;
 
 	public OdetteOperations(OdetteEndpoint odetteEndpoint) {
 		this.endpoint = odetteEndpoint;
@@ -36,13 +37,10 @@ public class OdetteOperations {
 		session.setDataExchangeBufferSize(cfg.getBufferSize());
 		session.setWindowSize(cfg.getWindowSize());
 
-		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null,
-				incomingQueue);
+		factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null, incomingQueue);
 
 		// prepare the incoming handler
-		factory.setEventListener(new InOutOftplet(endpoint));
-
-		client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
+		factory.setEventListener(new InOutOftpletListener(endpoint));
 	}
 
 	public boolean isConnected() {
@@ -64,7 +62,9 @@ public class OdetteOperations {
 	 * @throws ClientException
 	 */
 	public void pollServer() throws Exception {
-		if (client.isConnected() == false) {
+		if (client == null || !client.isConnected()) {
+			final OdetteConfiguration cfg = endpoint.getConfiguration();
+			client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
 			client.connect(true);
 		}
 	}
@@ -85,7 +85,7 @@ public class OdetteOperations {
 	}
 
 	public void disconnect() {
-		if (client != null) {
+		if (client != null && client.isConnected()) {
 			try {
 				client.disconnect();
 			} catch (Exception e) {

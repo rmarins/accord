@@ -34,7 +34,7 @@ import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
 import org.neociclo.odetteftp.support.SessionConfig;
 
@@ -68,7 +68,7 @@ public class ReceiveAllFiles {
 		TcpClient oftp = new TcpClient(server, port, factory);
 
 		// prepare the incoming handler
-		factory.setEventListener(new InOutOftpletEventListenerAdapter() {
+		factory.setEventListener(new OftpletEventListenerAdapter() {
 			@Override
 			public StartFileResponse acceptStartFile(VirtualFile incomingFile) {
 

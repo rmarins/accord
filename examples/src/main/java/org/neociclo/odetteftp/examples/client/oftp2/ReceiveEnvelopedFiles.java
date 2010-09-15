@@ -44,7 +44,7 @@ import org.neociclo.odetteftp.protocol.v20.DefaultSignedDeliveryNotification;
 import org.neociclo.odetteftp.protocol.v20.EnvelopedVirtualFile;
 import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
 import org.neociclo.odetteftp.support.SessionConfig;
 import org.neociclo.odetteftp.util.EnvelopingException;
@@ -94,7 +94,7 @@ public class ReceiveEnvelopedFiles {
 		TcpClient oftp = new TcpClient(server, port, factory);
 
 		// prepare the incoming handler
-		factory.setEventListener(new InOutOftpletEventListenerAdapter() {
+		factory.setEventListener(new OftpletEventListenerAdapter() {
 			@Override
 			public StartFileResponse acceptStartFile(VirtualFile incomingFile) {
 

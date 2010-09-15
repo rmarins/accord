@@ -32,7 +32,7 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class SharedQueueOftpletListener implements OftpletListener {
+class SharedQueueOftpletListener implements OftpletListener {
 
     private Queue<OdetteFtpObject> incoming;
     private InOutOftpletEventListener eventListener;

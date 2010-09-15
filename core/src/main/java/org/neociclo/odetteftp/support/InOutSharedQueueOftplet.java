@@ -35,7 +35,7 @@ import org.neociclo.odetteftp.security.SecurityContext;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
+class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 
 	private SessionConfig config;
 	private SecurityContext securityContext;
@@ -45,21 +45,11 @@ public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 
 	public InOutSharedQueueOftplet(SessionConfig sessionConfig, Queue<OdetteFtpObject> outgoing,
 			Queue<OdetteFtpObject> outgoingDone, Queue<OdetteFtpObject> incoming) {
+
 		super();
 		this.config = sessionConfig;
 		this.securityContext = new ConfigBasedSecurityContext(sessionConfig);
 
-		if (incoming != null) {
-			this.listener = new SharedQueueOftpletListener(incoming);
-		}
-
-		if (outgoing != null) {
-			this.speaker = new SharedQueueOftpletSpeaker(outgoing, outgoingDone);
-		}
-
-		if (speaker == null && listener == null) {
-			throw new IllegalArgumentException("Listener and Speaker cannot be null");
-		}
 	}
 
 	@Override
@@ -93,7 +83,7 @@ public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 
 	public void setEventListener(InOutOftpletEventListener eventListener) {
 		if (speaker != null) {
-			speaker.setEventListenet(eventListener);
+			speaker.setEventListener(eventListener);
 		}
 		if (listener != null) {
 			listener.setEventListener(eventListener);
@@ -102,8 +92,24 @@ public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 	}
 
 	@Override
+	public void onSessionStart() {
+		if (wrappedListener != null) {
+			wrappedListener.onSessionStart();
+		}
+	}
+
+	@Override
+	public void onSessionEnd() {
+		if (wrappedListener != null) {
+			wrappedListener.onSessionEnd();
+		}
+	}
+
+	@Override
 	public void onExceptionCaught(Throwable cause) {
-		wrappedListener.onExceptionCaught(cause);
+		if (wrappedListener != null) {
+			wrappedListener.onExceptionCaught(cause);
+		}
 	}
 
 }

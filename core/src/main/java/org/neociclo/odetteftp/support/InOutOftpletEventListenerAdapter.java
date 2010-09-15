@@ -73,4 +73,10 @@ public class InOutOftpletEventListenerAdapter implements InOutOftpletEventListen
 	public void onExceptionCaught(Throwable cause) {
 	}
 
+	public void onSessionStart() {
+	}
+
+	public void onSessionEnd() {
+	}
+
 }

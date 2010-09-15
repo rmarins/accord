@@ -31,7 +31,7 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class SharedQueueOftpletSpeaker implements OftpletSpeaker {
+class SharedQueueOftpletSpeaker implements OftpletSpeaker {
 
     private Queue<OdetteFtpObject> outgoing;
     private Queue<OdetteFtpObject> outgoingDone;
@@ -44,7 +44,11 @@ public class SharedQueueOftpletSpeaker implements OftpletSpeaker {
     }
 
     public OdetteFtpObject nextOftpObjectToSend() {
-        return outgoing.poll();
+    	OdetteFtpObject next = null;
+    	if (outgoing != null) {
+    		next = outgoing.poll();
+    	}
+        return next;
     }
 
     public void onSendFileStart(VirtualFile virtualFile, long answerCount) {
@@ -83,8 +87,8 @@ public class SharedQueueOftpletSpeaker implements OftpletSpeaker {
         }
     }
 
-    public void setEventListenet(InOutOftpletEventListener eventListener) {
-        this.eventListener = eventListener;
-    }
+	public void setEventListener(InOutOftpletEventListener listener) {
+		this.eventListener = listener;
+	}
 
 }

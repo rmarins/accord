@@ -35,7 +35,7 @@ class SharedQueueOftpletSpeaker implements OftpletSpeaker {
 
     private Queue<OdetteFtpObject> outgoing;
     private Queue<OdetteFtpObject> outgoingDone;
-    private InOutOftpletEventListener eventListener;
+    private OftpletEventListener eventListener;
 
     public SharedQueueOftpletSpeaker(Queue<OdetteFtpObject> outgoing, Queue<OdetteFtpObject> outgoingDone) {
         super();
@@ -87,7 +87,7 @@ class SharedQueueOftpletSpeaker implements OftpletSpeaker {
         }
     }
 
-	public void setEventListener(InOutOftpletEventListener listener) {
+	public void setEventListener(OftpletEventListener listener) {
 		this.eventListener = listener;
 	}
 

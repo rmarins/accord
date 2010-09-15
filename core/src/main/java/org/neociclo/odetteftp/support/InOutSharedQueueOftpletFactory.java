@@ -35,7 +35,7 @@ public class InOutSharedQueueOftpletFactory implements OftpletFactory {
 	private Queue<OdetteFtpObject> outgoing;
 	private Queue<OdetteFtpObject> outgoingDone;
 	private Queue<OdetteFtpObject> incoming;
-	private InOutOftpletEventListener eventListener;
+	private OftpletEventListener eventListener;
 
 	/**
 	 * Constructor for this shared queue Oftplet factory implementation,
@@ -76,11 +76,11 @@ public class InOutSharedQueueOftpletFactory implements OftpletFactory {
 		return oftplet;
 	}
 
-	public void setEventListener(InOutOftpletEventListener eventListener) {
+	public void setEventListener(OftpletEventListener eventListener) {
 		this.eventListener = eventListener;
 	}
 
-	public InOutOftpletEventListener getEventListener() {
+	public OftpletEventListener getEventListener() {
 		return eventListener;
 	}
 

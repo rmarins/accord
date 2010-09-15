@@ -28,9 +28,9 @@ import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public interface InOutOftpletEventListener extends OftpletSpeaker, OftpletListener, EventListener {
+public interface OftpletEventListener extends OftpletSpeaker, OftpletListener, EventListener {
 
-    void onSessionStart();
+	void onSessionStart();
 
     void onSessionEnd();
 

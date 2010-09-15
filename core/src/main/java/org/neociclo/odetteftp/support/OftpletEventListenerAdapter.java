@@ -29,7 +29,7 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class InOutOftpletEventListenerAdapter implements InOutOftpletEventListener {
+public class OftpletEventListenerAdapter implements OftpletEventListener {
 
     public OdetteFtpObject nextOftpObjectToSend() {
         return null;

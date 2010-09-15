@@ -35,7 +35,7 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
 class SharedQueueOftpletListener implements OftpletListener {
 
     private Queue<OdetteFtpObject> incoming;
-    private InOutOftpletEventListener eventListener;
+    private OftpletEventListener eventListener;
 
     public SharedQueueOftpletListener(Queue<OdetteFtpObject> incoming) {
         super();
@@ -88,7 +88,7 @@ class SharedQueueOftpletListener implements OftpletListener {
         }
     }
 
-    public void setEventListener(InOutOftpletEventListener eventListener) {
+    public void setEventListener(OftpletEventListener eventListener) {
         this.eventListener = eventListener;
     }
 

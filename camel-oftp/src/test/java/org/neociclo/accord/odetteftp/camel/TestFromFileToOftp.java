@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.oftp;
+package org.neociclo.accord.odetteftp.camel;
 
 import org.apache.camel.EndpointInject;
 import org.apache.camel.builder.RouteBuilder;

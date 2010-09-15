@@ -1,4 +1,4 @@
-package org.neociclo.accord.camel.oftp;
+package org.neociclo.accord.odetteftp.camel;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -6,7 +6,6 @@ import java.util.Date;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.neociclo.accord.camel.odette.FileRenameBean;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 
 public class TestFileRenameBean {

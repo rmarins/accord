@@ -1,10 +1,9 @@
-package org.neociclo.accord.camel.oftp;
+package org.neociclo.accord.odetteftp.camel;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.neociclo.accord.camel.odette.OdetteConfiguration;
 
 public class TestOdetteConfiguration extends Object {
 

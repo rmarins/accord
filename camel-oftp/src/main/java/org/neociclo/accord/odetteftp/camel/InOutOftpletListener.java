@@ -5,9 +5,9 @@ import static org.neociclo.odetteftp.util.OdetteFtpSupport.getReplyDeliveryNotif
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
-import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 
-public class InOutOftpletListener extends InOutOftpletEventListenerAdapter {
+public class InOutOftpletListener extends OftpletEventListenerAdapter {
 
 	private OdetteEndpoint endpoint;
 

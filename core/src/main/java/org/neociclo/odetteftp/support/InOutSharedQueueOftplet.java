@@ -50,6 +50,8 @@ class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 		this.config = sessionConfig;
 		this.securityContext = new ConfigBasedSecurityContext(sessionConfig);
 
+		this.listener = new SharedQueueOftpletListener(incoming);
+		this.speaker = new SharedQueueOftpletSpeaker(outgoing, outgoingDone);
 	}
 
 	@Override

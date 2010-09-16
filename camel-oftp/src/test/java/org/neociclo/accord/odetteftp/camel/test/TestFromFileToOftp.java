@@ -37,8 +37,7 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * @version $Rev$ $Date$
  */
 public class TestFromFileToOftp extends CamelTestSupport {
-
-	@EndpointInject(uri = "mock:result")
+TestFromOftpToFileuri = "mock:result")
 	private MockEndpoint resultEndpoint;
 
 	@Produce(uri = "direct:start")

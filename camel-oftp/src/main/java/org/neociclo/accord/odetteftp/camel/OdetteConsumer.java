@@ -11,6 +11,8 @@ import org.apache.camel.component.file.FileConsumer;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.ScheduledPollConsumer;
 import org.apache.camel.spi.ShutdownAware;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
 /**
@@ -26,6 +28,7 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  */
 public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsumer, ShutdownAware {
 
+	private static final transient Log LOG = LogFactory.getLog(ScheduledPollConsumer.class);
 	private OdetteOperations operations;
 
 	public OdetteConsumer(OdetteEndpoint endpoint, Processor processor, OdetteOperations operations) {
@@ -61,11 +64,15 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 
 		OdetteConfiguration configuration = ((OdetteEndpoint) getEndpoint()).getConfiguration();
 		String absolutePath = configuration.getTmpDir().getAbsolutePath();
-		GenericFile<File> file = FileConsumer.asGenericFile(absolutePath, incomingFile.getFile());
+		final GenericFile<File> file = FileConsumer.asGenericFile(absolutePath, incomingFile.getFile());
 
 		try {
 			Exchange e = odetteEndpoint.createExchange(file);
 			odetteEndpoint.configureMessage(file, incomingFile, e.getIn());
+
+			if (configuration.isDelete()) {
+				e.addOnCompletion(new OdetteOnFileReceived(operations, file));
+			}
 			getProcessor().process(e);
 		} catch (Exception e1) {
 			e1.printStackTrace();

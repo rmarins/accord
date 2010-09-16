@@ -37,53 +37,54 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * @version $Rev$ $Date$
  */
 public class TestFromFileToOftp extends CamelTestSupport {
-TestFromOftpToFileuri = "mock:result")
+
+	@EndpointInject(uri = "mock:result")
 	private MockEndpoint resultEndpoint;
 
 	@Produce(uri = "direct:start")
 	protected ProducerTemplate template;
 
-	private String oftpFromUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/tmp/odette&delay=5000";
+	private String oftpToUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/tmp/odette&delay=5000";
 
-    @Before
-    public void setUp() throws Exception {
-        log.info("********************************************************************************");
-        log.info("Testing: " + getTestMethodName() + "(" + getClass().getName() + ")");
-        log.info("********************************************************************************");
+	@Before
+	public void setUp() throws Exception {
+		log.info("********************************************************************************");
+		log.info("Testing: " + getTestMethodName() + "(" + getClass().getName() + ")");
+		log.info("********************************************************************************");
 
-        log.debug("setUp test");
-        if (!useJmx()) {
-            disableJMX();
-        } else {
-            enableJMX();
-        }
+		log.debug("setUp test");
+		if (!useJmx()) {
+			disableJMX();
+		} else {
+			enableJMX();
+		}
 
-        context = createCamelContext();
-        assertValidContext(context);
+		context = createCamelContext();
+		assertValidContext(context);
 
-        // reduce default shutdown timeout to avoid waiting for 300 seconds
-        context.getShutdownStrategy().setTimeout(60);
+		// reduce default shutdown timeout to avoid waiting for 300 seconds
+		context.getShutdownStrategy().setTimeout(120);
 
-        template = context.createProducerTemplate();
-        template.start();
-        consumer = context.createConsumerTemplate();
-        consumer.start();
+		template = context.createProducerTemplate();
+		template.start();
+		consumer = context.createConsumerTemplate();
+		consumer.start();
 
-        postProcessTest();
-        
-        if (isUseRouteBuilder()) {
-            RouteBuilder[] builders = createRouteBuilders();
-            for (RouteBuilder builder : builders) {
-                log.debug("Using created route builder: " + builder);
-                context.addRoutes(builder);
-            }
-            startCamelContext();
-            log.debug("Routing Rules are: " + context.getRoutes());
-        } else {
-            log.debug("Using route builder from the created context: " + context);
-        }
-        log.debug("Routing Rules are: " + context.getRoutes());
-    }
+		postProcessTest();
+
+		if (isUseRouteBuilder()) {
+			RouteBuilder[] builders = createRouteBuilders();
+			for (RouteBuilder builder : builders) {
+				log.debug("Using created route builder: " + builder);
+				context.addRoutes(builder);
+			}
+			startCamelContext();
+			log.debug("Routing Rules are: " + context.getRoutes());
+		} else {
+			log.debug("Using route builder from the created context: " + context);
+		}
+		log.debug("Routing Rules are: " + context.getRoutes());
+	}
 
 	public static class MyHandler implements OdetteHandler {
 		public void acceptIncoming(IncomingFileResponse incomingFileResponse) {
@@ -103,9 +104,7 @@ TestFromOftpToFileuri = "mock:result")
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
-				from(oftpFromUrl).to("mock:result");
-
-				// from("direct:start").to(oftpFromUrl);
+				from("file:/home/bruno/outbox").to(oftpToUrl);
 			}
 		};
 	}

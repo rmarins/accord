@@ -9,13 +9,14 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
+import org.apache.camel.ShutdownableService;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.ScheduledPollEndpoint;
 import org.apache.camel.util.ObjectHelper;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
-public class OdetteEndpoint extends ScheduledPollEndpoint {
+public class OdetteEndpoint extends ScheduledPollEndpoint implements ShutdownableService {
 
 	private static final String ODETTE_VIRTUAL_FILE = "OdetteVirtualFile";
 	private static final String ODETTE_ORIGINATOR = "OdetteOriginator";
@@ -24,6 +25,7 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 	private OdetteOperations operations;
 	private OdetteConfiguration configuration;
 	private Set<OdetteConsumer> consumers = new HashSet<OdetteConsumer>();
+	private Set<OdetteProducer> producers = new HashSet<OdetteProducer>();
 
 	// private Set<OdetteProducer> producers = new HashSet<OdetteProducer>();
 
@@ -48,9 +50,9 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 
 	public Producer createProducer() throws Exception {
 		operations.setHasOutQueue();
-		// OdetteProducer odetteProducer = new OdetteProducer(this, operations);
-		// producers.add(odetteProducer);
-		return null;// odetteProducer;
+		OdetteProducer odetteProducer = new OdetteProducer(this, operations);
+		producers.add(odetteProducer);
+		return odetteProducer;
 	}
 
 	public Exchange createExchange(GenericFile<File> file) {
@@ -110,6 +112,18 @@ public class OdetteEndpoint extends ScheduledPollEndpoint {
 
 	private char getFileSeparator() {
 		return File.separatorChar;
+	}
+
+	public void start() throws Exception {
+		
+	}
+
+	public void stop() throws Exception {
+		operations.disconnect();
+	}
+
+	public void shutdown() throws Exception {
+		operations.disconnect();
 	}
 
 }

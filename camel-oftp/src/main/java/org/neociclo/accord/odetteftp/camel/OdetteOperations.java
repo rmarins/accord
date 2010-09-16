@@ -1,18 +1,23 @@
 package org.neociclo.accord.odetteftp.camel;
 
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.camel.RuntimeCamelException;
+import org.apache.camel.component.file.FileOperations;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
+import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.service.TcpClient;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
 import org.neociclo.odetteftp.support.SessionConfig;
 
-public class OdetteOperations {
+public class OdetteOperations extends FileOperations {
 
 	protected final transient Log log = LogFactory.getLog(getClass());
 	private OdetteEndpoint endpoint;
@@ -89,7 +94,7 @@ public class OdetteOperations {
 	public void disconnect() {
 		if (client != null && client.isConnected()) {
 			try {
-				client.disconnect();
+				client.awaitDisconnect();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -102,6 +107,23 @@ public class OdetteOperations {
 
 	public void setHasOutQueue() {
 		hasOut = true;
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				if (outgoingQueue.isEmpty() == false) {
+					try {
+						pollServer();
+					} catch (Exception e) {
+						throw new RuntimeCamelException(e);
+					}
+				}
+			}
+		}, endpoint.getConfiguration().getDelay());
+	}
+
+	public void offer(VirtualFile payload) {
+		outgoingQueue.offer(payload);
 	}
 
 }

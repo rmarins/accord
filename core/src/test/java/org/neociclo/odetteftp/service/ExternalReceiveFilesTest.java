@@ -33,7 +33,7 @@ import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
-import org.neociclo.odetteftp.support.InOutOftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ public class ExternalReceiveFilesTest extends AbstractTcpClientExternal {
             return;
         }
 
-        factory.setEventListener(new InOutOftpletEventListenerAdapter() {
+        factory.setEventListener(new OftpletEventListenerAdapter() {
 
             @Override
             public StartFileResponse acceptStartFile(VirtualFile virtualFile) {

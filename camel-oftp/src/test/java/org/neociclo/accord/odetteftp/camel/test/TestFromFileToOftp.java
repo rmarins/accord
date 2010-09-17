@@ -44,7 +44,8 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	@Produce(uri = "direct:start")
 	protected ProducerTemplate template;
 
-	private String oftpToUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/tmp/odette&delay=5000";
+	private String oftpToUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/home/bruno/odette/work&delay=5000";
+	//private String oftpToUrl = "oftp://DINET:NEOCICLO@192.168.69.4:3305?tmpDir=/home/bruno/odette/work&delay=5000";
 
 	@Before
 	public void setUp() throws Exception {
@@ -104,7 +105,7 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
-				from("file:/home/bruno/outbox").to(oftpToUrl);
+				from("file:/home/bruno/odette/outbox").to(oftpToUrl);
 			}
 		};
 	}

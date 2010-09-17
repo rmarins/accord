@@ -11,8 +11,6 @@ import org.apache.camel.component.file.FileConsumer;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.ScheduledPollConsumer;
 import org.apache.camel.spi.ShutdownAware;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
 /**
@@ -28,7 +26,8 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  */
 public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsumer, ShutdownAware {
 
-	private static final transient Log LOG = LogFactory.getLog(ScheduledPollConsumer.class);
+	// private static final transient Log log =
+	// LogFactory.getLog(ScheduledPollConsumer.class);
 	private OdetteOperations operations;
 
 	public OdetteConsumer(OdetteEndpoint endpoint, Processor processor, OdetteOperations operations) {
@@ -55,24 +54,25 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 	 * Consumes data from the Odette server
 	 * </p>
 	 * 
-	 * @param incomingFile
+	 * @param incomingVirtualFile
 	 * 
 	 * @param om
 	 */
-	public void processOdetteMessage(VirtualFile incomingFile) {
+	public void processOdetteMessage(VirtualFile incomingVirtualFile) {
 		OdetteEndpoint odetteEndpoint = (OdetteEndpoint) getEndpoint();
 
 		OdetteConfiguration configuration = ((OdetteEndpoint) getEndpoint()).getConfiguration();
 		String absolutePath = configuration.getTmpDir().getAbsolutePath();
-		final GenericFile<File> file = FileConsumer.asGenericFile(absolutePath, incomingFile.getFile());
+		final GenericFile<File> file = FileConsumer.asGenericFile(absolutePath, incomingVirtualFile.getFile());
 
 		try {
 			Exchange e = odetteEndpoint.createExchange(file);
-			odetteEndpoint.configureMessage(file, incomingFile, e.getIn());
+			odetteEndpoint.configureMessage(file, incomingVirtualFile, e.getIn());
 
 			if (configuration.isDelete()) {
 				e.addOnCompletion(new OdetteOnFileReceived(operations, file));
 			}
+
 			getProcessor().process(e);
 		} catch (Exception e1) {
 			e1.printStackTrace();

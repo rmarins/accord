@@ -18,10 +18,14 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
 
 public class OdetteEndpoint extends ScheduledPollEndpoint implements ShutdownableService {
 
+	public static final String ODETTE_SOURCE_FILE = "OdetteSourceFile";
+	public static final String ODETTE_ORIGINATOR = "OdetteOriginator";
+	public static final String ODETTE_DESTINATION = "OdetteDestination";
+	public static final String ODETTE_DATASET_NAME = "OdetteDatasetName";
 	private static final String ODETTE_VIRTUAL_FILE = "OdetteVirtualFile";
-	private static final String ODETTE_ORIGINATOR = "OdetteOriginator";
-	private static final String ODETTE_DESTINATION = "OdetteDestination";
-	private static final String ODETTE_DATASET_NAME = "OdetteDatasetName";
+	public static final String ODETTE_RECORD_FORMAT = "OdetteRecordFormat";
+	public static final String ODETTE_RECORD_SIZE = "OdetteRecordSize";
+	public static final String ODETTE_RESTART_OFFSET = "OdetteRestartOffset";
 	private OdetteOperations operations;
 	private OdetteConfiguration configuration;
 	private Set<OdetteConsumer> consumers = new HashSet<OdetteConsumer>();
@@ -81,9 +85,9 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 	 * Configures the given message with the file which sets the body to the
 	 * file object.
 	 * 
-	 * @param incomingFile
+	 * @param virtualFile
 	 */
-	public void configureMessage(GenericFile<File> file, VirtualFile incomingFile, Message message) {
+	public void configureMessage(GenericFile<File> file, VirtualFile virtualFile, Message message) {
 		message.setBody(file);
 
 		// compute name to set on header that should be relative to starting
@@ -100,7 +104,7 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 		message.setHeader(Exchange.FILE_NAME, name);
 
 		// associate VirtualFile to message header
-		configureOdetteMessage(message, incomingFile);
+		configureOdetteMessage(message, virtualFile);
 	}
 
 	private void configureOdetteMessage(Message message, VirtualFile virtualFile) {
@@ -115,7 +119,7 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 	}
 
 	public void start() throws Exception {
-		
+
 	}
 
 	public void stop() throws Exception {

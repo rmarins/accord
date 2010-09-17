@@ -54,7 +54,7 @@ public class OdetteConfiguration implements Cloneable {
 	private long delay = 300;
 	private boolean useFixedDelay;
 
-	private boolean writeAsTemp = true;
+	private boolean copyBeforeSend = true;
 
 	private OdetteTransport transport;
 	private File tmpDir = new File(System.getProperty("java.io.tmpdir"));;
@@ -66,6 +66,8 @@ public class OdetteConfiguration implements Cloneable {
 	private long maxFileSize;
 
 	private boolean delete = true;
+
+	private boolean alwaysReplyDelivery;
 
 	public OdetteConfiguration() {
 	}
@@ -347,12 +349,12 @@ public class OdetteConfiguration implements Cloneable {
 		this.maxFileSize = maxFileSize;
 	}
 
-	public boolean isWriteAsTemp() {
-		return writeAsTemp;
+	public boolean isCopyBeforeSend() {
+		return copyBeforeSend;
 	}
 
-	public void setWriteAsTemp(boolean writeAsTemp) {
-		this.writeAsTemp = writeAsTemp;
+	public void setCopyBeforeSend(boolean copyBeforeSend) {
+		this.copyBeforeSend = copyBeforeSend;
 	}
 
 	public boolean isDelete() {
@@ -362,5 +364,14 @@ public class OdetteConfiguration implements Cloneable {
 	public void setDelete(boolean delete) {
 		this.delete = delete;
 	}
+
+	public boolean isAlwaysReplyDelivery() {
+		return alwaysReplyDelivery;
+	}
+	
+	public void setAlwaysReplyDelivery(boolean alwaysReplyDelivery) {
+		this.alwaysReplyDelivery = alwaysReplyDelivery;
+	}
+	
 
 }

@@ -6,22 +6,21 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.RuntimeCamelException;
-import org.apache.camel.component.file.GenericFileExist;
 import org.apache.camel.component.file.GenericFileOperationFailedException;
 import org.apache.camel.impl.DefaultProducer;
 import org.apache.camel.util.ExchangeHelper;
-import org.apache.camel.util.ObjectHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
+import org.neociclo.odetteftp.protocol.RecordFormat;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.util.OdetteFtpConstants;
 
 public class OdetteProducer extends DefaultProducer {
 
 	protected final transient Log log = LogFactory.getLog(getClass());
 	private OdetteEndpoint endpoint;
 	private OdetteOperations operations;
-	private File file;
 
 	public OdetteProducer(Endpoint endpoint, OdetteOperations operations) {
 		super(endpoint);
@@ -36,7 +35,6 @@ public class OdetteProducer extends DefaultProducer {
 	}
 
 	private void processExchange(Exchange exchange) {
-	/*
 		if (log.isTraceEnabled()) {
 			log.trace("Processing " + exchange);
 		}
@@ -51,80 +49,50 @@ public class OdetteProducer extends DefaultProducer {
 			virtualFile = convertToVirtualFile(file, in);
 		}
 
-		try {
-			String target = virtualFile.getFile().getPath();
+		File target = virtualFile.getFile();
+		File tempTarget = null;
 
-			// should we write to a temporary name and then afterwards rename to
-			// real target
-			boolean writeAsTempAndRename = ObjectHelper.isNotEmpty(endpoint.getConfiguration().isWriteAsTemp());
-			String tempTarget = null;
-			if (writeAsTempAndRename) {
-				// compute temporary name with the temp prefix
-				tempTarget = createTempFileName(exchange, target);
+		boolean copyBeforeSend = endpoint.getConfiguration().isCopyBeforeSend();
+		if (copyBeforeSend) {
+			// compute temporary name with the temp prefix
+			tempTarget = createTempFile(target);
 
+			if (log.isTraceEnabled()) {
+				log.trace("Writing using tempNameFile: " + target);
+			}
+
+			// cater for file exists option on the real target as
+			// the file operations code will work on the temp file
+
+			// delete any pre existing temp file
+			if (tempTarget.exists()) {
 				if (log.isTraceEnabled()) {
-					log.trace("Writing using tempNameFile: " + tempTarget);
+					log.trace("Deleting existing temp file: " + target);
 				}
-
-				// cater for file exists option on the real target as
-				// the file operations code will work on the temp file
-
-				// delete any pre existing temp file
-				if (operations.existsFile(tempTarget)) {
-					if (log.isTraceEnabled()) {
-						log.trace("Deleting existing temp file: " + tempTarget);
-					}
-					if (!operations.deleteFile(tempTarget)) {
-						throw new GenericFileOperationFailedException("Cannot delete file: " + tempTarget);
-					}
+				if (!operations.deleteFile(tempTarget.getPath())) {
+					throw new GenericFileOperationFailedException("Cannot delete file: " + tempTarget);
 				}
 			}
 
-			sendFile(exchange, tempTarget != null ? tempTarget : target);
-
-			// if we did write to a temporary name then rename it to the real
-			// name after we have written the file
-			if (tempTarget != null) {
-
-				// if we should not eager delete the target file then do it now
-				// just before renaming
-				if (!endpoint.isEagerDeleteTargetFile() && operations.existsFile(target)
-						&& endpoint.getFileExist() == GenericFileExist.Override) {
-					// we override the target so we do this by deleting it so
-					// the temp file can be renamed later
-					// with success as the existing target file have been
-					// deleted
-					if (log.isTraceEnabled()) {
-						log.trace("Deleting existing file: " + target);
-					}
-					if (!operations.deleteFile(target)) {
-						throw new GenericFileOperationFailedException("Cannot delete file: " + target);
-					}
-				}
-
-				// now we are ready to rename the temp file to the target file
-				if (log.isTraceEnabled()) {
-					log.trace("Renaming file: [" + tempTarget + "] to: [" + target + "]");
-				}
-				boolean renamed = operations.renameFile(tempTarget, target);
-				if (!renamed) {
-					throw new GenericFileOperationFailedException("Cannot rename file from: " + tempTarget + " to: "
-							+ target);
-				}
-			}
-
-			// lets store the name we really used in the header, so end-users
-			// can retrieve it
-			exchange.getIn().setHeader(Exchange.FILE_NAME_PRODUCED, target);
-		} catch (Exception e) {
-			handleFailedWrite(exchange, e);
+			operations.storeTempFile(target, tempTarget, exchange);
 		}
-*/
+
+		sendFile(exchange, virtualFile, tempTarget != null ? tempTarget : target);
+
+		// if we did copy to temporary file before send, let Odette Operations know about
+		if (tempTarget != null) {
+			endpoint.getOdetteOperations().notifyOfTemporaryFile(virtualFile);
+		}
+
+		// lets store the name we really used in the header, so end-users
+		// can retrieve it
+		exchange.getIn().setHeader(Exchange.FILE_NAME_PRODUCED, target);
 	}
 
-	private String createTempFileName(Exchange exchange, String target) {
-		// TODO Auto-generated method stub
-		return null;
+	private File createTempFile(File target) {
+		String suffix = ".outgoing";
+		File tempTarget = new File(endpoint.getConfiguration().getTmpDir(), target.getName() + suffix);
+		return tempTarget;
 	}
 
 	/**
@@ -136,21 +104,9 @@ public class OdetteProducer extends DefaultProducer {
 		throw exception;
 	}
 
-	private void sendFile(Exchange exchange) {
-		if (log.isTraceEnabled()) {
-			log.trace("Processing " + exchange);
-		}
-
-		Message in = exchange.getIn();
-		VirtualFile virtualFile = in.getBody(VirtualFile.class);
-		if (virtualFile == null) {
-			File file = in.getBody(File.class);
-			if (file == null) {
-				throw new RuntimeCamelException("No available data on exchange");
-			}
-			virtualFile = convertToVirtualFile(file, in);
-		}
-
+	private void sendFile(Exchange exchange, VirtualFile virtualFile, File target) {
+		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_SOURCE_FILE, virtualFile.getFile());
+		((DefaultVirtualFile) virtualFile).setFile(target);
 		operations.offer(virtualFile);
 	}
 
@@ -158,7 +114,15 @@ public class OdetteProducer extends DefaultProducer {
 		DefaultVirtualFile defaultvf = new DefaultVirtualFile();
 		defaultvf.setFile(payload);
 
-		// TODO fill VirtualFile with message headers
+		defaultvf
+				.setDatasetName(message.getHeader(OdetteEndpoint.ODETTE_DATASET_NAME, payload.getName(), String.class));
+		defaultvf.setOriginator(message.getHeader(OdetteEndpoint.ODETTE_ORIGINATOR, null, String.class));
+		defaultvf.setDestination(message.getHeader(OdetteEndpoint.ODETTE_DESTINATION, null, String.class));
+		defaultvf.setRecordFormat(message.getHeader(OdetteEndpoint.ODETTE_RECORD_FORMAT, RecordFormat.UNSTRUCTURED,
+				RecordFormat.class));
+		defaultvf.setRecordSize(message.getHeader(OdetteEndpoint.ODETTE_RECORD_SIZE,
+				OdetteFtpConstants.DEFAULT_RECORD_SIZE, Integer.class));
+		defaultvf.setRestartOffset(message.getHeader(OdetteEndpoint.ODETTE_RESTART_OFFSET, 0, Long.class));
 
 		return defaultvf;
 	}

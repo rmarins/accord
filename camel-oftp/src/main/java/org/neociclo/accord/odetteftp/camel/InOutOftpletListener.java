@@ -34,13 +34,21 @@ public class InOutOftpletListener extends OftpletEventListenerAdapter {
 
 	@Override
 	public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
-		// reply with EERP (positive delivery notification)
-		DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
-		endpoint.getOdetteOperations().offer(notif);
-
 		endpoint.notifyConsumersOfIncomingFile(virtualFile);
+
+		// reply with EERP (positive delivery notification) if
+		// 'alwaysReplyDelivery' is true
+		if (endpoint.getConfiguration().isAlwaysReplyDelivery()) {
+			DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
+			endpoint.getOdetteOperations().offer(notif);
+		}
+
 		// send the EERP back - request change direction (true)
 		return true;
 	}
 
+	@Override
+	public void onSendFileEnd(VirtualFile virtualFile) {
+		endpoint.getOdetteOperations().virtualFileSent(virtualFile);
+	}
 }

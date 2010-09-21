@@ -21,6 +21,8 @@ package org.neociclo.odetteftp.support;
 
 import java.util.EventListener;
 
+import org.neociclo.odetteftp.OdetteFtpException;
+import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.oftplet.OftpletListener;
 import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
 
@@ -30,10 +32,14 @@ import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
  */
 public interface OftpletEventListener extends OftpletSpeaker, OftpletListener, EventListener {
 
+	void onExceptionCaught(Throwable cause);
+
 	void onSessionStart();
 
-    void onSessionEnd();
+	void onSessionEnd();
 
-    void onExceptionCaught(Throwable cause);
+	void destroy();
+
+	void init(OdetteFtpSession session) throws OdetteFtpException;
 
 }

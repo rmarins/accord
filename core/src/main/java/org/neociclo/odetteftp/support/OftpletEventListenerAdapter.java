@@ -19,6 +19,8 @@
  */
 package org.neociclo.odetteftp.support;
 
+import org.neociclo.odetteftp.OdetteFtpException;
+import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
@@ -77,6 +79,12 @@ public class OftpletEventListenerAdapter implements OftpletEventListener {
 	}
 
 	public void onSessionEnd() {
+	}
+
+	public void destroy() {
+	}
+
+	public void init(OdetteFtpSession session) throws OdetteFtpException {
 	}
 
 }

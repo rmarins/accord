@@ -19,6 +19,8 @@
  */
 package org.neociclo.odetteftp.security;
 
+import java.io.IOException;
+
 import javax.security.auth.callback.Callback;
 
 /**
@@ -29,6 +31,12 @@ import javax.security.auth.callback.Callback;
  */
 public interface OneToOneHandler<T extends Callback> {
 
-    void handle(T cb) throws java.io.IOException;
+	/**
+	 * 
+	 * @param cb
+	 * @throws IOException
+	 *             if an input or output error occur.
+	 */
+	void handle(T cb) throws IOException;
 
 }

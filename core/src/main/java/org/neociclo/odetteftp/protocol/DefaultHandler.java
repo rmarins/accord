@@ -1073,7 +1073,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         /* Assure that odette-ftp peers have compatible transfer modes. */
         TransferMode localMode = session.getTransferMode();
-        if ((ssidsr != TransferMode.BOTH) && (ssidsr.getReversed() != localMode)) {
+        if ((localMode != TransferMode.BOTH) && (ssidsr.getReversed() != localMode)) {
             err = "Invalid transfer mode: " + ssidsr;
             LOGGER.error("[{}] Session setup failed. {}", session, err);
             abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, err);
@@ -1122,7 +1122,8 @@ public abstract class DefaultHandler implements ProtocolHandler {
             if (oftplet.isProtocolVersionSupported(version)) {
                 // agree to use a lower odette-ftp protocol version in session
                 session.setVersion(version);
-            } else {
+            }
+            else {
                 String versionNotSupported = "Required protocol version is not supported: " + version;
                 LOGGER.warn("[{}] SSID received. {}", session, versionNotSupported);
                 abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, versionNotSupported);
@@ -1299,7 +1300,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
         try {
             callbackHandler.handle(new Callback[] { callback });
         } catch (Throwable t) {
-            LOGGER.error("[" + session + "] Callback handler error.", t);
+            LOGGER.trace("[" + session + "] Callback handler error (type: " + callback.getClass().getName() + ").", t);
             return false;
         }
 

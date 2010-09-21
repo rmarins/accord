@@ -39,6 +39,7 @@ public class OdetteOperations extends FileOperations {
 	private boolean hasIn;
 	private InOutSharedQueueOftpletFactory factory;
 	private Set<String> temporaryFiles = new HashSet<String>();
+	private Object lock = new Object();
 
 	public OdetteOperations(OdetteEndpoint odetteEndpoint) {
 		this.endpoint = odetteEndpoint;
@@ -68,7 +69,7 @@ public class OdetteOperations extends FileOperations {
 
 			final OdetteConfiguration cfg = endpoint.getConfiguration();
 			client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
-			client.connect(true);
+			client.connect();
 		}
 	}
 
@@ -99,13 +100,12 @@ public class OdetteOperations extends FileOperations {
 		return null;
 	}
 
-	public void disconnect() {
-		synchronized (client) {
+	public void awaitDisconnect() {
+		synchronized (lock) {
 			if (client != null && client.isConnected()) {
 				try {
 					client.awaitDisconnect();
 				} catch (Exception e) {
-					e.printStackTrace();
 				}
 			}
 		}

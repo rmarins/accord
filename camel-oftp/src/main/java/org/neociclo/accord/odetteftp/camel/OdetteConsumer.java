@@ -11,6 +11,7 @@ import org.apache.camel.component.file.FileConsumer;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.ScheduledPollConsumer;
 import org.apache.camel.spi.ShutdownAware;
+import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
 /**
@@ -97,6 +98,21 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 	}
 
 	public void setMaxMessagesPerPoll(int arg0) {
+	}
+
+	public void processOdetteMessage(DeliveryNotification notif) {
+		OdetteEndpoint odetteEndpoint = (OdetteEndpoint) getEndpoint();
+
+		try {
+			Exchange e = odetteEndpoint.createExchange();
+			e.getIn().setBody(notif);
+			odetteEndpoint.configureOdetteMessage(e.getIn(), notif);
+
+			getProcessor().process(e);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			getExceptionHandler().handleException(e1);
+		}
 	}
 
 }

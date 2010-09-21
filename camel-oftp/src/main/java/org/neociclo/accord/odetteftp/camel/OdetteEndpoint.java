@@ -7,25 +7,36 @@ import java.util.Set;
 import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.PollingConsumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
-import org.apache.camel.ShutdownableService;
+import org.apache.camel.Service;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.ScheduledPollEndpoint;
 import org.apache.camel.util.ObjectHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.neociclo.odetteftp.protocol.DeliveryNotification;
+import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
-public class OdetteEndpoint extends ScheduledPollEndpoint implements ShutdownableService {
+public class OdetteEndpoint extends ScheduledPollEndpoint implements Service {
+
+	private static Log log = LogFactory.getLog(OdetteEndpoint.class);
 
 	public static final String ODETTE_SOURCE_FILE = "OdetteSourceFile";
 	public static final String ODETTE_ORIGINATOR = "OdetteOriginator";
 	public static final String ODETTE_DESTINATION = "OdetteDestination";
 	public static final String ODETTE_DATASET_NAME = "OdetteDatasetName";
-	private static final String ODETTE_VIRTUAL_FILE = "OdetteVirtualFile";
+	public static final String ODETTE_VIRTUAL_FILE = "OdetteVirtualFile";
 	public static final String ODETTE_RECORD_FORMAT = "OdetteRecordFormat";
 	public static final String ODETTE_RECORD_SIZE = "OdetteRecordSize";
 	public static final String ODETTE_RESTART_OFFSET = "OdetteRestartOffset";
+	public static final String ODETTE_DATE_TIME = "OdetteDateTime";
+	public static final String ODETTE_USER_DATA = "OdetteUserData";
+	public static final String ODETTE_DELIVERY_NOTIFICATION = "OdetteDeliveryNotification";
+
 	private OdetteOperations operations;
 	private OdetteConfiguration configuration;
 	private Set<OdetteConsumer> consumers = new HashSet<OdetteConsumer>();
@@ -44,7 +55,20 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 		return configuration;
 	}
 
+	@Override
+	public PollingConsumer createPollingConsumer() throws Exception {
+		if (log.isDebugEnabled()) {
+			log.debug("Creating OdettePollingConsumer");
+		}
+
+		return super.createPollingConsumer();
+	}
+
 	public Consumer createConsumer(Processor processor) throws Exception {
+		if (log.isDebugEnabled()) {
+			log.debug("Creating OdetteConsumer");
+		}
+
 		operations.setHasInQueue();
 		OdetteConsumer e = new OdetteConsumer(this, processor, operations);
 		consumers.add(e);
@@ -53,6 +77,10 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 	}
 
 	public Producer createProducer() throws Exception {
+		if (log.isDebugEnabled()) {
+			log.debug("Creating OdetteProducer");
+		}
+
 		operations.setHasOutQueue();
 		OdetteProducer odetteProducer = new OdetteProducer(this, operations);
 		producers.add(odetteProducer);
@@ -73,12 +101,6 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 
 	public OdetteOperations getOdetteOperations() {
 		return operations;
-	}
-
-	public void notifyConsumersOfIncomingFile(VirtualFile incomingFile) {
-		for (OdetteConsumer c : consumers) {
-			c.processOdetteMessage(incomingFile);
-		}
 	}
 
 	/**
@@ -109,9 +131,20 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 
 	private void configureOdetteMessage(Message message, VirtualFile virtualFile) {
 		message.setHeader(ODETTE_VIRTUAL_FILE, virtualFile);
-		message.setHeader(ODETTE_ORIGINATOR, virtualFile.getOriginator());
-		message.setHeader(ODETTE_DESTINATION, virtualFile.getDestination());
-		message.setHeader(ODETTE_DATASET_NAME, virtualFile.getDatasetName());
+		configureOdetteMessage(message, (OdetteFtpObject) virtualFile);
+	}
+
+	protected void configureOdetteMessage(Message message, DeliveryNotification notif) {
+		message.setHeader(ODETTE_DELIVERY_NOTIFICATION, notif);
+		configureOdetteMessage(message, (OdetteFtpObject) notif);
+	}
+
+	private void configureOdetteMessage(Message message, OdetteFtpObject oftpObject) {
+		message.setHeader(ODETTE_ORIGINATOR, oftpObject.getOriginator());
+		message.setHeader(ODETTE_DESTINATION, oftpObject.getDestination());
+		message.setHeader(ODETTE_DATASET_NAME, oftpObject.getDatasetName());
+		message.setHeader(ODETTE_DATE_TIME, oftpObject.getDateTime());
+		message.setHeader(ODETTE_USER_DATA, oftpObject.getUserData());
 	}
 
 	private char getFileSeparator() {
@@ -123,11 +156,19 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Shutdownabl
 	}
 
 	public void stop() throws Exception {
-		operations.disconnect();
+		operations.awaitDisconnect();
 	}
 
-	public void shutdown() throws Exception {
-		operations.disconnect();
+	public void notifyConsumersOf(VirtualFile incomingFile) {
+		for (OdetteConsumer c : consumers) {
+			c.processOdetteMessage(incomingFile);
+		}
+	}
+
+	public void notifyConsumersOf(DeliveryNotification notif) {
+		for (OdetteConsumer c : consumers) {
+			c.processOdetteMessage(notif);
+		}
 	}
 
 }

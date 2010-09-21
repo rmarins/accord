@@ -29,9 +29,9 @@ public class OdetteProducer extends DefaultProducer {
 	}
 
 	public void process(Exchange exchange) throws Exception {
-		Exchange fileExchange = endpoint.createExchange(exchange);
-		processExchange(fileExchange);
-		ExchangeHelper.copyResults(exchange, fileExchange);
+		Exchange oftpExchange = endpoint.createExchange(exchange);
+		processExchange(oftpExchange);
+		ExchangeHelper.copyResults(exchange, oftpExchange);
 	}
 
 	private void processExchange(Exchange exchange) {

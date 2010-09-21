@@ -1,6 +1,8 @@
 package org.neociclo.accord.odetteftp.camel.test;
 
 import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -9,6 +11,7 @@ import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Before;
 import org.junit.Test;
 import org.neociclo.accord.odetteftp.camel.IncomingFileResponse;
+import org.neociclo.accord.odetteftp.camel.OdetteEndpoint;
 import org.neociclo.accord.odetteftp.camel.OdetteHandler;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
@@ -31,8 +34,6 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * 
  * $Id: FromFileToOftpTest.java 482 2010-07-23
  * 
- * /**
- * 
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
@@ -45,7 +46,9 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	protected ProducerTemplate template;
 
 	private String oftpToUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/home/bruno/odette/work&delay=5000";
-	//private String oftpToUrl = "oftp://DINET:NEOCICLO@192.168.69.4:3305?tmpDir=/home/bruno/odette/work&delay=5000";
+
+	// private String oftpToUrl =
+	// "oftp://DINET:NEOCICLO@192.168.69.4:3305?tmpDir=/home/bruno/odette/work&delay=5000";
 
 	@Before
 	public void setUp() throws Exception {
@@ -105,7 +108,24 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
-				from("file:/home/bruno/odette/outbox").to(oftpToUrl);
+				from("file:/home/bruno/odette/outbox")
+					.to(oftpToUrl);
+
+			from(oftpToUrl)
+				.to("seda:a");
+
+			from("seda:a")
+				.choice()
+					.when(header(OdetteEndpoint.ODETTE_DELIVERY_NOTIFICATION).isNotNull())
+						.process(new Processor() {
+							public void process(Exchange exchange) throws Exception {
+								Thread.sleep(2000);
+								System.out.println("DELIVERY NOTIFICATION ARRIVED");
+								System.out.println(exchange.getIn().getBody());
+							}
+						})
+					.otherwise()
+						.to("file:/home/bruno/odette/inbox");
 			}
 		};
 	}

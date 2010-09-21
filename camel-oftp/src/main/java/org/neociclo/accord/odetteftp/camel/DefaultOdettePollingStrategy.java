@@ -32,12 +32,6 @@ public class DefaultOdettePollingStrategy implements PollingConsumerPollStrategy
 		if (listener != null) {
 			listener.sessionEnded();
 		}
-
-		try {
-			odette.getOdetteOperations().disconnect();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	public boolean rollback(Consumer consumer, Endpoint endpoint, int retryCounter, Exception cause) throws Exception {

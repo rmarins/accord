@@ -1120,14 +1120,11 @@ public abstract class DefaultHandler implements ProtocolHandler {
         OdetteFtpVersion version = OdetteFtpVersion.parse(ssidlev);
         if (version != session.getVersion()) {
             if (oftplet.isProtocolVersionSupported(version)) {
-                // agree to use a lower odette-ftp protocol version in session
+            	//
+                // agree to use another supported odette-ftp protocol version
+            	// in this session
+            	//
                 session.setVersion(version);
-            }
-            else {
-                String versionNotSupported = "Required protocol version is not supported: " + version;
-                LOGGER.warn("[{}] SSID received. {}", session, versionNotSupported);
-                abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, versionNotSupported);
-                return;
             }
         }
 

@@ -21,6 +21,7 @@ package org.neociclo.odetteftp.examples.server;
 
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
+import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.support.DefaultSecurityContext;
 import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
@@ -54,6 +55,12 @@ class ServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpeaker, O
 	// -------------------------------------------------------------------------
 	//   Oftplet implementation
 	// -------------------------------------------------------------------------
+
+	@Override
+	public boolean isProtocolVersionSupported(OdetteFtpVersion version) {
+		// server that accepts downgrading the version
+		return (config != null ? config.getVersion().isEqualOrOlder(version) : super.isProtocolVersionSupported(version));
+	};
 
 	@Override
 	public SecurityContext getSecurityContext() {

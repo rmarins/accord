@@ -6,8 +6,9 @@ import java.util.Set;
 
 import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
+import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
-import org.apache.camel.PollingConsumer;
+import org.apache.camel.MultipleConsumersSupport;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.Service;
@@ -21,10 +22,11 @@ import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
-public class OdetteEndpoint extends ScheduledPollEndpoint implements Service {
+public class OdetteEndpoint extends ScheduledPollEndpoint implements Service, MultipleConsumersSupport {
 
 	private static Log log = LogFactory.getLog(OdetteEndpoint.class);
 
+	// HEADERS
 	public static final String ODETTE_SOURCE_FILE = "OdetteSourceFile";
 	public static final String ODETTE_ORIGINATOR = "OdetteOriginator";
 	public static final String ODETTE_DESTINATION = "OdetteDestination";
@@ -36,10 +38,22 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Service {
 	public static final String ODETTE_DATE_TIME = "OdetteDateTime";
 	public static final String ODETTE_USER_DATA = "OdetteUserData";
 	public static final String ODETTE_DELIVERY_NOTIFICATION = "OdetteDeliveryNotification";
+	public static final String ODETTE_RETRY_LATER = "OdetteRetryLater";
+	public static final String ODETTE_OVERRIDE = "OdetteOverride";
+	public static final String ODETTE_FORCE_RESTART = "OdetteForceRestart";
+	public static final String ODETTE_REASON_TEXT = "OdetteReasonText";
+	public static final String ODETTE_ANSWER_REASON = "OdetteAnswerReason";
+	public static final String ODETTE_NEGATIVE_RESPONSE_REASON = "OdetteNegativeEndToEndResponseReason";
+	public static final String ODETTE_NERP_CREATOR = "OdetteNegativeEndToEndResponseCreator";
+	public static final String ODETTE_NERP_TEXT = "OdetteNegativeEndToEndResponseCreator";
+	public static final String ODETTE_FILE_DESCRIPTION = "OdetteFileDescription";
+	public static final String ODETTE_TOTAL_OCTETS_SENT = "OdetteTotalOctetsSent";
+	public static final String ODETTE_SEND_FILE_STARTED = "OdetteSendFileStarted";
+	public static final String ODETTE_ANSWER_COUNT = "OdetteAnswerCount";
 
 	private OdetteOperations operations;
 	private OdetteConfiguration configuration;
-	private Set<OdetteConsumer> consumers = new HashSet<OdetteConsumer>();
+	private OdetteConsumer consumer = null;
 	private Set<OdetteProducer> producers = new HashSet<OdetteProducer>();
 
 	// private Set<OdetteProducer> producers = new HashSet<OdetteProducer>();
@@ -55,25 +69,15 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Service {
 		return configuration;
 	}
 
-	@Override
-	public PollingConsumer createPollingConsumer() throws Exception {
-		if (log.isDebugEnabled()) {
-			log.debug("Creating OdettePollingConsumer");
-		}
-
-		return super.createPollingConsumer();
-	}
-
 	public Consumer createConsumer(Processor processor) throws Exception {
 		if (log.isDebugEnabled()) {
 			log.debug("Creating OdetteConsumer");
 		}
 
 		operations.setHasInQueue();
-		OdetteConsumer e = new OdetteConsumer(this, processor, operations);
-		consumers.add(e);
-		configureConsumer(e);
-		return e;
+		consumer = new OdetteConsumer(this, processor, operations);
+		configureConsumer(consumer);
+		return consumer;
 	}
 
 	public Producer createProducer() throws Exception {
@@ -117,7 +121,7 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Service {
 		String name = file.isAbsolute() ? file.getAbsoluteFilePath() : file.getRelativeFilePath();
 
 		// skip leading endpoint configured directory
-		String endpointPath = getConfiguration().getTmpDir().toString() + getFileSeparator();
+		String endpointPath = getConfiguration().getWorkpath().toString() + getFileSeparator();
 		if (ObjectHelper.isNotEmpty(endpointPath) && name.startsWith(endpointPath)) {
 			name = ObjectHelper.after(name, endpointPath);
 		}
@@ -159,16 +163,36 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Service {
 		operations.awaitDisconnect();
 	}
 
-	public void notifyConsumersOf(VirtualFile incomingFile) {
-		for (OdetteConsumer c : consumers) {
-			c.processOdetteMessage(incomingFile);
-		}
+	public boolean isMultipleConsumersSupported() {
+		return false;
 	}
 
-	public void notifyConsumersOf(DeliveryNotification notif) {
-		for (OdetteConsumer c : consumers) {
-			c.processOdetteMessage(notif);
-		}
+	public void notifyConsumerOf(VirtualFile incomingFile) {
+		consumer.processOdetteMessage(incomingFile);
 	}
 
+	public void notifyConsumerOf(DeliveryNotification notif) {
+		consumer.processOdetteMessage(notif);
+	}
+
+	public IncomingFileResponse askConsumerForIncomingFile(VirtualFile incomingFile) {
+		boolean routeFileRequest = configuration.isRouteFileRequest();
+
+		IncomingFileResponse incomingFileResponse = new IncomingFileResponse(incomingFile, configuration);
+		if (routeFileRequest) {
+			Exchange ex = createExchange(ExchangePattern.InOut);
+			configureOdetteMessage(ex.getIn(), incomingFile);
+			ex.addOnCompletion(incomingFileResponse);
+
+			try {
+				consumer.getProcessor().process(ex);
+			} catch (Exception e1) {
+				consumer.getExceptionHandler().handleException(e1);
+			}
+		} else {
+			incomingFileResponse.acceptFile();
+		}
+
+		return incomingFileResponse;
+	}
 }

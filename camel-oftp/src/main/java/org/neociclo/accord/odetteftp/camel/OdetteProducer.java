@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.file.GenericFileOperationFailedException;
@@ -15,6 +16,7 @@ import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.RecordFormat;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.protocol.v20.DefaultEnvelopedVirtualFile;
 import org.neociclo.odetteftp.util.OdetteFtpConstants;
 
 public class OdetteProducer extends DefaultProducer {
@@ -44,6 +46,7 @@ public class OdetteProducer extends DefaultProducer {
 		} else {
 			processFile(oftpExchange);
 		}
+
 		ExchangeHelper.copyResults(exchange, oftpExchange);
 	}
 
@@ -61,6 +64,8 @@ public class OdetteProducer extends DefaultProducer {
 		if (log.isTraceEnabled()) {
 			log.trace("Processing " + exchange);
 		}
+
+		exchange.setPattern(ExchangePattern.InOut);
 
 		Message in = exchange.getIn();
 		VirtualFile virtualFile = in.getBody(VirtualFile.class);
@@ -80,9 +85,6 @@ public class OdetteProducer extends DefaultProducer {
 			if (log.isTraceEnabled()) {
 				log.trace("Writing using tempNameFile: " + target);
 			}
-
-			// cater for file exists option on the real target as
-			// the file operations code will work on the temp file
 
 			// delete any pre existing temp file
 			if (tempTarget.exists()) {
@@ -112,40 +114,39 @@ public class OdetteProducer extends DefaultProducer {
 
 	private File createTempFile(File target) {
 		String suffix = ".outgoing";
-		File tempTarget = new File(endpoint.getConfiguration().getTmpDir(), target.getName() + suffix);
+		File tempTarget = new File(endpoint.getConfiguration().getWorkpath(), target.getName() + suffix);
 		return tempTarget;
-	}
-
-	/**
-	 * If we fail writing out a file, we will call this method. This hook is
-	 * provided to disconnect from servers or clean up files we created (if
-	 * needed).
-	 */
-	protected void handleFailedWrite(Exchange exchange, Exception exception) throws Exception {
-		throw exception;
 	}
 
 	private void sendFile(Exchange exchange, VirtualFile virtualFile, File target) {
 		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_SOURCE_FILE, virtualFile.getFile());
 		((DefaultVirtualFile) virtualFile).setFile(target);
-		operations.offer(virtualFile);
+
+		operations.offer(virtualFile, exchange);
 	}
 
-	private VirtualFile convertToVirtualFile(File payload, Message message) {
-		DefaultVirtualFile defaultvf = new DefaultVirtualFile();
-		defaultvf.setFile(payload);
+	private VirtualFile convertToVirtualFile(File payload, Message m) {
+		String hDatasetName = m.getHeader(OdetteEndpoint.ODETTE_DATASET_NAME, payload.getName(), String.class);
+		String hOriginator = m.getHeader(OdetteEndpoint.ODETTE_ORIGINATOR, null, String.class);
+		String hDestination = m.getHeader(OdetteEndpoint.ODETTE_DESTINATION, null, String.class);
+		RecordFormat hRecordFormat = m.getHeader(OdetteEndpoint.ODETTE_RECORD_FORMAT, RecordFormat.UNSTRUCTURED,
+				RecordFormat.class);
+		Integer hRecordSize = m.getHeader(OdetteEndpoint.ODETTE_RECORD_SIZE, OdetteFtpConstants.DEFAULT_RECORD_SIZE,
+				Integer.class);
+		Long hRestartOffset = m.getHeader(OdetteEndpoint.ODETTE_RESTART_OFFSET, 0, Long.class);
+		String hFileDescription = m.getHeader(OdetteEndpoint.ODETTE_FILE_DESCRIPTION, String.class);
 
-		defaultvf
-				.setDatasetName(message.getHeader(OdetteEndpoint.ODETTE_DATASET_NAME, payload.getName(), String.class));
-		defaultvf.setOriginator(message.getHeader(OdetteEndpoint.ODETTE_ORIGINATOR, null, String.class));
-		defaultvf.setDestination(message.getHeader(OdetteEndpoint.ODETTE_DESTINATION, null, String.class));
-		defaultvf.setRecordFormat(message.getHeader(OdetteEndpoint.ODETTE_RECORD_FORMAT, RecordFormat.UNSTRUCTURED,
-				RecordFormat.class));
-		defaultvf.setRecordSize(message.getHeader(OdetteEndpoint.ODETTE_RECORD_SIZE,
-				OdetteFtpConstants.DEFAULT_RECORD_SIZE, Integer.class));
-		defaultvf.setRestartOffset(message.getHeader(OdetteEndpoint.ODETTE_RESTART_OFFSET, 0, Long.class));
+		DefaultEnvelopedVirtualFile v = new DefaultEnvelopedVirtualFile();
+		v.setFile(payload);
+		v.setDatasetName(hDatasetName);
+		v.setOriginator(hOriginator);
+		v.setDestination(hDestination);
+		v.setRecordFormat(hRecordFormat);
+		v.setRecordSize(hRecordSize);
+		v.setRestartOffset(hRestartOffset);
+		v.setFileDescription(hFileDescription);
 
-		return defaultvf;
+		return v;
 	}
 
 }

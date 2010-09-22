@@ -2,11 +2,16 @@ package org.neociclo.accord.odetteftp.camel;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
@@ -14,20 +19,27 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.component.file.FileOperations;
 import org.apache.camel.component.file.GenericFileOperationFailedException;
 import org.apache.camel.util.IOHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.neociclo.odetteftp.OdetteFtpException;
+import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.TransferMode;
+import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
+import org.neociclo.odetteftp.oftplet.StartFileResponse;
+import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.service.TcpClient;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.OftpletEventListener;
 import org.neociclo.odetteftp.support.SessionConfig;
 
-public class OdetteOperations extends FileOperations {
+public class OdetteOperations implements OftpletEventListener {
 
 	private static final long TEMP_COPY_BUFFER_SIZE = 128 * 1024;
 	protected final transient Log log = LogFactory.getLog(getClass());
@@ -40,6 +52,7 @@ public class OdetteOperations extends FileOperations {
 	private InOutSharedQueueOftpletFactory factory;
 	private Set<String> temporaryFiles = new HashSet<String>();
 	private Object lock = new Object();
+	private Map<VirtualFile, Exchange> lockedOutgoingQueue = new Hashtable<VirtualFile, Exchange>();
 
 	public OdetteOperations(OdetteEndpoint odetteEndpoint) {
 		this.endpoint = odetteEndpoint;
@@ -69,7 +82,7 @@ public class OdetteOperations extends FileOperations {
 
 			final OdetteConfiguration cfg = endpoint.getConfiguration();
 			client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
-			client.connect();
+			client.connect(true);
 		}
 	}
 
@@ -86,7 +99,7 @@ public class OdetteOperations extends FileOperations {
 		session.setWindowSize(cfg.getWindowSize());
 
 		factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null, incomingQueue);
-		factory.setEventListener(new InOutOftpletListener(endpoint));
+		factory.setEventListener(this);
 	}
 
 	private TransferMode identifyTransferMode() {
@@ -119,9 +132,44 @@ public class OdetteOperations extends FileOperations {
 		hasOut = true;
 	}
 
-	public void offer(OdetteFtpObject payload) {
+	public void offer(DeliveryNotification notification) {
+		outgoingQueue.offer(notification);
+		offerQueueToClient();
+	}
+
+	public void offer(VirtualFile payload, Exchange lockable) {
 		outgoingQueue.offer(payload);
 		offerQueueToClient();
+
+		synchronized (lockable) {
+			try {
+				System.out.println("** LOCKING EXCHANGE ** ");
+				lockedOutgoingQueue.put(payload, lockable);
+				lockable.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected Exchange findLockedExchange(VirtualFile virtualFile) {
+		Exchange locked = lockedOutgoingQueue.get(virtualFile);
+
+		if (locked == null) {
+			for (VirtualFile vf : lockedOutgoingQueue.keySet()) {
+				if (vf.getDatasetName().equals(virtualFile.getDatasetName())) {
+					locked = lockedOutgoingQueue.get(vf);
+				}
+			}
+		}
+
+		return locked;
+	}
+
+	protected void notifyEnd(VirtualFile virtualFile) {
+		Exchange locked = findLockedExchange(virtualFile);
+
+		notifyLockedObjects(Arrays.asList(new Exchange[] { locked }));
 	}
 
 	private void offerQueueToClient() {
@@ -194,17 +242,11 @@ public class OdetteOperations extends FileOperations {
 
 	/**
 	 * Creates and prepares the output file channel. Will position itself in
-	 * correct position if eg. it should append or override any existing
-	 * content.
+	 * correct position.
 	 */
 	private FileChannel prepareOutputFileChannel(File target, FileChannel out) throws IOException {
-		/*
-		 * if (endpoint.getFileExist() == GenericFileExist.Append) { out = new
-		 * RandomAccessFile(target, "rw").getChannel(); out =
-		 * out.position(out.size()); } else { // will override out = new
-		 * FileOutputStream(target).getChannel(); }
-		 */
-		out = new FileOutputStream(target).getChannel();
+		out = new RandomAccessFile(target, "rw").getChannel();
+		out = out.position(out.size());
 		return out;
 	}
 
@@ -220,4 +262,108 @@ public class OdetteOperations extends FileOperations {
 		temporaryFiles.add(virtualFile.getFile().getPath());
 	}
 
+	public boolean hasOutgoingObjects() {
+		return !outgoingQueue.isEmpty();
+	}
+
+	public StartFileResponse acceptStartFile(VirtualFile incomingFile) {
+		IncomingFileResponse incomingFileResponse = endpoint.askConsumerForIncomingFile(incomingFile);
+
+		return incomingFileResponse.createStartFileResponse();
+	}
+
+	public void onReceiveFileStart(VirtualFile virtualFile, long answerCount) {
+	}
+
+	public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+		endpoint.notifyConsumerOf(virtualFile);
+
+		// send the EERP back - request change direction (true)
+		// only if there are objects on outgoing queue
+		return hasOutgoingObjects();
+	}
+
+	public void onDataSent(VirtualFile virtualFile, long totalOctetsSent) {
+		Exchange exchange = findLockedExchange(virtualFile);
+
+		if (exchange == null) {
+			return;
+		}
+
+		Message in = exchange.getIn();
+		Long hOctetsSent = in.getHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, 0, Long.class);
+		totalOctetsSent += hOctetsSent;
+		in.setHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, totalOctetsSent);
+	}
+
+	public void onSendFileEnd(VirtualFile virtualFile) {
+		notifyEnd(virtualFile);
+		virtualFileSent(virtualFile);
+	}
+
+	public void onSendFileError(VirtualFile virtualFile, AnswerReasonInfo reason, boolean retryLater) {
+		Exchange exchange = findLockedExchange(virtualFile);
+		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_ANSWER_REASON, reason.getAnswerReason());
+		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_REASON_TEXT, reason.getReasonText());
+		exchange.getIn().setFault(true);
+
+		notifyEnd(virtualFile);
+	}
+
+	public void onNotificationReceived(DeliveryNotification notif) {
+		endpoint.notifyConsumerOf(notif);
+	}
+
+	public OdetteFtpObject nextOftpObjectToSend() {
+		return null;
+	}
+
+	public void onSendFileStart(VirtualFile virtualFile, long answerCount) {
+		Exchange exchange = findLockedExchange(virtualFile);
+		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_ANSWER_COUNT, answerCount);
+		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_SEND_FILE_STARTED, Calendar.getInstance().getTime());
+	}
+
+	public void onNotificationSent(DeliveryNotification notif) {
+	}
+
+	public void onDataReceived(VirtualFile virtualFile, long totalOctetsReceived) {
+	}
+
+	public void onReceiveFileError(VirtualFile virtualFile, AnswerReasonInfo reason) {
+	}
+
+	public void onSessionStart() {
+	}
+
+	public void onSessionEnd() {
+		notifyLockedObjects(lockedOutgoingQueue.values());
+	}
+
+	public void onExceptionCaught(Throwable cause) {
+	}
+
+	public void destroy() {
+		notifyLockedObjects(lockedOutgoingQueue.values());
+	}
+
+	public void init(OdetteFtpSession session) throws OdetteFtpException {
+	}
+
+	public boolean existsFile(String absoluteFilePath) {
+		return new FileOperations().existsFile(absoluteFilePath);
+	}
+
+	public boolean deleteFile(String path) {
+		return new FileOperations().deleteFile(path);
+	}
+
+	private void notifyLockedObjects(Collection<Exchange> collection) {
+		for (Object locked : collection) {
+			synchronized (locked) {
+				System.out.println("** NOTIFYING EXCHANGE ** ");
+				locked.notify();
+			}
+		}
+	}
 }

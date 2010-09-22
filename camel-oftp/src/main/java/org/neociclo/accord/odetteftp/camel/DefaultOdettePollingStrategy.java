@@ -15,23 +15,10 @@ public class DefaultOdettePollingStrategy implements PollingConsumerPollStrategy
 			return false;
 		}
 
-		// let listener be aware of polling
-		OdetteAuditListener listener = odette.getConfiguration().getListener();
-		if (listener != null) {
-			listener.sessionStarted();
-		}
-
 		return true;
 	}
 
 	public void commit(Consumer consumer, Endpoint endpoint) {
-		OdetteEndpoint odette = (OdetteEndpoint) endpoint;
-
-		// let listener be aware of polling
-		OdetteAuditListener listener = odette.getConfiguration().getListener();
-		if (listener != null) {
-			listener.sessionEnded();
-		}
 	}
 
 	public boolean rollback(Consumer consumer, Endpoint endpoint, int retryCounter, Exception cause) throws Exception {

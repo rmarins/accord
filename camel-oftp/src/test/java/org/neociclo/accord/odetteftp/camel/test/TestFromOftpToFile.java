@@ -8,9 +8,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Before;
 import org.junit.Test;
-import org.neociclo.accord.odetteftp.camel.IncomingFileResponse;
-import org.neociclo.accord.odetteftp.camel.OdetteHandler;
-import org.neociclo.odetteftp.protocol.VirtualFile;
 
 /**
  * Neociclo Accord - Open Source B2B Integration Suite Copyright (C) 2005-2008
@@ -40,11 +37,6 @@ public class TestFromOftpToFile extends CamelTestSupport {
 
 	@EndpointInject(uri = "mock:result")
 	private MockEndpoint resultEndpoint;
-
-	@Produce(uri = "direct:start")
-	protected ProducerTemplate template;
-
-	private String oftpFromUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/home/bruno/odette/work&delay=5000";
 
 	@Before
 	public void setUp() throws Exception {
@@ -86,14 +78,6 @@ public class TestFromOftpToFile extends CamelTestSupport {
 		log.debug("Routing Rules are: " + context.getRoutes());
 	}
 
-	public static class MyHandler implements OdetteHandler {
-		public void acceptIncoming(IncomingFileResponse incomingFileResponse) {
-			VirtualFile vf = incomingFileResponse.getVirtualFile();
-			System.out.println(vf.getDatasetName());
-			incomingFileResponse.acceptFile();
-		}
-	}
-
 	@Test
 	public void testFromFileToFtp() throws Exception {
 		resultEndpoint.expectedMinimumMessageCount(1);
@@ -104,7 +88,8 @@ public class TestFromOftpToFile extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
-				from(oftpFromUrl).to("file:/home/bruno/odette/inbox");
+				from("oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001")
+				.to("file:/home/bruno/odette/inbox").to("mock:result");
 			}
 		};
 	}

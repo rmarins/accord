@@ -2,18 +2,14 @@ package org.neociclo.accord.odetteftp.camel.test;
 
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Before;
 import org.junit.Test;
-import org.neociclo.accord.odetteftp.camel.IncomingFileResponse;
 import org.neociclo.accord.odetteftp.camel.OdetteEndpoint;
-import org.neociclo.accord.odetteftp.camel.OdetteHandler;
-import org.neociclo.odetteftp.protocol.VirtualFile;
 
 /**
  * Neociclo Accord - Open Source B2B Integration Suite Copyright (C) 2005-2008
@@ -42,14 +38,6 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	@EndpointInject(uri = "mock:result")
 	private MockEndpoint resultEndpoint;
 
-	@Produce(uri = "direct:start")
-	protected ProducerTemplate template;
-
-	private String oftpToUrl = "oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?tmpDir=/home/bruno/odette/work&delay=5000";
-
-	// private String oftpToUrl =
-	// "oftp://DINET:NEOCICLO@192.168.69.4:3305?tmpDir=/home/bruno/odette/work&delay=5000";
-
 	@Before
 	public void setUp() throws Exception {
 		log.info("********************************************************************************");
@@ -67,7 +55,7 @@ public class TestFromFileToOftp extends CamelTestSupport {
 		assertValidContext(context);
 
 		// reduce default shutdown timeout to avoid waiting for 300 seconds
-		context.getShutdownStrategy().setTimeout(120);
+		context.getShutdownStrategy().setTimeout(10);
 
 		template = context.createProducerTemplate();
 		template.start();
@@ -90,14 +78,6 @@ public class TestFromFileToOftp extends CamelTestSupport {
 		log.debug("Routing Rules are: " + context.getRoutes());
 	}
 
-	public static class MyHandler implements OdetteHandler {
-		public void acceptIncoming(IncomingFileResponse incomingFileResponse) {
-			VirtualFile vf = incomingFileResponse.getVirtualFile();
-			System.out.println(vf.getDatasetName());
-			incomingFileResponse.acceptFile();
-		}
-	}
-
 	@Test
 	public void testFromFileToFtp() throws Exception {
 		resultEndpoint.expectedMinimumMessageCount(1);
@@ -108,24 +88,28 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
+				
+				errorHandler(loggingErrorHandler().level(LoggingLevel.TRACE));
+				
 				from("file:/home/bruno/odette/outbox")
-					.to(oftpToUrl);
-
-			from(oftpToUrl)
-				.to("seda:a");
-
-			from("seda:a")
-				.choice()
-					.when(header(OdetteEndpoint.ODETTE_DELIVERY_NOTIFICATION).isNotNull())
+						.to("oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?workpath=/home/bruno/odette/work")
 						.process(new Processor() {
 							public void process(Exchange exchange) throws Exception {
-								Thread.sleep(2000);
-								System.out.println("DELIVERY NOTIFICATION ARRIVED");
-								System.out.println(exchange.getIn().getBody());
+								System.out.println("** IS FAULT? " + exchange.getIn().isFault());
+								System.out.println("** TOTAL TRANSFERED: "+exchange.getIn().getHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT));
+								exchange.setOut(exchange.getIn());
 							}
-						})
-					.otherwise()
-						.to("file:/home/bruno/odette/inbox");
+						}).to("file:/home/bruno/odette/sent").to("mock:result");
+				/*
+				 * from(oftpToUrl)
+				 * .filter(header(OdetteEndpoint.ODETTE_DELIVERY_NOTIFICATION
+				 * ).isNotNull()) .process(new Processor() { public void
+				 * process(Exchange exchange) throws Exception {
+				 * Thread.sleep(2000);
+				 * System.out.println("DELIVERY NOTIFICATION ARRIVED");
+				 * System.out.println(exchange.getIn().getBody()); } })
+				 * .to("file:/home/bruno/odette/inbox");
+				 */
 			}
 		};
 	}

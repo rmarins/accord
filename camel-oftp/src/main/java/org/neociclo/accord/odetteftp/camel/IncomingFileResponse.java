@@ -1,27 +1,34 @@
 package org.neociclo.accord.odetteftp.camel;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.camel.spi.Synchronization;
+import org.apache.commons.io.FileSystemUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.neociclo.odetteftp.protocol.AnswerReason;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
-public class IncomingFileResponse {
+class IncomingFileResponse implements Synchronization {
 
-	private FileRenameBean renameBean;
+	private static final Log log = LogFactory.getLog(IncomingFileResponse.class);
+
 	private VirtualFile incomingFile;
 	private AnswerReason userReason = AnswerReason.UNSPECIFIED;
 	private OdetteConfiguration config;
-	private String userFilename;
+	private File userFile;
 	private boolean accepted = true;
 	private String text;
 	private boolean retryLater = true;
 	private boolean override;
 	private boolean forceRestart;
 
-	public IncomingFileResponse(VirtualFile incomingFile, FileRenameBean fileRenameBean, OdetteConfiguration config) {
+	public IncomingFileResponse(VirtualFile incomingFile, OdetteConfiguration config) {
 		this.incomingFile = incomingFile;
-		this.renameBean = fileRenameBean;
 		this.config = config;
 		this.override = config.getOverride();
 	}
@@ -39,8 +46,8 @@ public class IncomingFileResponse {
 		this.text = text;
 	}
 
-	public void setFilename(String userFilename) {
-		this.userFilename = userFilename;
+	public void setFile(File userFile) {
+		this.userFile = userFile;
 	}
 
 	public void acceptFile() {
@@ -51,7 +58,7 @@ public class IncomingFileResponse {
 		this.accepted = false;
 	}
 
-	public void forcedRestart() {
+	public void forceRestart() {
 		this.forceRestart = true;
 	}
 
@@ -60,8 +67,9 @@ public class IncomingFileResponse {
 	}
 
 	private File defineLocalFile() {
-		String filename = userFilename != null ? userFilename : renameBean.renameFile(incomingFile);
-		File localFile = new File(config.getTmpDir(), filename);
+		FileRenameBean fileRenameBean = config.getFileRenameBean();
+		String filename = fileRenameBean.renameFile(incomingFile);
+		File localFile = userFile != null ? userFile : new File(config.getWorkpath(), filename);
 		return localFile;
 	}
 
@@ -72,14 +80,14 @@ public class IncomingFileResponse {
 			return DefaultStartFileResponse.negativeAnswer(AnswerReason.DUPLICATE_FILE, text, retryLater);
 		}
 
-		if (!checkFileSystemSpace()) {
-			return DefaultStartFileResponse.negativeAnswer(AnswerReason.FILE_SIZE_EXCEED,
-					"No enough space available to save incoming file", false);
-		}
-
 		long maxFileSize = config.getMaxFileSize();
 		if ((maxFileSize > 0 && incomingFile.getSize() > maxFileSize)) {
 			return DefaultStartFileResponse.negativeAnswer(AnswerReason.FILE_SIZE_EXCEED, text, false);
+		}
+
+		if (!checkFileSystemSpace(localFile, incomingFile.getSize())) {
+			return DefaultStartFileResponse.negativeAnswer(AnswerReason.FILE_SIZE_EXCEED,
+					"No enough space available to save incoming file", false);
 		}
 
 		if (accepted) {
@@ -93,8 +101,50 @@ public class IncomingFileResponse {
 		}
 	}
 
-	private boolean checkFileSystemSpace() {
-		// TODO check if there's enough space to save
+	private boolean checkFileSystemSpace(File localFile, long fileSize) {
+		fileSize = fileSize / 1024; // convert to Kb
+		try {
+			long freeSpace = FileSystemUtils.freeSpaceKb(localFile.getParent());
+			return freeSpace > fileSize;
+		} catch (IOException e) {
+			log.warn("Tried to check file system's free space", e);
+		}
+
 		return true;
+	}
+
+	public void onComplete(Exchange exchange) {
+		acceptFile();
+
+		Message out = exchange.getOut();
+		File saveTo = out.getBody(File.class);
+		if (saveTo != null) {
+			setFile(saveTo);
+		}
+
+		Boolean headerOverride = out.getHeader(OdetteEndpoint.ODETTE_OVERRIDE, Boolean.class);
+		if (headerOverride != null) {
+			setOverride(headerOverride.booleanValue());
+		}
+
+		Boolean headerForceRestart = out.getHeader(OdetteEndpoint.ODETTE_FORCE_RESTART, Boolean.class);
+		if (headerForceRestart != null && headerForceRestart.booleanValue()) {
+			forceRestart();
+		}
+	}
+
+	public void onFailure(Exchange exchange) {
+		rejectFile();
+
+		Message out = exchange.getOut();
+		AnswerReason reason = out.getHeader(OdetteEndpoint.ODETTE_ANSWER_REASON, AnswerReason.UNSPECIFIED,
+				AnswerReason.class);
+		String reasonText = out.getHeader(OdetteEndpoint.ODETTE_REASON_TEXT, String.class);
+		setNegativeAnswer(reason, reasonText);
+
+		Boolean headerRetryLater = out.getHeader(OdetteEndpoint.ODETTE_RETRY_LATER, Boolean.class);
+		if (headerRetryLater != null && headerRetryLater.booleanValue()) {
+			retryLater();
+		}
 	}
 }

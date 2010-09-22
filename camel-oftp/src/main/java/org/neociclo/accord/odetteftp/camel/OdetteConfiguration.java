@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.camel.RuntimeCamelException;
-import org.apache.camel.util.ObjectHelper;
 
 /**
  * @author Rafael Marins
@@ -34,40 +33,33 @@ public class OdetteConfiguration implements Cloneable {
 
 	public static final int DEFAULT_RETRY_COUNT = 2;
 
-	private OdetteAuditListener listener = new OdetteAuditAdapter();
+	private OdetteTransport transport;
+	private File workpath = new File(System.getProperty("java.io.tmpdir"));;
+	private FileRenameBean fileRenameBean = new FileRenameBean();
 
 	private String protocol;
 	private String host;
-	private int port;
-
 	private String oid;
 	private String password;
+
+	private int port;
 	private int bufferSize = 4096;
 	private int windowSize = 64;
-	private long timeout = 90000;
-
-	private boolean longFilename = false;
 	private int maxRetry = 0;
 
-	// ScheduledPollConsumer properties (workaround defined)
-	private long initialDelay = 10;
-	private long delay = 300;
+	private boolean longFilename = false;
 	private boolean useFixedDelay;
-
 	private boolean copyBeforeSend = true;
-
-	private OdetteTransport transport;
-	private File tmpDir = new File(System.getProperty("java.io.tmpdir"));;
-	private FileRenameBean fileRenameBean = new FileRenameBean();
-	private OdetteHandler handler = new OdetteHandlerAdapter();
 	private boolean autoResume = true;
 	private boolean override = true;
-
-	private long maxFileSize;
-
 	private boolean delete = true;
+	private boolean autoReplyDelivery = true;
+	private boolean routeFileRequest = false;
 
-	private boolean alwaysReplyDelivery;
+	private long timeout = 90000;
+	private long initialDelay = 10;
+	private long delay = 300;
+	private long maxFileSize;
 
 	public OdetteConfiguration() {
 	}
@@ -175,10 +167,6 @@ public class OdetteConfiguration implements Cloneable {
 		this.delay = delay;
 	}
 
-	public boolean isUseFixedDelay() {
-		return useFixedDelay;
-	}
-
 	public void setUseFixedDelay(boolean useFixedDelay) {
 		this.useFixedDelay = useFixedDelay;
 	}
@@ -260,7 +248,7 @@ public class OdetteConfiguration implements Cloneable {
 		clone.setOid(oid);
 
 		try {
-			clone.setTmpDir(tmpDir);
+			clone.setWorkpath(workpath);
 		} catch (IOException e) {
 		}
 
@@ -277,35 +265,15 @@ public class OdetteConfiguration implements Cloneable {
 		return clone;
 	}
 
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer(getProtocol());
-		sb.append("+").append(getTransport().name().toLowerCase());
-		sb.append("://").append(getOid()).append("@");
-		sb.append(getHost()).append(":").append(getPort());
-		sb.append("?listener=#").append(getListener());
-
-		return sb.toString();
+	public File getWorkpath() {
+		return workpath;
 	}
 
-	protected OdetteAuditListener getListener() {
-		return listener;
-	}
+	public void setWorkpath(File workpath) throws IOException {
+		this.workpath = workpath;
 
-	protected void setListener(OdetteAuditListener listener) {
-		ObjectHelper.isNotEmpty(listener);
-		this.listener = listener;
-	}
-
-	public File getTmpDir() {
-		return tmpDir;
-	}
-
-	public void setTmpDir(File tmpDir) throws IOException {
-		this.tmpDir = tmpDir;
-
-		if (tmpDir != null && !tmpDir.exists()) {
-			tmpDir.mkdir();
+		if (workpath != null && !workpath.exists()) {
+			workpath.mkdir();
 		}
 	}
 
@@ -315,14 +283,6 @@ public class OdetteConfiguration implements Cloneable {
 
 	public void setFileRenameBean(FileRenameBean bean) {
 		this.fileRenameBean = bean;
-	}
-
-	public OdetteHandler getHandler() {
-		return this.handler;
-	}
-
-	public void setHandler(OdetteHandler handler) {
-		this.handler = handler;
 	}
 
 	public boolean getAutoResume() {
@@ -360,18 +320,25 @@ public class OdetteConfiguration implements Cloneable {
 	public boolean isDelete() {
 		return delete;
 	}
-	
+
 	public void setDelete(boolean delete) {
 		this.delete = delete;
 	}
 
-	public boolean isAlwaysReplyDelivery() {
-		return alwaysReplyDelivery;
+	public boolean isAutoReplyDelivery() {
+		return autoReplyDelivery;
 	}
-	
-	public void setAlwaysReplyDelivery(boolean alwaysReplyDelivery) {
-		this.alwaysReplyDelivery = alwaysReplyDelivery;
+
+	public void setAutoReplyDelivery(boolean autoReplyDelivery) {
+		this.autoReplyDelivery = autoReplyDelivery;
 	}
-	
+
+	public void setRouteFileRequest(boolean routeFileRequest) {
+		this.routeFileRequest = routeFileRequest;
+	}
+
+	public boolean isRouteFileRequest() {
+		return this.routeFileRequest;
+	}
 
 }

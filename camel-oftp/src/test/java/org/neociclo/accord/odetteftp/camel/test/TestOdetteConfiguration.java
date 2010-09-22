@@ -11,7 +11,7 @@ public class TestOdetteConfiguration extends Object {
 	@Test
 	public void testOdetteConfig() {
 		OdetteConfiguration cfg = new OdetteConfiguration();
-		assertNotNull(cfg.getTmpDir());
-		assertTrue(cfg.getTmpDir().exists());
+		assertNotNull(cfg.getWorkpath());
+		assertTrue(cfg.getWorkpath().exists());
 	}
 }

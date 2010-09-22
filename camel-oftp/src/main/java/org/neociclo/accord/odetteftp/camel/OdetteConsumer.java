@@ -1,16 +1,12 @@
 package org.neociclo.accord.odetteftp.camel;
 
 import java.io.File;
-import java.util.Queue;
 
-import org.apache.camel.BatchConsumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.ShutdownRunningTask;
 import org.apache.camel.component.file.FileConsumer;
 import org.apache.camel.component.file.GenericFile;
 import org.apache.camel.impl.ScheduledPollConsumer;
-import org.apache.camel.spi.ShutdownAware;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
@@ -25,10 +21,8 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * @author bruno
  * 
  */
-public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsumer, ShutdownAware {
+public class OdetteConsumer extends ScheduledPollConsumer {
 
-	// private static final transient Log log =
-	// LogFactory.getLog(ScheduledPollConsumer.class);
 	private OdetteOperations operations;
 
 	public OdetteConsumer(OdetteEndpoint endpoint, Processor processor, OdetteOperations operations) {
@@ -40,14 +34,6 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 		setUseFixedDelay(true);
 
 		this.operations = operations;
-	}
-
-	public boolean deferShutdown(ShutdownRunningTask shutdownRunningTask) {
-		return false;
-	}
-
-	public int getPendingExchangesSize() {
-		return 0;
 	}
 
 	/**
@@ -63,7 +49,7 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 		OdetteEndpoint odetteEndpoint = (OdetteEndpoint) getEndpoint();
 
 		OdetteConfiguration configuration = ((OdetteEndpoint) getEndpoint()).getConfiguration();
-		String absolutePath = configuration.getTmpDir().getAbsolutePath();
+		String absolutePath = configuration.getWorkpath().getAbsolutePath();
 		final GenericFile<File> file = FileConsumer.asGenericFile(absolutePath, incomingVirtualFile.getFile());
 
 		try {
@@ -74,9 +60,14 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 				e.addOnCompletion(new OdetteOnFileReceived(operations, file));
 			}
 
+			// reply with EERP (positive delivery notification) if
+			// 'autoReplyDelivery'
+			if (configuration.isAutoReplyDelivery()) {
+				e.addOnCompletion(new AutoReplyDeliveryNotification(operations));
+			}
+
 			getProcessor().process(e);
 		} catch (Exception e1) {
-			e1.printStackTrace();
 			getExceptionHandler().handleException(e1);
 		}
 	}
@@ -86,18 +77,8 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 		try {
 			operations.pollServer();
 		} catch (Exception e) {
-			e.printStackTrace();
+			getExceptionHandler().handleException(e);
 		}
-	}
-
-	public boolean isBatchAllowed() {
-		return false;
-	}
-
-	public void processBatch(Queue<Object> arg0) throws Exception {
-	}
-
-	public void setMaxMessagesPerPoll(int arg0) {
 	}
 
 	public void processOdetteMessage(DeliveryNotification notif) {
@@ -110,7 +91,6 @@ public class OdetteConsumer extends ScheduledPollConsumer implements BatchConsum
 
 			getProcessor().process(e);
 		} catch (Exception e1) {
-			e1.printStackTrace();
 			getExceptionHandler().handleException(e1);
 		}
 	}

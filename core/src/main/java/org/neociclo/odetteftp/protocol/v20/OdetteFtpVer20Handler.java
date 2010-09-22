@@ -426,7 +426,7 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         }
 
         // return the normalized virtual file
-        DefaultEnvelopedVirtualFile n = new DefaultEnvelopedVirtualFile();
+        DefaultNormalizedEnvelopedVirtualFile n = new DefaultNormalizedEnvelopedVirtualFile(vf);
         n.setDatasetName(dsn);
         n.setDateTime(dateTime);
         n.setOriginator(orig);

@@ -12,6 +12,7 @@ import org.apache.camel.util.ExchangeHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
+import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.RecordFormat;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.util.OdetteFtpConstants;
@@ -30,11 +31,33 @@ public class OdetteProducer extends DefaultProducer {
 
 	public void process(Exchange exchange) throws Exception {
 		Exchange oftpExchange = endpoint.createExchange(exchange);
-		processExchange(oftpExchange);
+
+		Message in = oftpExchange.getIn();
+		DeliveryNotification bodyAsDN = in.getBody(DeliveryNotification.class);
+		File bodyAsFile = in.getBody(File.class);
+		if (bodyAsDN == null && bodyAsFile == null) {
+			throw new RuntimeCamelException("Invalid exchange body. Neither File or DeliveryNotification");
+		}
+
+		if (bodyAsDN != null) {
+			processDeliveryNotification(oftpExchange);
+		} else {
+			processFile(oftpExchange);
+		}
 		ExchangeHelper.copyResults(exchange, oftpExchange);
 	}
 
-	private void processExchange(Exchange exchange) {
+	private void processDeliveryNotification(Exchange exchange) {
+		if (log.isTraceEnabled()) {
+			log.trace("Processing " + exchange);
+		}
+
+		Message in = exchange.getIn();
+		DeliveryNotification dn = in.getBody(DeliveryNotification.class);
+		operations.offer(dn);
+	}
+
+	private void processFile(Exchange exchange) {
 		if (log.isTraceEnabled()) {
 			log.trace("Processing " + exchange);
 		}
@@ -43,9 +66,6 @@ public class OdetteProducer extends DefaultProducer {
 		VirtualFile virtualFile = in.getBody(VirtualFile.class);
 		if (virtualFile == null) {
 			File file = in.getBody(File.class);
-			if (file == null) {
-				throw new RuntimeCamelException("No available data on exchange");
-			}
 			virtualFile = convertToVirtualFile(file, in);
 		}
 
@@ -79,7 +99,8 @@ public class OdetteProducer extends DefaultProducer {
 
 		sendFile(exchange, virtualFile, tempTarget != null ? tempTarget : target);
 
-		// if we did copy to temporary file before send, let Odette Operations know about
+		// if we did copy to temporary file before send, let Odette Operations
+		// know about
 		if (tempTarget != null) {
 			endpoint.getOdetteOperations().notifyOfTemporaryFile(virtualFile);
 		}

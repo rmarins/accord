@@ -1,3 +1,23 @@
+/**
+ * Neociclo Accord, Open Source B2B Integration Suite
+
+ * Copyright (C) 2005-2010 Neociclo, http://www.neociclo.com
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id$
+ */
 package org.neociclo.accord.odetteftp.camel;
 
 import java.io.File;
@@ -6,7 +26,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -18,6 +37,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.net.ssl.SSLEngine;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -54,9 +75,12 @@ public class OdetteOperations implements OftpletEventListener {
 	private Set<String> temporaryFiles = new HashSet<String>();
 	private Map<VirtualFile, Exchange> lockedOutgoingQueue = new Hashtable<VirtualFile, Exchange>();
 	private volatile Exchange exchangeInTransit;
+	private SSLEngine sslEngine;
 
-	public OdetteOperations(OdetteEndpoint odetteEndpoint) {
+	public OdetteOperations(OdetteEndpoint odetteEndpoint) throws Exception {
 		this.endpoint = odetteEndpoint;
+
+		initSSLEngine();
 	}
 
 	public boolean isConnected() {
@@ -82,9 +106,25 @@ public class OdetteOperations implements OftpletEventListener {
 			initClient();
 
 			final OdetteConfiguration cfg = endpoint.getConfiguration();
-			client = new TcpClient(cfg.getHost(), cfg.getPort(), factory);
+
+			client = new TcpClient(cfg.getHost(), cfg.getPort(), sslEngine, factory);
 			client.connect(true);
 		}
+	}
+
+	private SSLEngine initSSLEngine() throws Exception {
+		OdetteConfiguration cfg = endpoint.getConfiguration();
+		if (!cfg.isSsl()) {
+			return null;
+		}
+
+		SSLEngineFactory userEngineFactory = cfg.getSslEngineFactory();
+		if (userEngineFactory == null) {
+			userEngineFactory = new SSLEngineFactory().setup(cfg.getKeyStoreFormat(), cfg.getSecurityProvider(),
+					cfg.getKeyStoreFile(), cfg.getTrustStoreFile(), cfg.getPassphrase().toCharArray());
+		}
+
+		return userEngineFactory.createClientSSLEngine();
 	}
 
 	private void initClient() {

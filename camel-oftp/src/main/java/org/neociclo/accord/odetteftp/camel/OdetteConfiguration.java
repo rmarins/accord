@@ -38,7 +38,7 @@ public class OdetteConfiguration implements Cloneable {
 	private File workpath = new File(System.getProperty("java.io.tmpdir"));;
 	private FileRenameBean fileRenameBean = new FileRenameBean();
 
-	private String protocol;
+	private OdetteProtocol protocol;
 	private String host;
 	private String oid;
 	private String password;
@@ -63,8 +63,19 @@ public class OdetteConfiguration implements Cloneable {
 	private long delay = 300;
 	private long maxFileSize;
 
-
 	private TransferMode transferMode;
+
+	private SSLEngineFactory sslEngineFactory;
+
+	private String passphrase;
+
+	private File trustStoreFile;
+
+	private File keyStoreFile;
+
+	private String securityProvider;
+
+	private String keyStoreFormat;
 
 	public OdetteConfiguration() {
 	}
@@ -82,7 +93,7 @@ public class OdetteConfiguration implements Cloneable {
 		this.maxRetry = maxRetry;
 	}
 
-	public String getProtocol() {
+	public OdetteProtocol getProtocol() {
 		return protocol;
 	}
 
@@ -94,7 +105,7 @@ public class OdetteConfiguration implements Cloneable {
 		}
 	}
 
-	protected void setProtocol(String protocol) {
+	private void setProtocol(OdetteProtocol protocol) {
 		this.protocol = protocol;
 	}
 
@@ -201,7 +212,7 @@ public class OdetteConfiguration implements Cloneable {
 		OdetteProtocol protocol = validateProtocol(scheme);
 
 		setTransport(transport);
-		setProtocol(protocol.name().toLowerCase());
+		setProtocol(protocol);
 		setPort(protocol.defaultPort());
 
 		setUserCredentials(uri.getUserInfo());
@@ -362,4 +373,59 @@ public class OdetteConfiguration implements Cloneable {
 		return transferMode;
 	}
 
+	protected boolean isSsl() {
+		return protocol == OdetteProtocol.OFTPS;
+	}
+
+	public SSLEngineFactory getSslEngineFactory() {
+		return sslEngineFactory;
+	}
+
+	public void setSSLEngineFactory(SSLEngineFactory engineFactory) {
+		this.sslEngineFactory = engineFactory;
+	}
+
+	public String getKeyStoreFormat() {
+		return keyStoreFormat;
+	}
+
+	public void setSslEngineFactory(SSLEngineFactory sslEngineFactory) {
+		this.sslEngineFactory = sslEngineFactory;
+	}
+
+	public void setPassphrase(String passphrase) {
+		this.passphrase = passphrase;
+	}
+
+	public void setTrustStoreFile(File trustStoreFile) {
+		this.trustStoreFile = trustStoreFile;
+	}
+
+	public void setKeyStoreFile(File keyStoreFile) {
+		this.keyStoreFile = keyStoreFile;
+	}
+
+	public void setSecurityProvider(String securityProvider) {
+		this.securityProvider = securityProvider;
+	}
+
+	public void setKeyStoreFormat(String keyStoreFormat) {
+		this.keyStoreFormat = keyStoreFormat;
+	}
+
+	public String getSecurityProvider() {
+		return securityProvider;
+	}
+
+	public File getKeyStoreFile() {
+		return keyStoreFile;
+	}
+
+	public File getTrustStoreFile() {
+		return trustStoreFile;
+	}
+
+	public String getPassphrase() {
+		return passphrase;
+	}
 }

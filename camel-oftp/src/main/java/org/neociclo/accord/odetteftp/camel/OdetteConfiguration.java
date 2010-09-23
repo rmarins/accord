@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.camel.RuntimeCamelException;
+import org.neociclo.odetteftp.TransferMode;
 
 /**
  * @author Rafael Marins
@@ -46,7 +47,6 @@ public class OdetteConfiguration implements Cloneable {
 	private int bufferSize = 4096;
 	private int windowSize = 64;
 	private int maxRetry = 0;
-	private int eerpTimeout = 300;
 
 	private boolean longFilename = false;
 	private boolean useFixedDelay;
@@ -56,11 +56,15 @@ public class OdetteConfiguration implements Cloneable {
 	private boolean delete = true;
 	private boolean autoReplyDelivery = true;
 	private boolean routeFileRequest = false;
+	private boolean waitForDeliveryNotification = false;
 
 	private long timeout = 90000;
 	private long initialDelay = 10;
 	private long delay = 300;
 	private long maxFileSize;
+
+
+	private TransferMode transferMode;
 
 	public OdetteConfiguration() {
 	}
@@ -342,12 +346,20 @@ public class OdetteConfiguration implements Cloneable {
 		return this.routeFileRequest;
 	}
 
-	public void setEerpTimeout(int eerpTimeout) {
-		this.eerpTimeout = eerpTimeout;
+	public void setWaitForDeliveryNotification(boolean value) {
+		this.waitForDeliveryNotification = value;
 	}
 
-	public int getEerpTimeout() {
-		return eerpTimeout;
+	public boolean isWaitForDelivery() {
+		return waitForDeliveryNotification;
+	}
+
+	public void setTransferMode(TransferMode mode) {
+		this.transferMode = mode;
+	}
+
+	public TransferMode getTransferMode() {
+		return transferMode;
 	}
 
 }

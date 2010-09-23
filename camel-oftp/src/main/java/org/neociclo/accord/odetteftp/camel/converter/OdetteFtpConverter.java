@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import org.apache.camel.Converter;
+import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 
@@ -53,4 +54,12 @@ public class OdetteFtpConverter {
         return vFile.getFile();
     }
 
+    @Converter
+    public static TransferMode toTransferMode(String value) {
+    	if (value.length() == 1) {
+    		return TransferMode.parse(value);
+    	}
+
+    	return TransferMode.valueOf(value);
+    }
 }

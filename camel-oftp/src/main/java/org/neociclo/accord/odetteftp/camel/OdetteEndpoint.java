@@ -51,6 +51,8 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Service, Mu
 	public static final String ODETTE_SEND_FILE_STARTED = "OdetteSendFileStarted";
 	public static final String ODETTE_ANSWER_COUNT = "OdetteAnswerCount";
 
+	public static final String ODETTE_WAIT_FOR_DELIVERY = "OdetteWaitForDelivery";
+
 	private OdetteOperations operations;
 	private OdetteConfiguration configuration;
 	private OdetteConsumer consumer = null;
@@ -172,7 +174,13 @@ public class OdetteEndpoint extends ScheduledPollEndpoint implements Service, Mu
 	}
 
 	public void notifyConsumerOf(DeliveryNotification notif) {
-		consumer.processOdetteMessage(notif);
+		if (consumer == null && log.isWarnEnabled()) {
+			log.warn("No consumer to process DeliveryNotification: " + notif);
+		}
+
+		if (consumer != null) {
+			consumer.processOdetteMessage(notif);
+		}
 	}
 
 	public IncomingFileResponse askConsumerForIncomingFile(VirtualFile incomingFile) {

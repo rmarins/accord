@@ -164,13 +164,6 @@ public class OdetteOperations implements OftpletEventListener {
 		return locked;
 	}
 
-	protected void notifyEnd(VirtualFile virtualFile) {
-		Exchange locked = findLockedExchange(virtualFile);
-
-		notifyLockedObjects(Arrays.asList(new Exchange[] { locked }));
-		lockedOutgoingQueue.remove(virtualFile);
-	}
-
 	private void offerQueueToClient() {
 		int size = outgoingQueue.size();
 		boolean wasEmpty = size == 1;
@@ -283,46 +276,31 @@ public class OdetteOperations implements OftpletEventListener {
 	}
 
 	public void onDataSent(VirtualFile virtualFile, long totalOctetsSent) {
-		exchangeInTransit = findLockedExchange(virtualFile);
-
-		if (exchangeInTransit == null) {
-			return;
+		if (exchangeInTransit != null) {
+			Message in = exchangeInTransit.getIn();
+			Long hOctetsSent = in.getHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, 0, Long.class);
+			totalOctetsSent += hOctetsSent;
+			in.setHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, totalOctetsSent);
 		}
-
-		Message in = exchangeInTransit.getIn();
-		Long hOctetsSent = in.getHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, 0, Long.class);
-		totalOctetsSent += hOctetsSent;
-		in.setHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, totalOctetsSent);
 	}
 
-	public void onSendFileEnd(final VirtualFile virtualFile) {
+	public void onSendFileEnd(VirtualFile virtualFile) {
 		deleteTemporaryFileIfNeeded(virtualFile);
+		notifyExchangeInTransit(virtualFile);
 	}
 
 	public void onSendFileError(VirtualFile virtualFile, AnswerReasonInfo reason, boolean retryLater) {
-		exchangeInTransit = findLockedExchange(virtualFile);
-		exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_ANSWER_REASON, reason.getAnswerReason());
-		exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_REASON_TEXT, reason.getReasonText());
-		exchangeInTransit.getIn().setFault(true);
+		if (exchangeInTransit != null) {
+			exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_ANSWER_REASON, reason.getAnswerReason());
+			exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_REASON_TEXT, reason.getReasonText());
+			exchangeInTransit.getIn().setFault(true);
+		}
 
-		notifyEnd(virtualFile);
+		notifyExchangeInTransit(virtualFile);
 	}
 
 	public void onNotificationReceived(DeliveryNotification notif) {
-		if (exchangeInTransit != null) {
-			synchronized (exchangeInTransit) {
-				// seems that this delivery notification is comming right after
-				// a file was sent
-				exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_DELIVERY_NOTIFICATION, notif);
-				lockedOutgoingQueue.remove(exchangeInTransit);
-				exchangeInTransit.notifyAll();
-				exchangeInTransit = null;
-			}
-		} else {
-			// looks like the server is sending a delivery notification for a
-			// file that was sent in another session
-			endpoint.notifyConsumerOf(notif);
-		}
+		endpoint.notifyConsumerOf(notif);
 	}
 
 	public OdetteFtpObject nextOftpObjectToSend() {
@@ -330,9 +308,27 @@ public class OdetteOperations implements OftpletEventListener {
 	}
 
 	public void onSendFileStart(VirtualFile virtualFile, long answerCount) {
-		Exchange exchange = findLockedExchange(virtualFile);
-		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_ANSWER_COUNT, answerCount);
-		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_SEND_FILE_STARTED, Calendar.getInstance().getTime());
+		exchangeInTransit = findLockedExchange(virtualFile);
+
+		Message in = exchangeInTransit.getIn();
+		in.setHeader(OdetteEndpoint.ODETTE_ANSWER_COUNT, answerCount);
+		in.setHeader(OdetteEndpoint.ODETTE_SEND_FILE_STARTED, Calendar.getInstance().getTime());
+
+		OdetteConfiguration configuration = endpoint.getConfiguration();
+		boolean defaultWaitForDelivery = configuration.isWaitForDelivery();
+		boolean waitForDelivery = in.getHeader(OdetteEndpoint.ODETTE_WAIT_FOR_DELIVERY, defaultWaitForDelivery,
+				Boolean.class);
+
+		if (!waitForDelivery) {
+			notifyExchangeInTransit(virtualFile);
+		}
+	}
+
+	private void notifyExchangeInTransit(VirtualFile vf) {
+		Exchange e = exchangeInTransit;
+		exchangeInTransit = null;
+		lockedOutgoingQueue.remove(vf);
+		notifyLockedObject(e);
 	}
 
 	public void onNotificationSent(DeliveryNotification notif) {
@@ -372,15 +368,21 @@ public class OdetteOperations implements OftpletEventListener {
 		return new FileOperations().deleteFile(path);
 	}
 
+	private void notifyLockedObject(Object locked) {
+		if (locked != null) {
+			synchronized (locked) {
+				locked.notifyAll();
+			}
+		}
+	}
+
 	private void notifyLockedObjects(Collection<Exchange> collection) {
 		for (Object locked : new ArrayList<Exchange>(collection)) {
 			if (locked == null) {
 				continue;
 			}
 
-			synchronized (locked) {
-				locked.notifyAll();
-			}
+			notifyLockedObject(locked);
 		}
 	}
 

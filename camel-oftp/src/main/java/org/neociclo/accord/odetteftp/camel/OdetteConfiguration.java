@@ -46,6 +46,7 @@ public class OdetteConfiguration implements Cloneable {
 	private int bufferSize = 4096;
 	private int windowSize = 64;
 	private int maxRetry = 0;
+	private int eerpTimeout = 300;
 
 	private boolean longFilename = false;
 	private boolean useFixedDelay;
@@ -339,6 +340,14 @@ public class OdetteConfiguration implements Cloneable {
 
 	public boolean isRouteFileRequest() {
 		return this.routeFileRequest;
+	}
+
+	public void setEerpTimeout(int eerpTimeout) {
+		this.eerpTimeout = eerpTimeout;
+	}
+
+	public int getEerpTimeout() {
+		return eerpTimeout;
 	}
 
 }

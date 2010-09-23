@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -51,8 +52,8 @@ public class OdetteOperations implements OftpletEventListener {
 	private boolean hasIn;
 	private InOutSharedQueueOftpletFactory factory;
 	private Set<String> temporaryFiles = new HashSet<String>();
-	private Object lock = new Object();
 	private Map<VirtualFile, Exchange> lockedOutgoingQueue = new Hashtable<VirtualFile, Exchange>();
+	private volatile Exchange exchangeInTransit;
 
 	public OdetteOperations(OdetteEndpoint odetteEndpoint) {
 		this.endpoint = odetteEndpoint;
@@ -114,12 +115,10 @@ public class OdetteOperations implements OftpletEventListener {
 	}
 
 	public void awaitDisconnect() {
-		synchronized (lock) {
-			if (client != null && client.isConnected()) {
-				try {
-					client.awaitDisconnect();
-				} catch (Exception e) {
-				}
+		if (client != null) {
+			try {
+				client.awaitDisconnect();
+			} catch (Exception e) {
 			}
 		}
 	}
@@ -143,7 +142,6 @@ public class OdetteOperations implements OftpletEventListener {
 
 		synchronized (lockable) {
 			try {
-				System.out.println("** LOCKING EXCHANGE ** ");
 				lockedOutgoingQueue.put(payload, lockable);
 				lockable.wait();
 			} catch (InterruptedException e) {
@@ -170,6 +168,7 @@ public class OdetteOperations implements OftpletEventListener {
 		Exchange locked = findLockedExchange(virtualFile);
 
 		notifyLockedObjects(Arrays.asList(new Exchange[] { locked }));
+		lockedOutgoingQueue.remove(virtualFile);
 	}
 
 	private void offerQueueToClient() {
@@ -250,7 +249,7 @@ public class OdetteOperations implements OftpletEventListener {
 		return out;
 	}
 
-	public void virtualFileSent(VirtualFile virtualFile) {
+	public void deleteTemporaryFileIfNeeded(VirtualFile virtualFile) {
 		File file = virtualFile.getFile();
 		String path = file.getPath();
 		if (temporaryFiles.remove(path)) {
@@ -284,34 +283,46 @@ public class OdetteOperations implements OftpletEventListener {
 	}
 
 	public void onDataSent(VirtualFile virtualFile, long totalOctetsSent) {
-		Exchange exchange = findLockedExchange(virtualFile);
+		exchangeInTransit = findLockedExchange(virtualFile);
 
-		if (exchange == null) {
+		if (exchangeInTransit == null) {
 			return;
 		}
 
-		Message in = exchange.getIn();
+		Message in = exchangeInTransit.getIn();
 		Long hOctetsSent = in.getHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, 0, Long.class);
 		totalOctetsSent += hOctetsSent;
 		in.setHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT, totalOctetsSent);
 	}
 
-	public void onSendFileEnd(VirtualFile virtualFile) {
-		notifyEnd(virtualFile);
-		virtualFileSent(virtualFile);
+	public void onSendFileEnd(final VirtualFile virtualFile) {
+		deleteTemporaryFileIfNeeded(virtualFile);
 	}
 
 	public void onSendFileError(VirtualFile virtualFile, AnswerReasonInfo reason, boolean retryLater) {
-		Exchange exchange = findLockedExchange(virtualFile);
-		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_ANSWER_REASON, reason.getAnswerReason());
-		exchange.getIn().setHeader(OdetteEndpoint.ODETTE_REASON_TEXT, reason.getReasonText());
-		exchange.getIn().setFault(true);
+		exchangeInTransit = findLockedExchange(virtualFile);
+		exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_ANSWER_REASON, reason.getAnswerReason());
+		exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_REASON_TEXT, reason.getReasonText());
+		exchangeInTransit.getIn().setFault(true);
 
 		notifyEnd(virtualFile);
 	}
 
 	public void onNotificationReceived(DeliveryNotification notif) {
-		endpoint.notifyConsumerOf(notif);
+		if (exchangeInTransit != null) {
+			synchronized (exchangeInTransit) {
+				// seems that this delivery notification is comming right after
+				// a file was sent
+				exchangeInTransit.getIn().setHeader(OdetteEndpoint.ODETTE_DELIVERY_NOTIFICATION, notif);
+				lockedOutgoingQueue.remove(exchangeInTransit);
+				exchangeInTransit.notifyAll();
+				exchangeInTransit = null;
+			}
+		} else {
+			// looks like the server is sending a delivery notification for a
+			// file that was sent in another session
+			endpoint.notifyConsumerOf(notif);
+		}
 	}
 
 	public OdetteFtpObject nextOftpObjectToSend() {
@@ -337,14 +348,17 @@ public class OdetteOperations implements OftpletEventListener {
 	}
 
 	public void onSessionEnd() {
+		// exchanges that sent file to this endpoint are still waiting for an
+		// EERP but they weren't sent. Let's notify them and let them go
 		notifyLockedObjects(lockedOutgoingQueue.values());
+		lockedOutgoingQueue.clear();
 	}
 
 	public void onExceptionCaught(Throwable cause) {
 	}
 
 	public void destroy() {
-		notifyLockedObjects(lockedOutgoingQueue.values());
+		onSessionEnd();
 	}
 
 	public void init(OdetteFtpSession session) throws OdetteFtpException {
@@ -359,11 +373,15 @@ public class OdetteOperations implements OftpletEventListener {
 	}
 
 	private void notifyLockedObjects(Collection<Exchange> collection) {
-		for (Object locked : collection) {
+		for (Object locked : new ArrayList<Exchange>(collection)) {
+			if (locked == null) {
+				continue;
+			}
+
 			synchronized (locked) {
-				System.out.println("** NOTIFYING EXCHANGE ** ");
-				locked.notify();
+				locked.notifyAll();
 			}
 		}
 	}
+
 }

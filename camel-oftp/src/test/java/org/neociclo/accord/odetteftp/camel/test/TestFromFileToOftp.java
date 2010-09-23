@@ -9,7 +9,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Before;
 import org.junit.Test;
-import org.neociclo.accord.odetteftp.camel.OdetteEndpoint;
 
 /**
  * Neociclo Accord - Open Source B2B Integration Suite Copyright (C) 2005-2008
@@ -80,7 +79,7 @@ public class TestFromFileToOftp extends CamelTestSupport {
 
 	@Test
 	public void testFromFileToFtp() throws Exception {
-		resultEndpoint.expectedMinimumMessageCount(1);
+		resultEndpoint.expectedMinimumMessageCount(2);
 		resultEndpoint.assertIsSatisfied();
 		resultEndpoint.await();
 	}
@@ -88,28 +87,20 @@ public class TestFromFileToOftp extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
-				
 				errorHandler(loggingErrorHandler().level(LoggingLevel.TRACE));
-				
-				from("file:/home/bruno/odette/outbox")
-						.to("oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?workpath=/home/bruno/odette/work")
+
+				from("file:odette/outbox")
+						.to("oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?workpath=odette/work")
 						.process(new Processor() {
 							public void process(Exchange exchange) throws Exception {
-								System.out.println("** IS FAULT? " + exchange.getIn().isFault());
-								System.out.println("** TOTAL TRANSFERED: "+exchange.getIn().getHeader(OdetteEndpoint.ODETTE_TOTAL_OCTETS_SENT));
 								exchange.setOut(exchange.getIn());
 							}
-						}).to("file:/home/bruno/odette/sent").to("mock:result");
-				/*
-				 * from(oftpToUrl)
-				 * .filter(header(OdetteEndpoint.ODETTE_DELIVERY_NOTIFICATION
-				 * ).isNotNull()) .process(new Processor() { public void
-				 * process(Exchange exchange) throws Exception {
-				 * Thread.sleep(2000);
-				 * System.out.println("DELIVERY NOTIFICATION ARRIVED");
-				 * System.out.println(exchange.getIn().getBody()); } })
-				 * .to("file:/home/bruno/odette/inbox");
-				 */
+						}).to("file:odette/sent").to("mock:result").process(new Processor() {
+							public void process(Exchange arg0) throws Exception {
+								System.out.println(arg0);
+								System.out.println(arg0.getIn().getHeaders());
+							}
+						});
 			}
 		};
 	}

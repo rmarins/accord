@@ -1,8 +1,7 @@
 package org.neociclo.accord.odetteftp.camel.test;
 
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
@@ -88,8 +87,10 @@ public class TestFromOftpToFile extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new RouteBuilder() {
 			public void configure() throws Exception {
-				from("oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001")
-				.to("file:/home/bruno/odette/inbox").to("mock:result");
+				errorHandler(loggingErrorHandler().level(LoggingLevel.TRACE));
+
+				from("oftp://O0055SOFTMIDIA1:8169S412@200.244.109.85:6001?workpath=odette/work")
+				.to("file:odette/inbox").to("mock:result");
 			}
 		};
 	}

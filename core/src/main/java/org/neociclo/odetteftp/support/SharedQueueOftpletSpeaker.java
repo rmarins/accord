@@ -31,7 +31,7 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-class SharedQueueOftpletSpeaker implements OftpletSpeaker {
+public class SharedQueueOftpletSpeaker implements OftpletSpeaker {
 
     private Queue<OdetteFtpObject> outgoing;
     private Queue<OdetteFtpObject> outgoingDone;

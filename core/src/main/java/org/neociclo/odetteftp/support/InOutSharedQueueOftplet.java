@@ -35,7 +35,7 @@ import org.neociclo.odetteftp.security.SecurityContext;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
+public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 
 	private SessionConfig config;
 	private SecurityContext securityContext;

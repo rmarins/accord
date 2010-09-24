@@ -1073,7 +1073,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         /* Assure that odette-ftp peers have compatible transfer modes. */
         TransferMode localMode = session.getTransferMode();
-        if ((ssidsr != null) && (localMode != TransferMode.BOTH) && (ssidsr.getReversed() != localMode)) {
+        if ((ssidsr != null) && (localMode != TransferMode.BOTH) && (ssidsr == localMode)) {
             err = "Invalid transfer mode: " + ssidsr;
             LOGGER.error("[{}] Session setup failed. {}", session, err);
             abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, err);

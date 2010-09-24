@@ -1073,7 +1073,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         /* Assure that odette-ftp peers have compatible transfer modes. */
         TransferMode localMode = session.getTransferMode();
-        if ((localMode != TransferMode.BOTH) && (ssidsr.getReversed() != localMode)) {
+        if ((ssidsr != null) && (localMode != TransferMode.BOTH) && (ssidsr.getReversed() != localMode)) {
             err = "Invalid transfer mode: " + ssidsr;
             LOGGER.error("[{}] Session setup failed. {}", session, err);
             abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, err);
@@ -1134,15 +1134,8 @@ public abstract class DefaultHandler implements ProtocolHandler {
         boolean compression = (ssidcmpr && session.isCompressionSupported());
         boolean restart = (ssidrest && session.isRestartSupported());
 
-        TransferMode mode = ssidsr.getReversed();
-        if (mode != session.getTransferMode() && session.getTransferMode() != null && session.getTransferMode() != TransferMode.BOTH) {
-            String incompatibleTransferMode = "Icompatible transfer mode: " + mode;
-            LOGGER.warn("[{}] SSID received. {}", session, incompatibleTransferMode);
-            abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, incompatibleTransferMode);
-            return;
-        } else {
-            session.setTransferMode(mode);
-        }
+        TransferMode remoteModeReversed = ssidsr.getReversed();
+		session.setTransferMode(remoteModeReversed);
 
         session.setDataBufferSize(dataBufferSize);
         session.setWindowSize(windowSize);
@@ -1175,11 +1168,6 @@ public abstract class DefaultHandler implements ProtocolHandler {
                 session.getResponseUserData(), session);
         session.write(responseSsid);
 
-//        /*
-//         * Perform Speaker's tasks of starting file transmit and acknowledgment
-//         * issuing. After the session handshaking.
-//         */
-//        speakerTransmitRequests(session);
     }
 
     // ABSTRACT METHODS

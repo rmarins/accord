@@ -19,7 +19,6 @@
  */
 package org.neociclo.odetteftp.oftplet;
 
-import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.protocol.AnswerReason;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
@@ -42,9 +41,6 @@ public interface OftpletListener {
      * @param virtualFile
      *            holder of file receive indication parameters.
      * @return the VirtualFile instance ready to start the file receiving.
-     * @throws FileTransferException
-     *             file receive failure and error reason code.
-     * @throws OdetteFtpException
      */
     StartFileResponse acceptStartFile(VirtualFile virtualFile);
 
@@ -69,9 +65,6 @@ public interface OftpletListener {
      * @param unitCount
      *            exact number of units (octets) transmitted.
      * @return whether to change direction after complete the file receiving.
-     * @throws FileTransferException
-     *             end file receive failure and error reason code.
-     * @throws OdetteFtpException
      */
     boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount);
     

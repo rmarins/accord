@@ -22,6 +22,7 @@ package org.neociclo.odetteftp.support;
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
@@ -62,8 +63,8 @@ public class OftpletEventListenerAdapter implements OftpletEventListener {
     public void onNotificationReceived(DeliveryNotification notif) {
     }
 
-    public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
-        return false;
+    public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+        return null;
     }
 
     public void onReceiveFileError(VirtualFile virtualFile, AnswerReasonInfo reason) {

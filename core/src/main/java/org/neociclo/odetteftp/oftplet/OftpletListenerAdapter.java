@@ -49,8 +49,8 @@ public class OftpletListenerAdapter implements OftpletListener {
     public void onNotificationReceived(DeliveryNotification notif) {
     }
 
-    public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
-        return false;
+    public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+        return null;
     }
 
     public void onReceiveFileError(VirtualFile virtualFile, AnswerReasonInfo reason) {

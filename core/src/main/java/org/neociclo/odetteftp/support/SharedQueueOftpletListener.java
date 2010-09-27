@@ -22,8 +22,10 @@ package org.neociclo.odetteftp.support;
 import java.util.Queue;
 
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.OftpletListener;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
+import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
@@ -63,14 +65,14 @@ public class SharedQueueOftpletListener implements OftpletListener {
         }
     }
 
-    public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+    public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
     	if (incoming != null) {
     		incoming.add(virtualFile);
     	}
         if (eventListener != null) {
             return eventListener.onReceiveFileEnd(virtualFile, recordCount, unitCount);
         }
-        return true;
+        return DefaultEndFileResponse.positiveAnswer();
     }
 
     public void onReceiveFileError(VirtualFile virtualFile, AnswerReasonInfo reason) {

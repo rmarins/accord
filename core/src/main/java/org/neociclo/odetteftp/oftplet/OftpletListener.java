@@ -66,7 +66,7 @@ public interface OftpletListener {
      *            exact number of units (octets) transmitted.
      * @return whether to change direction after complete the file receiving.
      */
-    boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount);
+    EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount);
     
     void onReceiveFileError(VirtualFile virtualFile, AnswerReasonInfo reason);
 

@@ -29,7 +29,9 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.neociclo.odetteftp.TransferMode;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
+import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
@@ -80,13 +82,13 @@ public class ExternalReceiveFilesTest extends AbstractTcpClientExternal {
             }
 
             @Override
-            public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+            public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
                 LOGGER.debug("Receive file completed: {}", virtualFile);
 
                 // reply with EERP (positive delivery notification)
                 DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
                 outgoing.offer(notif);
-                return true;
+                return DefaultEndFileResponse.positiveAnswer();
             }
         });
 

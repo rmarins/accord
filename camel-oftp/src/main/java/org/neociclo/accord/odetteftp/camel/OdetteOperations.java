@@ -52,7 +52,9 @@ import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
+import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
@@ -307,12 +309,12 @@ public class OdetteOperations implements OftpletEventListener {
 	public void onReceiveFileStart(VirtualFile virtualFile, long answerCount) {
 	}
 
-	public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+	public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
 		endpoint.notifyConsumerOf(virtualFile);
 
 		// send the EERP back - request change direction (true)
 		// only if there are objects on outgoing queue
-		return hasOutgoingObjects();
+		return DefaultEndFileResponse.positiveAnswer(hasOutgoingObjects());
 	}
 
 	public void onDataSent(VirtualFile virtualFile, long totalOctetsSent) {

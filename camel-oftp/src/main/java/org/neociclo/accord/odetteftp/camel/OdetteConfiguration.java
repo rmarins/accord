@@ -35,7 +35,7 @@ public class OdetteConfiguration implements Cloneable {
 	public static final int DEFAULT_RETRY_COUNT = 2;
 
 	private OdetteTransport transport;
-	private File workpath = new File(System.getProperty("java.io.tmpdir"));;
+	private File workpath = new File(System.getProperty("java.io.tmpdir"));
 	private FileRenameBean fileRenameBean = new FileRenameBean();
 
 	private OdetteProtocol protocol;
@@ -289,7 +289,9 @@ public class OdetteConfiguration implements Cloneable {
 		this.workpath = workpath;
 
 		if (workpath != null && !workpath.exists()) {
-			workpath.mkdir();
+			if (!workpath.mkdirs()) {
+				throw new RuntimeCamelException("Impossible to create workpath: " + workpath);
+			}
 		}
 	}
 

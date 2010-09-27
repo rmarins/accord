@@ -29,12 +29,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 
 /**
@@ -132,11 +134,6 @@ public class EnvelopingUtilTest {
         // the private-key
         byte[] decrypted = parseEnvelopedData(encryptedData, myCert, privateKey);
         assertTrue("Challenges are not equals.", Arrays.equals(challenge, decrypted));
-
-        // make sure that a String can accommodate the challenge byte array
-        // without loss
-        String challengeText = new String(decrypted);
-        assertTrue("Challenge lost when converting from String.", Arrays.equals(decrypted, challengeText.getBytes()));
 
     }
 

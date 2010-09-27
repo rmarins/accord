@@ -314,6 +314,9 @@ public class OdetteOperations implements OftpletEventListener {
 
 		// send the EERP back - request change direction (true)
 		// only if there are objects on outgoing queue
+		if (true) {
+			throw new RuntimeException("FOOBAR");
+		}
 		return DefaultEndFileResponse.positiveAnswer(hasOutgoingObjects());
 	}
 
@@ -393,6 +396,7 @@ public class OdetteOperations implements OftpletEventListener {
 	}
 
 	public void onExceptionCaught(Throwable cause) {
+		cause.printStackTrace();
 	}
 
 	public void destroy() {

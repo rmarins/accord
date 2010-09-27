@@ -25,6 +25,7 @@ import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.support.DefaultSecurityContext;
 import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletAdapter;
 import org.neociclo.odetteftp.oftplet.OftpletListener;
@@ -154,8 +155,8 @@ class ServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpeaker, O
 	public void onDataReceived(VirtualFile virtualFile, long totalOctetsReceived) {
 	}
 
-	public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
-		return false;
+	public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+		return null;
 	}
 
 	public void onReceiveFileError(VirtualFile virtualFile, AnswerReasonInfo reason) {

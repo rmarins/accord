@@ -19,12 +19,13 @@
  */
 package org.neociclo.odetteftp.examples.client.oftp2;
 
-import static org.neociclo.odetteftp.TransferMode.*;
-import static org.neociclo.odetteftp.protocol.AnswerReason.*;
+import static org.neociclo.odetteftp.TransferMode.RECEIVER_ONLY;
+import static org.neociclo.odetteftp.protocol.AnswerReason.DUPLICATE_FILE;
 import static org.neociclo.odetteftp.protocol.v20.SecurityLevel.ENCRYPTED;
 import static org.neociclo.odetteftp.protocol.v20.SecurityLevel.ENCRYPTED_AND_SIGNED;
 import static org.neociclo.odetteftp.protocol.v20.SecurityLevel.SIGNED;
-import static org.neociclo.odetteftp.util.OdetteFtpSupport.*;
+import static org.neociclo.odetteftp.util.OdetteFtpSupport.getReplyDeliveryNotification;
+import static org.neociclo.odetteftp.util.OdetteFtpSupport.parseEnvelopedFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.MainSupport;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
+import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
@@ -44,8 +47,8 @@ import org.neociclo.odetteftp.protocol.v20.DefaultSignedDeliveryNotification;
 import org.neociclo.odetteftp.protocol.v20.EnvelopedVirtualFile;
 import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.SessionConfig;
 import org.neociclo.odetteftp.util.EnvelopingException;
 import org.neociclo.odetteftp.util.EnvelopingUtil;
@@ -120,7 +123,7 @@ public class ReceiveEnvelopedFiles {
 			}
 
 			@Override
-			public boolean onReceiveFileEnd(VirtualFile argVirtualFile, long recordCount, long unitCount) {
+			public EndFileResponse onReceiveFileEnd(VirtualFile argVirtualFile, long recordCount, long unitCount) {
 
 				System.out.println("Receive file completed: " + argVirtualFile);
 
@@ -145,7 +148,7 @@ public class ReceiveEnvelopedFiles {
 						System.err.println();
 						e.printStackTrace();
 
-						return true;
+						return DefaultEndFileResponse.positiveAnswer();
 					}
 
 					X509Certificate userCert = null;
@@ -172,7 +175,7 @@ public class ReceiveEnvelopedFiles {
 							System.err.println();
 							e.printStackTrace();
 
-							return true;
+							return DefaultEndFileResponse.positiveAnswer();
 						}
 					}
 
@@ -201,7 +204,7 @@ public class ReceiveEnvelopedFiles {
 							System.err.println();
 							e.printStackTrace();
 
-							return true;
+							return DefaultEndFileResponse.positiveAnswer();
 						}
 					}
 
@@ -220,7 +223,7 @@ public class ReceiveEnvelopedFiles {
 						System.err.println();
 						e.printStackTrace();
 
-						return true;
+						return DefaultEndFileResponse.positiveAnswer();
 					}
 					
 				}
@@ -242,7 +245,7 @@ public class ReceiveEnvelopedFiles {
 				outgoingQueue.offer(notif);
 
 				// to send the EERP back, request change direction (true)
-				return true;
+				return DefaultEndFileResponse.positiveAnswer();
 			}
 
 		});

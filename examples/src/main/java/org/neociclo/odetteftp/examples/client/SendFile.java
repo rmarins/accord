@@ -43,7 +43,7 @@ public class SendFile {
 
 		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
 				"payload");
-//		args = ms.args();
+		args = ms.args();
 
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
@@ -59,6 +59,7 @@ public class SendFile {
 		Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
 		DefaultVirtualFile vf = new DefaultVirtualFile();
+		vf.setDatasetName("SW1"+payload.getName());
 		vf.setFile(payload);
 
 		filesToSend.offer(vf);

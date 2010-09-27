@@ -19,8 +19,8 @@
  */
 package org.neociclo.odetteftp.examples.client;
 
-import static org.neociclo.odetteftp.TransferMode.*;
-import static org.neociclo.odetteftp.protocol.AnswerReason.*;
+import static org.neociclo.odetteftp.TransferMode.RECEIVER_ONLY;
+import static org.neociclo.odetteftp.protocol.AnswerReason.DUPLICATE_FILE;
 import static org.neociclo.odetteftp.util.OdetteFtpSupport.getReplyDeliveryNotification;
 
 import java.io.File;
@@ -28,14 +28,16 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.neociclo.odetteftp.examples.MainSupport;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
+import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.SessionConfig;
 
 /**
@@ -94,7 +96,7 @@ public class ReceiveAllFiles {
 			}
 
 			@Override
-			public boolean onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
+			public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
 
 				// reply with EERP (positive delivery notification)
 				DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
@@ -103,7 +105,7 @@ public class ReceiveAllFiles {
 				System.out.println("Receive file completed: " + virtualFile);
 
 				// send the EERP back - request change direction (true)
-				return true;
+				return DefaultEndFileResponse.positiveAnswer();
 			}
 
 		});

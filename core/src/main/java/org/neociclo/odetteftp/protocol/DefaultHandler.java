@@ -220,11 +220,11 @@ public abstract class DefaultHandler implements ProtocolHandler {
         /* Assure a Virtual File were returned by the support implementation. */
         if (response == null) {
 
-            LOGGER.warn("[{}] SFID received. File Receive failed. Oftplet listener accept request returned null.",
+            LOGGER.warn("[{}] SFID received. File Receive failed. ",
                     session);
 
             CommandExchangeBuffer sfnaUnspecified = buildStartFileNegativeAnswerCommand(AnswerReason.UNSPECIFIED,
-                    "Unable to handle the Start File request.", true);
+            		"Unable to handle the Start File request.", true);
             session.write(sfnaUnspecified);
 
             return;
@@ -470,6 +470,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
          * Notify OdetteFtpSupport provider on End File
          */
         EndFileResponse endFileResponse = oftpletListener.onReceiveFileEnd(virtualFile, recordCount, unitCount);
+
         if (endFileResponse.accepted()) {
 	        boolean changeDirection = endFileResponse.changeDirection();
 	
@@ -482,7 +483,6 @@ public abstract class DefaultHandler implements ProtocolHandler {
                     endFileResponse.getReasonText());
             session.write(efna);
         }
-
     }
 
     // SPEAKER STATE METHODS
@@ -948,8 +948,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
     }
 
-    public void protocolRelease(final OdetteFtpSession session, EndSessionReason reason, String reasonText)
-            throws OdetteFtpException {
+    public void protocolRelease(final OdetteFtpSession session, EndSessionReason reason, String reasonText) {
 
         /* Indicate the odette-ftp support provider on session closed. */
         final Oftplet oftplet = getSessionOftplet(session);
@@ -969,7 +968,6 @@ public abstract class DefaultHandler implements ProtocolHandler {
         };
 
         session.write(esid, closeOnComplete);
-
     }
 
     public void endSessionReceived(OdetteFtpSession session, CommandExchangeBuffer esid) throws OdetteFtpException {

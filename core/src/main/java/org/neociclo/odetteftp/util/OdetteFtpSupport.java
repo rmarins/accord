@@ -415,7 +415,7 @@ public class OdetteFtpSupport {
 		notif.setVirtualFileHash(virtualFileHash);
 		notif.setNotificationSignature(notifSignature);
 
-		return null;
+		return notif;
 	}
 
 	private static void setNotifBasicInfo(DefaultDeliveryNotification notif, VirtualFile vf, String creator,

@@ -197,7 +197,9 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
         if (fileHash != null) {
             eerp.setAttribute(EERPHSHL_FIELD, formatBinaryNumber(fileHash.length, EERP_V20.getField(EERPHSHL_FIELD).getSize()));
             eerp.setAttribute(EERPHSH_FIELD, fileHash);
-        }
+        } else { // Page 60 of RFC5024 : A binary value of 0 indicates that no hash is present. This is always the case if the EERP is not signed
+			eerp.setAttribute(EERPHSHL_FIELD, formatBinaryNumber(0, EERP_V20.getField(EERPHSHL_FIELD).getSize()));
+		}
 
         if (signature != null) {
             eerp.setAttribute(EERPSIGL_FIELD, formatBinaryNumber(signature.length,EERP_V20.getField(EERPSIGL_FIELD).getSize()));

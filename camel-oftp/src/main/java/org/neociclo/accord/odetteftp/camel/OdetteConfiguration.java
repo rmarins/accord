@@ -46,21 +46,17 @@ public class OdetteConfiguration implements Cloneable {
 	private int port;
 	private int bufferSize = 4096;
 	private int windowSize = 64;
-	private int maxRetry = 0;
 
-	private boolean longFilename = false;
-	private boolean useFixedDelay;
 	private boolean copyBeforeSend = true;
 	private boolean autoResume = true;
 	private boolean override = true;
 	private boolean delete = true;
 	private boolean autoReplyDelivery = true;
 	private boolean routeFileRequest = false;
-	private boolean waitForDeliveryNotification = false;
+	private boolean waitForEerp = false;
 
-	private long timeout = 90000;
-	private long initialDelay = 10;
-	private long delay = 300;
+	private long queueOfferDelay = 300;
+
 	private long maxFileSize;
 
 	private TransferMode transferMode;
@@ -83,14 +79,6 @@ public class OdetteConfiguration implements Cloneable {
 	public OdetteConfiguration(URI uri) {
 		this();
 		configure(uri);
-	}
-
-	public int getMaxRetry() {
-		return maxRetry;
-	}
-
-	public void setMaxRetry(int maxRetry) {
-		this.maxRetry = maxRetry;
 	}
 
 	public OdetteProtocol getProtocol() {
@@ -159,40 +147,12 @@ public class OdetteConfiguration implements Cloneable {
 		this.windowSize = windowSize;
 	}
 
-	public long getTimeout() {
-		return timeout;
+	public long getQueueOfferDelay() {
+		return queueOfferDelay;
 	}
 
-	public void setTimeout(long timeout) {
-		this.timeout = timeout;
-	}
-
-	public long getInitialDelay() {
-		return initialDelay;
-	}
-
-	public void setInitialDelay(long initialDelay) {
-		this.initialDelay = initialDelay;
-	}
-
-	public long getDelay() {
-		return delay;
-	}
-
-	public void setDelay(long delay) {
-		this.delay = delay;
-	}
-
-	public void setUseFixedDelay(boolean useFixedDelay) {
-		this.useFixedDelay = useFixedDelay;
-	}
-
-	public boolean isLongFilename() {
-		return longFilename;
-	}
-
-	public void setLongFilename(boolean longFilename) {
-		this.longFilename = longFilename;
+	public void setQueueOfferDelay(long delay) {
+		this.queueOfferDelay = delay;
 	}
 
 	/**
@@ -270,13 +230,8 @@ public class OdetteConfiguration implements Cloneable {
 
 		clone.setTransport(transport);
 		clone.setBufferSize(bufferSize);
-		clone.setDelay(delay);
-		clone.setInitialDelay(initialDelay);
-		clone.setMaxRetry(maxRetry);
 		clone.setPort(port);
-		clone.setTimeout(timeout);
 		clone.setWindowSize(windowSize);
-		clone.setUseFixedDelay(useFixedDelay);
 
 		return clone;
 	}
@@ -359,12 +314,12 @@ public class OdetteConfiguration implements Cloneable {
 		return this.routeFileRequest;
 	}
 
-	public void setWaitForDeliveryNotification(boolean value) {
-		this.waitForDeliveryNotification = value;
+	public void setWaitForEERP(boolean value) {
+		this.waitForEerp = value;
 	}
 
-	public boolean isWaitForDelivery() {
-		return waitForDeliveryNotification;
+	public boolean isWaitForEERP() {
+		return waitForEerp;
 	}
 
 	public void setTransferMode(TransferMode mode) {

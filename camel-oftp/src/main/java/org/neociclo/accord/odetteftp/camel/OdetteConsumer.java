@@ -49,8 +49,6 @@ public class OdetteConsumer extends ScheduledPollConsumer {
 		super(endpoint, processor);
 
 		setPollStrategy(new DefaultOdettePollingStrategy());
-		setDelay(endpoint.getConfiguration().getDelay());
-		setInitialDelay(endpoint.getConfiguration().getInitialDelay());
 		setUseFixedDelay(true);
 
 		this.operations = operations;

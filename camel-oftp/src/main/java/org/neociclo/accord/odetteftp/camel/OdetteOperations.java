@@ -122,7 +122,7 @@ public class OdetteOperations implements OftpletEventListener {
 
 		SSLEngineFactory userEngineFactory = cfg.getSslEngineFactory();
 		if (userEngineFactory == null) {
-			userEngineFactory = new SSLEngineFactory().setup(cfg.getKeyStoreFormat(), cfg.getSecurityProvider(),
+			userEngineFactory = new DefaultSSLEngineFactory().setup(cfg.getKeyStoreFormat(), cfg.getSecurityProvider(),
 					cfg.getKeyStoreFile(), cfg.getTrustStoreFile(), cfg.getPassphrase().toCharArray());
 		}
 
@@ -222,7 +222,7 @@ public class OdetteOperations implements OftpletEventListener {
 						throw new RuntimeCamelException(e);
 					}
 				}
-			}, configuration.getDelay());
+			}, configuration.getQueueOfferDelay());
 		}
 	}
 
@@ -311,12 +311,6 @@ public class OdetteOperations implements OftpletEventListener {
 
 	public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
 		endpoint.notifyConsumerOf(virtualFile);
-
-		// send the EERP back - request change direction (true)
-		// only if there are objects on outgoing queue
-		if (true) {
-			throw new RuntimeException("FOOBAR");
-		}
 		return DefaultEndFileResponse.positiveAnswer(hasOutgoingObjects());
 	}
 
@@ -360,7 +354,7 @@ public class OdetteOperations implements OftpletEventListener {
 		in.setHeader(OdetteEndpoint.ODETTE_SEND_FILE_STARTED, Calendar.getInstance().getTime());
 
 		OdetteConfiguration configuration = endpoint.getConfiguration();
-		boolean defaultWaitForDelivery = configuration.isWaitForDelivery();
+		boolean defaultWaitForDelivery = configuration.isWaitForEERP();
 		boolean waitForDelivery = in.getHeader(OdetteEndpoint.ODETTE_WAIT_FOR_DELIVERY, defaultWaitForDelivery,
 				Boolean.class);
 

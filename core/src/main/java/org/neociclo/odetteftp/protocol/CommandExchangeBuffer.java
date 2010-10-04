@@ -96,6 +96,10 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
     }
 
     public static boolean checkAttribute(char type, String value) {
+        if (value == null) {
+            return true;
+        }
+
         if (type == Field.ALPHANUMERIC_TYPE) {
             int length = value.length();
             if (!value.matches("\\p{Alnum}{" + length + "}")) {

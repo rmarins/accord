@@ -71,9 +71,13 @@ Accord Odette FTP
 
  Other algorithms might be supported as well, through the {{{http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136007.html}Java Cryptography Extension (JCE) layer}}.
 
+* Apache Camel integration
+
+ If you are already using or considering to use {{{http://camel.apache.org}Apache Camel}} on your project, you can take advantage of the {{{/camel.index.html}Camel OFTP}} component. 
+
 * Comparison to 
 
- The {{{http://oftp2.mendelson-e-c.com/}mendelson OFTP2}} project is an open source tool that supports OFTP2 specification. Although it is written in Java, the project itself is not delivered as a Java library. So it cannot be easily embedded to third-party software. Also it does not support older versions of the Odette FTP (1.3 nor 1.4).
+ The {{{http://oftp2.mendelson-e-c.com/}mendelson project}} only offers a Java client with support for OFTP 2.0. Because of that, it cannot be easily embedded to third-party software. Also it does not support older versions of the Odette FTP specification (1.3 and 1.4).
 
 * Graphical User Interface for Accord Odette FTP
 

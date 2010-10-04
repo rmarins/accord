@@ -1,0 +1,95 @@
+            ------
+            Overview
+            ------
+            Bruno Borges
+            ------
+            2010-09-27
+
+Accord Odette FTP Camel Component
+
+ The Camel OFTP Component is an adaptor for the {{{http://camel.apache.org}Apache Camel}} framework that enables developers to leverage Odette FTP support on scenarios of file transfer between B2B applications. It is well suited for projects that need to have support for OFTP 1.3, 1.4 and OFTP2 on ESBs (Enterprise Service Bus) like {{{http://servicemix.apache.org}Apache ServiceMix}}., JEE-based applications and any route-enabled architectures.
+
+Quick Start
+
+ To enable OFTP2 support on a Camel project, it is required to add a Maven dependency for the Accord Camel OFTP component:
+
++-------------------------------+
+ <dependency>
+    <groupId>org.neociclo.accord.odetteftp</groupId>
+    <artifactId>camel-oftp</artifactId>
+    <version>1.2-SNAPSHOT</version>
+ </dependency>
++-------------------------------+
+
+ We hardly recommend to use {{{http://maven.apache.org}Apache Maven}} to integrate this component within your application. If you are not using Maven, you can download Apache Camel's distribution and then download Accord Odette Camel from Maven repository. We are not planing on releasing 
+
+Example
+
++-------------------------------+
+ from("oftp://odetteid:password@10.10.1.1?workpath=odette/work")
+    .to("file:odette/inbox");
++-------------------------------+
+
+ You can check more examples on project's unit tests.
+
+Reference
+
+ The Camel OFTP component's URI follows the pattern below:
+
++-------------------------------+
+ oftp[s]://[oid[:pass]@]hostname[:port]?param=value
++-------------------------------+
+
+ <<Observation:>>
+
+ <<<If URI is preffixed with 'oftps' scheme, then SSL will be enabled>>>
+
+ Following the parameter reference table for Camel OFTP's URI:
+
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|  <<Parameter>> | <<Required>> |     <<Default>>    | <<Description>>                                     |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|    <<workpath>>    |    false     |   java.io.tmpdir   | Indicates where temporary files will be written     |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|   <<bufferSize>>   |    false     |        4096        | The buffer size for this endpoint's OFTP connection OFTP |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<windowSize>>     |   false      | 64                 | The length of each packet window set for this endpoint's OFTP connection |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<waitForEERP>>    |   false      |      false         | Must the component lock exchange until EERP is received from remote server after uploading a file |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<transferMode>>   | false        |    * automatic     | This endpoint's transfermode. Look enum values of org.neociclo.odetteftp.TransferMode. If not present, transfer mode will be set automatically based on route definition. For example, if it is consumer-only, will be set to RECEIVE_ONLY. |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<autoReplyDelivery>> |  false    |     true           | Will this endpoint automatically send an EERP after a file is received - before consumed by Camel route. |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<routeFileRequest>>  | false     | false   | Will this endpoint route an exchange to warn of incoming file and ask for acceptance and File storage location. |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<autoResume>> | false | true | Will this endpoint automatically resume file transfers if temporary file is found. |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<copyBeforeSend>> | false | true | Will this endpoint copy an outgoing file to the workpath before sending it to the remote server |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<queueOfferDelay>>| false        | 300 ms   | How long (in ms) will this endpoint wait for exchanges before actually connecting to remote server and offer data (send file / EERP) |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<maxFileSize>>    | false        | 0        | Maximum file size for transfered files within this endpoint. Zero for no check |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<override>> | false | true | Will this endpoint override any existing file |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<delete>> | false | true | Will this endpoint delete any temporary file after exchange is processed |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+| <<fileRenameBean>> | false    | default implementation | How files should be named on disk on arrival. Defaults to HEXDATETIME_ORIGINATOR_DATASETNAME. See org.neociclo.accord.odetteftp.camel.FileRenameBean |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+
+ These parameters are related to <<SSL-enabled>> endpoints (<<oftps://>>)
+
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|  <<Parameter>> | <<Required>> |     <<Default>>    | <<Description>>                                     |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|sslEngineFactory |  | DefaultSSLEngineFactory | Bean implementing org.neociclo.accord.odetteftp.camel.SSLEngineFactory | 
+*----------------*--------------*--------------------*-----------------------------------------------------+     
+|trustStoreFile   |  |  | File storing trusted keys |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|keyStoreFile     |  |  | File storing keys  |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|securityProvider |  |  | SSL Security provider       |
+*----------------*--------------*--------------------*-----------------------------------------------------+
+|keyStoreFormat   |  |  | File format for storing keys|
+*----------------*--------------*--------------------*-----------------------------------------------------+

@@ -32,6 +32,16 @@ Example
 
  You can check more examples on project's unit tests.
 
+How it works
+
+ Each endpoint connects to a remote OFTP server. It is possible to send and receive files, as well delivery notifications (EERPs). To receive anything, one must configure the endpoint as consumer, like in the example above.
+
+ To send files or Delivery Notifications, the endpoint must be configured as producer. If you want to send and receive files, two routes are needed.
+
+ The component will use the same OFTP session to both send and receive data if applicable. This means outgoing data sent to an OFTP endpoint will be actually delivered when a connection is estabilished, saving resources. An internal queue is used to store this outgoing data. In the mean time, incoming data will be sent to endpoint's consumer. 
+
+ It is, however, possible to have an endpoint with both consumer and producer, but on specific OFTP transfer modes. This is necessary to be able to send Delivery Notifications on different sessions. For instance, when a file arrives but no EERP is sent back automatically.
+
 Reference
 
  The Camel OFTP component's URI follows the pattern below:

@@ -204,6 +204,9 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
         if (signature != null) {
             eerp.setAttribute(EERPSIGL_FIELD, formatBinaryNumber(signature.length,EERP_V20.getField(EERPSIGL_FIELD).getSize()));
             eerp.setAttribute(EERPSIG_FIELD, signature);
+        } else {
+            // Page 60 - 0 indicates the EERP is not signed
+        	eerp.setAttribute(EERPSIGL_FIELD, formatBinaryNumber(0, EERP_V20.getField(EERPSIGL_FIELD).getSize()));
         }
 
         return eerp;

@@ -20,23 +20,35 @@
 package org.neociclo.odetteftp.util;
 
 import static org.junit.Assert.assertTrue;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.*;
-import static org.neociclo.odetteftp.util.OftpTestUtil.*;
-import static org.neociclo.odetteftp.util.SecurityUtil.*;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createCompressedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createEnvelopedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromCompressedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromEnvelopedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromSignedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.createSignedData;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.openCompressedDataStreamGenerator;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.openEnvelopedDataStreamGenerator;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.openSignedDataParser;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.openSignedDataStreamGenerator;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.parseEnvelopedData;
+import static org.neociclo.odetteftp.util.OftpTestUtil.getResourceFile;
+import static org.neociclo.odetteftp.util.OftpTestUtil.getTestDataDir;
+import static org.neociclo.odetteftp.util.SecurityUtil.getCertificateEntry;
+import static org.neociclo.odetteftp.util.SecurityUtil.getPrivateKey;
+import static org.neociclo.odetteftp.util.SecurityUtil.openCertificate;
+import static org.neociclo.odetteftp.util.SecurityUtil.openKeyStore;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 
 /**

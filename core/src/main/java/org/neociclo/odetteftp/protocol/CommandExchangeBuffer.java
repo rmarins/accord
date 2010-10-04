@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * In protocol version 2.0 implementation the CommandExchangeBuffer use
  * DynamicField feature to compute the field size and/or positioning.
- *
+ * 
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
@@ -50,7 +50,7 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
     public static final Charset DEFAULT_PROTOCOL_CHARSET = Charset.forName("ISO_646.IRV:1991");
 
     /**
-     * UTF-8 charset encoding used in text description in the new OFTP 2.0. 
+     * UTF-8 charset encoding used in text description in the new OFTP 2.0.
      */
     public static final Charset UTF8_ENCODED_PROTOCOL_CHARSET = Charset.forName("UTF-8");
 
@@ -63,21 +63,58 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
         char type = field.getType();
         int length = field.getSize();
 
+        checkAttribute(field.getType(), value);
+
         if (type == Field.ALPHANUMERIC_TYPE) {
-        	if (value != null && value.length() > length) {
-        		// truncate
-        		result = value.substring(0, length);
-        	} else {
-        		// padd with whitespace
-        		result = ProtocolUtil.padd(value, length, false, ' ');
-        	}
+            if (value != null && value.length() > length) {
+                // truncate
+                LOGGER.warn("Truncating field [{}] with length value of [{}] greater than {}.",
+                        new Object[] { field.getName(), value, length });
+                result = value.substring(0, length);
+            } else {
+                LOGGER.warn("Padding field [{}] with length value of [{}] lower than {}.",
+                        new Object[] { field.getName(), value, length });
+                // padd with whitespace
+                result = ProtocolUtil.padd(value, length, false, ' ');
+            }
+            
+            String upperResult = result.toUpperCase();
+            if (!upperResult.equals(result)) {
+                LOGGER.warn("Value [{}] has lower case characters. Original value not being changed.");
+            }
         } else if (type == Field.NUMERIC_TYPE) {
+            if (value.length() < length) {
+                LOGGER.warn("Padding numeric field [{}] with length value of [{}] lower than {}.",
+                        new Object[] { field.getName(), value, length });
+            }
             result = ProtocolUtil.padd(value, length, true, '0');
         } else if (type == Field.ENCODED_TYPE) {
             result = value;
         }
 
         return result;
+    }
+
+    public static boolean checkAttribute(char type, String value) {
+        if (type == Field.ALPHANUMERIC_TYPE) {
+            int length = value.length();
+            if (!value.matches("\\p{Alnum}{" + length + "}")) {
+                LOGGER.warn("Value [{}] is not ALPHANUMERIC", value);
+                return false;
+            }
+
+            return true;
+        } else if (type == Field.NUMERIC_TYPE) {
+            int length = value.length();
+            if (!value.matches("\\p{Digit}{" + length + "}")) {
+                LOGGER.warn("Value [{}] is not NUMERIC", value);
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private Map<String, Object> attributes;
@@ -94,7 +131,7 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
      * Return a Command Exchange Buffer parameter value for the specified field.
      * 
      * @param name
-     *        Field key name.
+     *            Field key name.
      * @return Corresponding parameter value for a given field.
      */
     public Object getAttribute(String name) {
@@ -138,11 +175,11 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
                 octets = getByteArrayAttribute(fieldName);
             } else {
                 String text = formatAttribute(field, getStringAttribute(fieldName));
-    
+
                 if (text == null) {
                     continue;
                 }
-    
+
                 if (field.getType() == Field.ENCODED_TYPE) {
                     octets = text.getBytes(UTF8_ENCODED_PROTOCOL_CHARSET);
                 } else {
@@ -206,7 +243,7 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
         StringBuffer sb = new StringBuffer();
         sb.append(getIdentifier()).append("[");
         String[] names = getFieldNames();
-        for (int i=0; i<names.length; i++) {
+        for (int i = 0; i < names.length; i++) {
             String fieldName = names[i];
             Object value = getAttribute(fieldName);
             sb.append(fieldName.toLowerCase()).append(": ").append(value);

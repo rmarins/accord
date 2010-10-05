@@ -46,6 +46,7 @@
 		<item name="Protocol" href="/protocol.html" />
 		<item name="Quick Start" href="/quickstart.html" />
 		<item name="RFC 5024" href="/rfc5024.html" />
+		<item name="Apache Camel" href="/camel.html" />
 	</menu>
 
 	<menu name="Accord MFT Suite">

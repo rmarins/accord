@@ -54,6 +54,9 @@ import org.neociclo.odetteftp.OdetteFtpException;
  *               18 - Compression not allowed.
  *               19 - Signed file not allowed.
  *               20 - Unsigned file not allowed.
+ *               21 - Invalid file signature
+ *               22 - File decryption failure
+ *               23 - File decompression failure
  * </pre>
  *
  * @author Rafael Marins
@@ -65,12 +68,22 @@ public enum AnswerReason {
      * Access method failure.
      */
     ACCESS_METHOD_FAILURE(12),
+    
+    CIPHER_SUITE_NOT_SUPPORTED(15),
+    
+    COMPRESSION_NOT_ALLOWED(18),
 
     /**
      * Duplicate file.
      */
     DUPLICATE_FILE(13),
 
+    ENCRYPTED_FILE_NOT_ALLOWED(16),
+    
+    FILE_DECOMPRESSION_FAILURE(23),
+    
+    FILE_DECRYPTION_FAILURE(22),
+    
     /**
      * File direction refused. Valid only on ODDETE-FTP version 1.4 and above.
      */
@@ -90,6 +103,8 @@ public enum AnswerReason {
      * Invalid destination.
      */
     INVALID_DESTINATION(2),
+    
+    INVALID_FILE_SIGNATURE(21),
 
     /**
      * Invalid filename.
@@ -105,6 +120,12 @@ public enum AnswerReason {
      * Invalid record count.
      */
     INVALID_RECORD_COUNT(10),
+    
+    SIGNED_FILE_NOT_ALLOWED(19),
+    
+    UNENCRYPTED_FILE_NOT_ALLOWED(17),
+    
+    UNSIGNED_FILE_NOT_ALLOWED(20),
 
     /**
      * Unspecified reason.

@@ -342,7 +342,15 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         byte[] fileHash = nerp.getByteArrayAttribute(NERPHSH_FIELD);
         byte[] notifSignature = nerp.getByteArrayAttribute(NERPSIG_FIELD);
 
-        NegativeResponseReason reason = NegativeResponseReason.parse(nerp.getStringAttribute(NERPREAS_FIELD));
+        // Put it as unspecified first
+        NegativeResponseReason reason = null;
+        try {
+        	NegativeResponseReason.parse(nerp.getStringAttribute(NERPREAS_FIELD));
+        } catch (OdetteFtpException e) {
+        	// We could not parse it, warn the user, but don't stop the processing. Just put it as "unspecified"
+        	reason = NegativeResponseReason.UNSPECIFIED_REASON;
+        	LOGGER.warn("Could not parse NegativeResponseReason " + nerp.getStringAttribute(NERPREAS_FIELD) + ". Setting it as UNSPECIFIED_REASON instead.");
+        }
         String reasonText = nerp.getStringAttribute(NERPREAST_FIELD);
 
         Date fileDateTime = parseDateTime(fileDate, fileTime);

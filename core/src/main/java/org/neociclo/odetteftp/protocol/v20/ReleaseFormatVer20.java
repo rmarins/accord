@@ -107,18 +107,18 @@ public enum ReleaseFormatVer20 implements CommandFormat {
     NERP_V20(NERP, new Field[] { new Field(0, NERPCMD_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1),
             new Field(1, NERPDSN_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 26),
             new Field(27, NERPRSV1_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 6),
-            new Field(33, NERPDATE_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 8),
-            new Field(41, NERPTIME_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 10),
+            new Field(33, NERPDATE_FIELD, VARIABLE_FORMAT, NUMERIC_TYPE, 8),
+            new Field(41, NERPTIME_FIELD, VARIABLE_FORMAT, NUMERIC_TYPE, 10),
             new Field(51, NERPDEST_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 25),
             new Field(76, NERPORIG_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 25),
             new Field(101, NERPCREA_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 25),
             new Field(126, NERPREAS_FIELD, FIXED_FORMAT, NUMERIC_TYPE, 2),
             new Field(128, NERPREASL_FIELD, VARIABLE_FORMAT, NUMERIC_TYPE, 3),                     // Reason Text Length
             new Field(131, NERPREAST_FIELD, FIXED_FORMAT, ENCODED_TYPE, NERPREASL_FIELD),          // Reason Text
-            new Field(NERPREAST_FIELD, NERPHSHL_FIELD, VARIABLE_FORMAT, NUMERIC_TYPE, 2),           // Virtual File hash length
-            new Field(NERPHSHL_FIELD, NERPHSH_FIELD, FIXED_FORMAT, NUMERIC_TYPE, NERPHSHL_FIELD),  // Virtual File hash
-            new Field(NERPHSH_FIELD, NERPSIGL_FIELD, VARIABLE_FORMAT, NUMERIC_TYPE, 2),            // NERP signature length
-            new Field(NERPSIGL_FIELD, NERPSIG_FIELD, FIXED_FORMAT, NUMERIC_TYPE, NERPSIGL_FIELD)   // NERP signature
+            new Field(NERPREAST_FIELD, NERPHSHL_FIELD, VARIABLE_FORMAT, BINARY_TYPE, 2),           // Virtual File hash length
+            new Field(NERPHSHL_FIELD, NERPHSH_FIELD, FIXED_FORMAT, BINARY_TYPE, NERPHSHL_FIELD),  // Virtual File hash
+            new Field(NERPHSH_FIELD, NERPSIGL_FIELD, VARIABLE_FORMAT, BINARY_TYPE, 2),            // NERP signature length
+            new Field(NERPSIGL_FIELD, NERPSIG_FIELD, FIXED_FORMAT, BINARY_TYPE, NERPSIGL_FIELD)   // NERP signature
     }),
 
     /** Ready To Receive command format. */

@@ -36,9 +36,50 @@
 
   <properties>
     <!-- DON'T deploy oftp assemblies-parent artifacts. -->
-    <maven.deploy.skip>true</maven.deploy.skip>
+  <!--  <maven.deploy.skip>true</maven.deploy.skip> -->
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>oftp-core</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>oftp-core</artifactId>
+	      <version>${project.version}</version>
+	      <classifier>javadoc</classifier>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>oftp-core</artifactId>
+	      <version>${project.version}</version>
+	      <classifier>sources</classifier>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>oftp-examples</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.bouncycastle</groupId>
+	      <artifactId>bcmail-jdk15</artifactId>
+	      <version>${bouncycastle.version}</version>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.bouncycastle</groupId>
+	      <artifactId>bcmail-jdk16</artifactId>
+	      <version>${bouncycastle.version}</version>
+	    </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <modules>
     <module>oftp-core-distro</module>

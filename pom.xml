@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.neociclo.accord</groupId>
     <artifactId>accord-parent</artifactId>
-    <version>1.6</version>
+    <version>1.7-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -175,12 +175,12 @@
   <modules>
     <module>core</module>
     <module>camel-oftp</module>
+    <module>examples</module>
 <!--
     <module>forby-oftp</module>
     <module>cli-oftp</module>
--->
-    <module>examples</module>
     <module>assemblies</module>
+-->
   </modules>
 
   <properties>

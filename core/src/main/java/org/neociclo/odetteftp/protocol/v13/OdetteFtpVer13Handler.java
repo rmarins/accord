@@ -133,12 +133,13 @@ public class OdetteFtpVer13Handler extends DefaultHandler {
         return endSession(reason);
     }
 
-    protected Date parseDateTime(String sdate, String stime) {
-
+    public Date parseDateTime(String sdate, String stime) {
+        // date format: yymmdd
         int year = Integer.parseInt(sdate.substring(0, 2));
         int month = Integer.parseInt(sdate.substring(2, 4));
         int day = Integer.parseInt(sdate.substring(4, 6));
 
+        // time format: hhmmss
         int hour = Integer.parseInt(stime.substring(0, 2));
         int minute = Integer.parseInt(stime.substring(2, 4));
         int second = Integer.parseInt(stime.substring(4, 6));

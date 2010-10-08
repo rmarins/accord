@@ -43,14 +43,14 @@ public class ProtocolUtil {
      * Create date from given values. Local timezone is used in returning date.
      * 
      * @param year
-     *        Four* digit year. When single decimals is used, set the current
-     *        century from local date time.
+     *            Four* digit year. When single decimals is used, set the
+     *            current century from local date time.
      * @param month
-     *        From January (1) to December (12)
+     *            From January (1) to December (12)
      * @param day
-     *        Day of the month.
+     *            Day of the month.
      * @param hour
-     *        24 hour format.
+     *            24 hour format.
      * @param minute
      * @param second
      * @param millisecond
@@ -103,23 +103,10 @@ public class ProtocolUtil {
         return paddText.toString();
     }
 
-    public static Date parseCommandDateTime(String sdate, String stime) {
-
-        int year = Integer.parseInt(sdate.substring(0, 2));
-        int month = Integer.parseInt(sdate.substring(2, 4));
-        int day = Integer.parseInt(sdate.substring(4, 6));
-
-        int hour = Integer.parseInt(stime.substring(0, 2));
-        int minute = Integer.parseInt(stime.substring(2, 4));
-        int second = Integer.parseInt(stime.substring(4, 6));
-
-        return createDate(year, month, day, hour, minute, second, 0);
-    }
-
     public static byte[] formatBinaryNumber(int number, int size) {
         byte[] bin = new byte[size];
         int work = number;
-        for (int i=(size - 1); i>=0; i--) {
+        for (int i = (size - 1); i >= 0; i--) {
             int b = (work & 0xff);
             bin[i] = (byte) b;
             work = (work >> 8);
@@ -129,7 +116,7 @@ public class ProtocolUtil {
 
     public static int parseBinaryNumber(byte[] bin) {
         int num = 0;
-        for (int i=0; i<bin.length; i++) {
+        for (int i = 0; i < bin.length; i++) {
             if (i > 0)
                 num = num << 8;
             num |= (int) bin[i];
@@ -174,6 +161,7 @@ public class ProtocolUtil {
         return offset;
 
     }
+
     public static long computeVirtualFileSize(long unitCount, RecordFormat recordFormat, int recordSize) {
 
         int blockSize = OdetteFtpConstants.DEFAULT_RECORD_SIZE;

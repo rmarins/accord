@@ -544,20 +544,6 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         return MAX_TRANSMITTED_FILE_SIZE_VER20;
     }
 
-    protected Date parseDateTime(String sdate, String stime) {
-
-        int year = Integer.parseInt(sdate.substring(0, 4));
-        int month = Integer.parseInt(sdate.substring(4, 6));
-        int day = Integer.parseInt(sdate.substring(6, 8));
-
-        int hour = Integer.parseInt(stime.substring(0, 2));
-        int minute = Integer.parseInt(stime.substring(2, 4));
-        int second = Integer.parseInt(stime.substring(4, 6));
-        int millis = Integer.parseInt(stime.substring(6, 10));
-
-        return ProtocolUtil.createDate(year, month, day, hour, minute, second, millis);
-    }
-
     protected void checkSecureAuthentication(OdetteFtpSession session) throws OdetteFtpException {
         if (session.useSecureAuthentication() && !isSessionSecureAuthenticated(session)) {
             abnormalRelease(session, PROTOCOL_VIOLATION, "Secure Authentication required in this session");

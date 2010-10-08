@@ -128,12 +128,13 @@ public class OdetteFtpVer14Handler extends OdetteFtpVer13Handler {
     }
 
     @Override
-    protected Date parseDateTime(String sdate, String stime) {
-
+    public Date parseDateTime(String sdate, String stime) {
+        // date format: yyyymmdd
         int year = Integer.parseInt(sdate.substring(0, 4));
         int month = Integer.parseInt(sdate.substring(4, 6));
         int day = Integer.parseInt(sdate.substring(6, 8));
 
+        // time format: hhmmssSSSS
         int hour = Integer.parseInt(stime.substring(0, 2));
         int minute = Integer.parseInt(stime.substring(2, 4));
         int second = Integer.parseInt(stime.substring(4, 6));

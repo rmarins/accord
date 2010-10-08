@@ -54,7 +54,6 @@
 		<item name="Odette International" href="http://www.odette.org" />
 	</menu>
 
-	<menu ref="modules" /> 
 	<menu ref="reports" />
   </body>
 </project>

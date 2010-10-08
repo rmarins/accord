@@ -73,7 +73,7 @@ Accord Odette FTP
 
 * Apache Camel integration
 
- If you are already using or considering to use {{{http://camel.apache.org}Apache Camel}} on your project, you can take advantage of the {{{/camel.index.html}Camel OFTP}} component. 
+ If you are already using or considering to use {{{http://camel.apache.org}Apache Camel}} on your project, you can take advantage of the {{{camel.html}Camel OFTP}} component. 
 
 * Comparison to 
 

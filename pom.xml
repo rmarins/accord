@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.neociclo.accord</groupId>
     <artifactId>accord-parent</artifactId>
-    <version>1.7</version>
+    <version>1.8</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -88,6 +88,13 @@
           <artifactId>maven-site-plugin</artifactId>
           <configuration>
             <siteDirectory>site</siteDirectory>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <configuration>
+            <addVersionToProjectName>true</addVersionToProjectName>
           </configuration>
         </plugin>
       </plugins>

@@ -93,7 +93,7 @@ public class CommandExchangeBufferBuilder {
                     if (!"\r".equals(text) && !"\n".equals(text))
                         text = text.trim();
                 } else if (field.getType() == Field.NUMERIC_TYPE) {
-                    text = Integer.valueOf(text.trim()).toString();
+                    text = text.trim();
                 }
 
                 command.setAttribute(field.getName(), text);

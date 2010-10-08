@@ -102,7 +102,7 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
 
         if (type == Field.ALPHANUMERIC_TYPE) {
             int length = value.length();
-            if (!value.matches("\\p{Alnum}{" + length + "}")) {
+            if (length > 0 && !value.matches("[A-Z0-9/\\-\\.&\\(\\) ]{" + length + "}")) {
                 LOGGER.warn("Value [{}] is not ALPHANUMERIC", value);
                 return false;
             }

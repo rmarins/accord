@@ -806,9 +806,8 @@ public class EnvelopingUtil {
         sb.append(formatAttribute(EERP_V20.getField("EERPDSN"), info.getDatasetName()));
         sb.append(formatDate(info.getDateTime()));
         sb.append(formatTime(info.getDateTime()));
-        sb.append(formatAttribute(EERP_V20.getField("EERPDEST"), info.getDatasetName()));
-        sb.append(formatAttribute(EERP_V20.getField("EERPORIG"), info.getDatasetName()));
-        sb.append(formatAttribute(EERP_V20.getField("EERPCREA"), info.getDatasetName()));
+        sb.append(formatAttribute(EERP_V20.getField("EERPDEST"), info.getDestination()));
+        sb.append(formatAttribute(EERP_V20.getField("EERPORIG"), info.getOriginator()));
 
         byte[] text = sb.toString().getBytes(DEFAULT_PROTOCOL_CHARSET);
         sb = null;

@@ -26,6 +26,7 @@ import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.formatTime
 import static org.neociclo.odetteftp.protocol.v20.ReleaseFormatVer20.EERP_V20;
 import static org.neociclo.odetteftp.util.SecurityUtil.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -547,6 +548,19 @@ public class EnvelopingUtil {
         byte[] content = bout.toByteArray();
 
         return content;
+    }
+
+    public static byte[] parseSignedData(byte[] encoded, X509Certificate checkCert, SignatureVerifyResult checkResult) throws CMSException, IOException {
+
+    	installBouncyCastleProviderIfNecessary();
+
+    	ByteArrayInputStream sigData = new ByteArrayInputStream(encoded);
+    	InputStream contentStream = openSignedDataParser(sigData, checkCert, checkResult);
+
+    	ByteArrayOutputStream content = new ByteArrayOutputStream();
+    	IoUtil.copyStream(contentStream, content);
+
+    	return content.toByteArray();
     }
 
     public static void parseSignedDataContentStream(InputStream signedStream, OutputStream outStream,

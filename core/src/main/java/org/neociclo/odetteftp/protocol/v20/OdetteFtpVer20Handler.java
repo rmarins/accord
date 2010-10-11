@@ -511,7 +511,7 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         CipherSuite cipherSuite = CipherSuite.parse(Integer.parseInt(sfid.getStringAttribute(SFIDCIPH_FIELD)));
         FileCompression compressionAlgorithm = FileCompression.parse(Integer.parseInt(sfid.getStringAttribute(SFIDCOMP_FIELD)));
         FileEnveloping envelopeFormat = FileEnveloping.parse(Integer.parseInt(sfid.getStringAttribute(SFIDENV_FIELD)));
-        boolean signedNotif = Boolean.parseBoolean(sfid.getStringAttribute(SFIDSIGN_FIELD));
+        boolean signedNotif = valueOfYesNo(sfid.getStringAttribute(SFIDSIGN_FIELD));
         String fileDescription = sfid.getStringAttribute(sfid.getStringAttribute(SFIDDESC_FIELD));
 
         Date fileDateTime = parseDateTime(fileDate, fileTime);

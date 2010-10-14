@@ -28,6 +28,8 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
  */
 class DefaultNormalizedEnvelopedVirtualFile extends DefaultEnvelopedVirtualFile implements NormalizedVirtualFile {
 
+	private static final long serialVersionUID = 1L;
+
 	private VirtualFile originalVirtualFile;
 
 	public DefaultNormalizedEnvelopedVirtualFile(VirtualFile originalVirtualFile) {

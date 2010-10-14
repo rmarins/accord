@@ -119,7 +119,7 @@ public class ProtocolUtil {
         for (int i = 0; i < bin.length; i++) {
             if (i > 0)
                 num = num << 8;
-            num |= (int) bin[i];
+            num |= bin[i] & 0xff;
         }
         return num;
     }

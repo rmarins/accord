@@ -34,12 +34,6 @@
   <name>Accord Odette FTP :: Assemblies Parent</name>
   <description>Accord Odette FTP Library</description>
 
-  <properties>
-    <!-- DON'T deploy oftp assemblies-parent artifacts. -->
-    <maven.deploy.skip>true</maven.deploy.skip>
-    <maven.generateReports>false</maven.generateReports>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
 	    <dependency>

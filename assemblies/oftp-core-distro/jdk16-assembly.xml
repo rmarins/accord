@@ -57,6 +57,10 @@
       <directory>${basedir}/../../examples/src/main/java</directory>
       <outputDirectory>examples/src</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${basedir}/../../examples/simpleserver-data</directory>
+      <outputDirectory>examples/simpleserver-data</outputDirectory>
+    </fileSet>
 
   </fileSets>
 

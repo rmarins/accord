@@ -57,6 +57,11 @@ class SimpleServerRoutingWorker {
 			File destDir = SimpleServerHelper.getUserMailboxDir(baseDir, recipientOid);
 			File destFile = new File(destDir, filename);
 	
+			if (destFile.exists()) {
+				LOGGER.warn("Delivery failed. Duplicate file in recipient mailbox. This is a simple server " +
+						"implementation and it doesn't support delivery retries. Overwriting file: {}", destFile);
+			}
+
 			try {
 				IoUtil.move(sourceFile, destFile);
 				LOGGER.info("Delivered to [{}]: ", recipientOid, obj);

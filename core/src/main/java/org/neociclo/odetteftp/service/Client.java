@@ -102,6 +102,7 @@ public abstract class Client {
 
         Channel c = connectFuture.getChannel();
         if (!c.isConnected()) {
+        	releaseExternalResources();
             LOGGER.info("Connection failed. Channel is not connected: {} ", c);
             throw new Exception("Channel is not connected.");
         }

@@ -58,6 +58,26 @@
 
 	    <dependency>
 	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>camel-oftp</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>camel-oftp</artifactId>
+	      <version>${project.version}</version>
+	      <classifier>javadoc</classifier>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>camel-oftp</artifactId>
+	      <version>${project.version}</version>
+	      <classifier>sources</classifier>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
 	      <artifactId>oftp-examples</artifactId>
 	      <version>${project.version}</version>
 	    </dependency>
@@ -78,6 +98,7 @@
 
   <modules>
     <module>oftp-core-distro</module>
+    <module>camel-oftp-distro</module>
   </modules>
 
 </project>

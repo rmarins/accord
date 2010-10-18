@@ -36,7 +36,8 @@
 
   <properties>
     <!-- DON'T deploy oftp assemblies-parent artifacts. -->
-  <!--  <maven.deploy.skip>true</maven.deploy.skip> -->
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.generateReports>false</maven.generateReports>
   </properties>
 
   <dependencyManagement>

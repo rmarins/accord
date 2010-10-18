@@ -186,8 +186,8 @@
 <!--
     <module>forby-oftp</module>
     <module>cli-oftp</module>
-    <module>assemblies</module>
 -->
+    <module>assemblies</module>
   </modules>
 
   <properties>

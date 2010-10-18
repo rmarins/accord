@@ -57,19 +57,6 @@
       <groupId>org.neociclo.accord.odetteftp</groupId>
       <artifactId>oftp-core</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.neociclo.accord.odetteftp</groupId>
-      <artifactId>oftp-core</artifactId>
-      <classifier>javadoc</classifier>
-    </dependency>
-
-    <dependency>
-      <groupId>org.neociclo.accord.odetteftp</groupId>
-      <artifactId>oftp-core</artifactId>
-      <classifier>sources</classifier>
-    </dependency>
-
     <dependency>
       <groupId>org.neociclo.accord.odetteftp</groupId>
       <artifactId>oftp-examples</artifactId>
@@ -85,5 +72,24 @@
       <artifactId>bcmail-jdk16</artifactId>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>withSourcesAndDocs</id>
+      <dependencies>
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>oftp-core</artifactId>
+	      <classifier>javadoc</classifier>
+	    </dependency>
+	
+	    <dependency>
+	      <groupId>org.neociclo.accord.odetteftp</groupId>
+	      <artifactId>oftp-core</artifactId>
+	      <classifier>sources</classifier>
+	    </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
 </project>

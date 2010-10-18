@@ -72,7 +72,7 @@ public class SharedQueueOftpletListener implements OftpletListener {
         if (eventListener != null) {
             return eventListener.onReceiveFileEnd(virtualFile, recordCount, unitCount);
         }
-        return DefaultEndFileResponse.positiveAnswer();
+        return DefaultEndFileResponse.positiveEndFileAnswer();
     }
 
     public void onReceiveFileError(VirtualFile virtualFile, AnswerReasonInfo reason) {

@@ -71,7 +71,7 @@ public class ExternalReceiveFilesTest extends AbstractTcpClientExternal {
 
                 File saveToFile = createIncomingFile(virtualFile);
 
-                DefaultStartFileResponse response = DefaultStartFileResponse.positiveAnswer(saveToFile);
+                DefaultStartFileResponse response = DefaultStartFileResponse.positiveStartFileAnswer(saveToFile);
 
                 return response;
             }
@@ -88,7 +88,7 @@ public class ExternalReceiveFilesTest extends AbstractTcpClientExternal {
                 // reply with EERP (positive delivery notification)
                 DeliveryNotification notif = getReplyDeliveryNotification(virtualFile);
                 outgoing.offer(notif);
-                return DefaultEndFileResponse.positiveAnswer();
+                return DefaultEndFileResponse.positiveEndFileAnswer();
             }
         });
 

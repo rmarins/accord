@@ -23,6 +23,23 @@ import org.neociclo.odetteftp.oftplet.EndFileResponse;
 
 public class DefaultEndFileResponse implements EndFileResponse {
 
+	public static EndFileResponse positiveEndFileAnswer() {
+		return positiveEndFileAnswer(true);
+	}
+
+	public static DefaultEndFileResponse positiveEndFileAnswer(boolean changeDirection) {
+		DefaultEndFileResponse response = new DefaultEndFileResponse(true, changeDirection);
+		return response;
+	}
+
+	public static DefaultEndFileResponse negativeEndFileAnswer() {
+		return negativeEndFileAnswer(AnswerReason.UNSPECIFIED, null);
+	}
+
+	public static DefaultEndFileResponse negativeEndFileAnswer(AnswerReason reason, String reasonText) {
+		return new DefaultEndFileResponse(false, reason, reasonText);
+	}
+
 	private boolean accepted;
 	private boolean changeDirection;
 	private AnswerReason reason;
@@ -37,23 +54,6 @@ public class DefaultEndFileResponse implements EndFileResponse {
 		this.accepted = accepted;
 		this.reason = reason != null ? reason : AnswerReason.UNSPECIFIED;
 		this.reasonText = reasonText;
-	}
-
-	public static EndFileResponse positiveAnswer() {
-		return positiveAnswer(true);
-	}
-
-	public static DefaultEndFileResponse positiveAnswer(boolean changeDirection) {
-		DefaultEndFileResponse response = new DefaultEndFileResponse(true, changeDirection);
-		return response;
-	}
-
-	public static DefaultEndFileResponse negativeAnswer() {
-		return negativeAnswer(AnswerReason.UNSPECIFIED, null);
-	}
-
-	public static DefaultEndFileResponse negativeAnswer(AnswerReason reason, String reasonText) {
-		return new DefaultEndFileResponse(false, reason, reasonText);
 	}
 
 	public boolean accepted() {

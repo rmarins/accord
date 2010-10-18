@@ -38,21 +38,21 @@ public class DefaultStartFileResponse implements StartFileResponse {
 
 	private File file;
 
-	public static DefaultStartFileResponse positiveAnswer(File saveTo) {
-		return positiveAnswer(saveTo, 0);
+	public static DefaultStartFileResponse positiveStartFileAnswer(File saveTo) {
+		return positiveStartFileAnswer(saveTo, 0);
 	}
 
-	public static DefaultStartFileResponse positiveAnswer(File saveTo, long restartOffset) {
+	public static DefaultStartFileResponse positiveStartFileAnswer(File saveTo, long restartOffset) {
 		DefaultStartFileResponse response = new DefaultStartFileResponse(true, restartOffset);
 		response.file = saveTo;
 		return response;
 	}
 
-	public static DefaultStartFileResponse negativeAnswer() {
-		return negativeAnswer(AnswerReason.UNSPECIFIED, null, true);
+	public static DefaultStartFileResponse negativeStartFileAnswer() {
+		return negativeStartFileAnswer(AnswerReason.UNSPECIFIED, null, true);
 	}
 
-	public static DefaultStartFileResponse negativeAnswer(AnswerReason reason, String reasonText, boolean retryLater) {
+	public static DefaultStartFileResponse negativeStartFileAnswer(AnswerReason reason, String reasonText, boolean retryLater) {
 		return new DefaultStartFileResponse(false, reason, reasonText, retryLater);
 	}
 

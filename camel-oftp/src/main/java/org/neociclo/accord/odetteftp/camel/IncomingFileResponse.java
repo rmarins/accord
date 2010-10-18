@@ -97,16 +97,16 @@ class IncomingFileResponse implements Synchronization {
 		File localFile = defineLocalFile();
 
 		if (localFile.exists() && !override) {
-			return DefaultStartFileResponse.negativeAnswer(AnswerReason.DUPLICATE_FILE, text, retryLater);
+			return DefaultStartFileResponse.negativeStartFileAnswer(AnswerReason.DUPLICATE_FILE, text, retryLater);
 		}
 
 		long maxFileSize = config.getMaxFileSize();
 		if ((maxFileSize > 0 && incomingFile.getSize() > maxFileSize)) {
-			return DefaultStartFileResponse.negativeAnswer(AnswerReason.FILE_SIZE_EXCEED, text, false);
+			return DefaultStartFileResponse.negativeStartFileAnswer(AnswerReason.FILE_SIZE_EXCEED, text, false);
 		}
 
 		if (!checkFileSystemSpace(localFile, incomingFile.getSize())) {
-			return DefaultStartFileResponse.negativeAnswer(AnswerReason.FILE_SIZE_EXCEED,
+			return DefaultStartFileResponse.negativeStartFileAnswer(AnswerReason.FILE_SIZE_EXCEED,
 					"No enough space available to save incoming file", false);
 		}
 
@@ -115,9 +115,9 @@ class IncomingFileResponse implements Synchronization {
 			if (config.getAutoResume() && localFile.exists() && !forceRestart) {
 				restartOffset = localFile.length();
 			}
-			return DefaultStartFileResponse.positiveAnswer(localFile, restartOffset);
+			return DefaultStartFileResponse.positiveStartFileAnswer(localFile, restartOffset);
 		} else {
-			return DefaultStartFileResponse.negativeAnswer(userReason, text, retryLater);
+			return DefaultStartFileResponse.negativeStartFileAnswer(userReason, text, retryLater);
 		}
 	}
 

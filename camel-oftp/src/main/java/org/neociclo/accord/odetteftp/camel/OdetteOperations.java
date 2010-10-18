@@ -311,7 +311,7 @@ public class OdetteOperations implements OftpletEventListener {
 
 	public EndFileResponse onReceiveFileEnd(VirtualFile virtualFile, long recordCount, long unitCount) {
 		endpoint.notifyConsumerOf(virtualFile);
-		return DefaultEndFileResponse.positiveAnswer(hasOutgoingObjects());
+		return DefaultEndFileResponse.positiveEndFileAnswer(hasOutgoingObjects());
 	}
 
 	public void onDataSent(VirtualFile virtualFile, long totalOctetsSent) {

@@ -42,7 +42,7 @@ public class SendFile {
 	public static void main(String[] args) throws Exception {
 
 		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
-				"payload");
+				"payload", "destination");
 		args = ms.args();
 
 		String host = args[0];
@@ -50,6 +50,7 @@ public class SendFile {
 		String usercode = args[2];
 		String password = args[3];
 		File payload = new File(args[4]);
+		String destination = args[5];
 
 		SessionConfig conf = new SessionConfig();
 		conf.setUserCode(usercode);
@@ -59,7 +60,8 @@ public class SendFile {
 		Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
 		DefaultVirtualFile vf = new DefaultVirtualFile();
-		vf.setDatasetName("SW1"+payload.getName());
+		vf.setDatasetName(payload.getName());
+		vf.setDestination(destination);
 		vf.setFile(payload);
 
 		filesToSend.offer(vf);

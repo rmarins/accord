@@ -80,12 +80,12 @@ public class ReceiveAllFiles {
 
 				// handle duplicate file
 				if (saveToFile.exists()) {
-					DefaultStartFileResponse duplicateFile = DefaultStartFileResponse.negativeAnswer(DUPLICATE_FILE,
+					DefaultStartFileResponse duplicateFile = DefaultStartFileResponse.negativeStartFileAnswer(DUPLICATE_FILE,
 							"File already exist in local system.", true);
 					return duplicateFile;
 				}
 
-				DefaultStartFileResponse acceptedFile = DefaultStartFileResponse.positiveAnswer(saveToFile);
+				DefaultStartFileResponse acceptedFile = DefaultStartFileResponse.positiveStartFileAnswer(saveToFile);
 
 				return acceptedFile;
 			}
@@ -105,7 +105,7 @@ public class ReceiveAllFiles {
 				System.out.println("Receive file completed: " + virtualFile);
 
 				// send the EERP back - request change direction (true)
-				return DefaultEndFileResponse.positiveAnswer();
+				return DefaultEndFileResponse.positiveEndFileAnswer();
 			}
 
 		});

@@ -107,12 +107,12 @@ public class ReceiveEnvelopedFiles {
 
 				// handle duplicate file
 				if (saveToFile.exists()) {
-					DefaultStartFileResponse duplicateFile = DefaultStartFileResponse.negativeAnswer(DUPLICATE_FILE,
+					DefaultStartFileResponse duplicateFile = DefaultStartFileResponse.negativeStartFileAnswer(DUPLICATE_FILE,
 							"File already exist in local system.", true);
 					return duplicateFile;
 				}
 
-				DefaultStartFileResponse acceptedFile = DefaultStartFileResponse.positiveAnswer(saveToFile);
+				DefaultStartFileResponse acceptedFile = DefaultStartFileResponse.positiveStartFileAnswer(saveToFile);
 
 				return acceptedFile;
 			}
@@ -148,7 +148,7 @@ public class ReceiveEnvelopedFiles {
 						System.err.println();
 						e.printStackTrace();
 
-						return DefaultEndFileResponse.positiveAnswer();
+						return DefaultEndFileResponse.positiveEndFileAnswer();
 					}
 
 					X509Certificate userCert = null;
@@ -175,7 +175,7 @@ public class ReceiveEnvelopedFiles {
 							System.err.println();
 							e.printStackTrace();
 
-							return DefaultEndFileResponse.positiveAnswer();
+							return DefaultEndFileResponse.positiveEndFileAnswer();
 						}
 					}
 
@@ -204,7 +204,7 @@ public class ReceiveEnvelopedFiles {
 							System.err.println();
 							e.printStackTrace();
 
-							return DefaultEndFileResponse.positiveAnswer();
+							return DefaultEndFileResponse.positiveEndFileAnswer();
 						}
 					}
 
@@ -223,7 +223,7 @@ public class ReceiveEnvelopedFiles {
 						System.err.println();
 						e.printStackTrace();
 
-						return DefaultEndFileResponse.positiveAnswer();
+						return DefaultEndFileResponse.positiveEndFileAnswer();
 					}
 					
 				}
@@ -245,7 +245,7 @@ public class ReceiveEnvelopedFiles {
 				outgoingQueue.offer(notif);
 
 				// to send the EERP back, request change direction (true)
-				return DefaultEndFileResponse.positiveAnswer();
+				return DefaultEndFileResponse.positiveEndFileAnswer();
 			}
 
 		});

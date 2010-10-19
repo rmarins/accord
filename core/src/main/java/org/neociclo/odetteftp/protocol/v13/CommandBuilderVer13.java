@@ -179,13 +179,13 @@ public class CommandBuilderVer13 extends CommandBuilder {
 
         CommandExchangeBuffer eerp = new CommandExchangeBuffer(EERP_V13);
 
-        eerp.setAttribute("EERPCMD", String.valueOf(EERP.getCode()));
-        eerp.setAttribute("EERPDSN", dataSetName);
-        eerp.setAttribute("EERPDATE", ProtocolUtil.formatDate(DATE_STAMP_PATTERN, dateTime));
-        eerp.setAttribute("EERPTIME", ProtocolUtil.formatDate(TIME_STAMP_PATTERN, dateTime));
-        eerp.setAttribute("EERPUSER", userData);
-        eerp.setAttribute("EERPDEST", destination);
-        eerp.setAttribute("EERPORIG", originator);
+        eerp.setAttribute(EERPCMD_FIELD, String.valueOf(EERP.getCode()));
+        eerp.setAttribute(EERPDSN_FIELD, dataSetName);
+        eerp.setAttribute(EERPDATE_FIELD, ProtocolUtil.formatDate(DATE_STAMP_PATTERN, dateTime));
+        eerp.setAttribute(EERPTIME_FIELD, ProtocolUtil.formatDate(TIME_STAMP_PATTERN, dateTime));
+        eerp.setAttribute(EERPUSER_FIELD, userData);
+        eerp.setAttribute(EERPDEST_FIELD, destination);
+        eerp.setAttribute(EERPORIG_FIELD, originator);
 
         return eerp;
     }

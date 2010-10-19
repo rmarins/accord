@@ -33,6 +33,7 @@ public class DefaultDeliveryNotification implements DeliveryNotification {
 
     private String datasetName;
     private Date dateTime;
+    private Short ticker;
     private String destination;
     private String originator;
     private String userData;
@@ -59,9 +60,17 @@ public class DefaultDeliveryNotification implements DeliveryNotification {
         return dateTime;
     }
 
+	public Short getTicker() {
+		return ticker;
+	}
+
     public void setDateTime(Date dateTime) {
         this.dateTime = dateTime;
     }
+
+	public void setTicker(Short ticker) {
+		this.ticker = ticker;
+	}
 
     public String getDestination() {
         return destination;
@@ -122,6 +131,7 @@ public class DefaultDeliveryNotification implements DeliveryNotification {
         result = prime * result + ((creator == null) ? 0 : creator.hashCode());
         result = prime * result + ((datasetName == null) ? 0 : datasetName.hashCode());
         result = prime * result + ((dateTime == null) ? 0 : dateTime.hashCode());
+        result = prime * result + ((ticker == null) ? 0 : ticker.hashCode());
         result = prime * result + ((destination == null) ? 0 : destination.hashCode());
         result = prime * result + ((originator == null) ? 0 : originator.hashCode());
         result = prime * result + ((reason == null) ? 0 : reason.hashCode());
@@ -154,6 +164,11 @@ public class DefaultDeliveryNotification implements DeliveryNotification {
             if (other.dateTime != null)
                 return false;
         } else if (!dateTime.equals(other.dateTime))
+            return false;
+        if (ticker == null) {
+            if (other.ticker != null)
+                return false;
+        } else if (!ticker.equals(other.ticker))
             return false;
         if (destination == null) {
             if (other.destination != null)
@@ -194,7 +209,10 @@ public class DefaultDeliveryNotification implements DeliveryNotification {
         StringBuffer sb = new StringBuffer(getClass().getSimpleName());
         sb.append("(").append(getType());
         sb.append(", dsn=").append(getDatasetName());
-        sb.append(", dtm=").append(ProtocolUtil.formatDate("yyyy-MM-dd HH:mm:ss.SSSS", getDateTime()));
+        sb.append(", dtm=").append(ProtocolUtil.formatDate("yyyy-MM-dd HH:mm:ss", getDateTime()));
+        if (ticker != null) {
+        	sb.append(", ticker=").append(ticker.toString());
+        }
         sb.append(", orig=").append(getOriginator());
         sb.append(", dest=").append(getDestination()).append(")");
         return sb.toString();

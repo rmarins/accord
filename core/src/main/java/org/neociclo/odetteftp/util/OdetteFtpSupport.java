@@ -423,6 +423,7 @@ public class OdetteFtpSupport {
 
 		notif.setDatasetName(vf.getDatasetName());
 		notif.setDateTime(new Date(vf.getDateTime().getTime()));
+		notif.setTicker(vf.getTicker());
 		notif.setOriginator(vf.getDestination());
 		notif.setDestination(vf.getOriginator());
 		notif.setUserData(vf.getUserData());

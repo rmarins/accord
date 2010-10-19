@@ -52,6 +52,7 @@ import org.neociclo.odetteftp.security.EncryptAuthenticationChallengeCallback;
 import org.neociclo.odetteftp.util.BufferUtil;
 import org.neociclo.odetteftp.util.OftpUtil;
 import org.neociclo.odetteftp.util.ProtocolUtil;
+import org.neociclo.odetteftp.util.TimestampTicker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -263,13 +264,14 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
             signature = signed.getNotificationSignature();
         }
 
-        if (notif.getType() == EndResponseType.END_TO_END_RESPONSE) {
-            return endToEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getUserData(), notif
-                    .getDestination(), notif.getOriginator(), fileHash, signature);
-        } else {
-            return negativeEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getDestination(), notif
-                    .getOriginator(), notif.getCreator(), notif.getReason(), notif.getReasonText(), fileHash, signature);
-        }
+		if (notif.getType() == EndResponseType.END_TO_END_RESPONSE) {
+			return endToEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getTicker(),
+					notif.getUserData(), notif.getDestination(), notif.getOriginator(), fileHash, signature);
+		} else {
+			return negativeEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getTicker(),
+					notif.getDestination(), notif.getOriginator(), notif.getCreator(), notif.getReason(),
+					notif.getReasonText(), fileHash, signature);
+		}
 
     }
 
@@ -315,11 +317,13 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         byte[] notifSignature = eerp.getByteArrayAttribute(EERPSIG_FIELD);
 
         Date fileDateTime = parseDateTime(fileDate, fileTime);
+        short ticker = parseTimeTicker(fileTime);
 
         /* Prepare the File Delivery acknowledgment data object. */
         DefaultSignedDeliveryNotification notif = new DefaultSignedDeliveryNotification(EndResponseType.END_TO_END_RESPONSE);
         notif.setDatasetName(datasetName);
         notif.setDateTime(fileDateTime);
+        notif.setTicker(ticker);
         notif.setDestination(destination);
         notif.setOriginator(originator);
         notif.setUserData(userData);
@@ -354,11 +358,13 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         String reasonText = nerp.getStringAttribute(NERPREAST_FIELD);
 
         Date fileDateTime = parseDateTime(fileDate, fileTime);
+        short ticker = parseTimeTicker(fileTime);
 
         /* Prepare the File Delivery acknowledgment data object. */
         DefaultSignedDeliveryNotification notif = new DefaultSignedDeliveryNotification(EndResponseType.NEGATIVE_END_RESPONSE);
         notif.setDatasetName(datasetName);
         notif.setDateTime(fileDateTime);
+        notif.setTicker(ticker);
         notif.setDestination(destination);
         notif.setOriginator(originator);
         notif.setCreator(creator);
@@ -387,6 +393,12 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
             throw new NullPointerException("Enveloped Virtual File object has null Dataset Name");
         } else if (dateTime == null) {
             throw new NullPointerException("Enveloped Virtual File object has null Date/Time");
+        }
+
+        // set API's generated timestamp counter (ticker) if empty
+        Short ticker = vf.getTicker();
+        if (ticker == null) {
+        	ticker = Short.valueOf((short) TimestampTicker.getInstance().incrementAndGet());
         }
 
         int dsnLength = ReleaseFormatVer20.SFID_V20.getField(SFIDDSN_FIELD).getSize();
@@ -437,6 +449,7 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         DefaultNormalizedEnvelopedVirtualFile n = new DefaultNormalizedEnvelopedVirtualFile(vf);
         n.setDatasetName(dsn);
         n.setDateTime(dateTime);
+        n.setTicker(ticker);
         n.setOriginator(orig);
         n.setDestination(dest);
         n.setRecordFormat(recordFormat);
@@ -464,7 +477,7 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
 
         EnvelopedVirtualFile env = (EnvelopedVirtualFile) vf;
 
-        return startFile(env.getDatasetName(), env.getDateTime(), env.getUserData(), env.getDestination(), env
+        return startFile(env.getDatasetName(), env.getDateTime(), env.getTicker(), env.getUserData(), env.getDestination(), env
                 .getOriginator(), env.getRecordFormat(), env.getRecordSize(), env.getSize(), env.getOriginalFileSize(),
                 env.getRestartOffset(), env.getSecurityLevel(), env.getCipherSuite(), env.getCompressionAlgorithm(),
                 env.getEnvelopingFormat(), env.isSignedNotificationRequest(), env.getFileDescription());
@@ -515,10 +528,12 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         String fileDescription = sfid.getStringAttribute(sfid.getStringAttribute(SFIDDESC_FIELD));
 
         Date fileDateTime = parseDateTime(fileDate, fileTime);
+        short ticker = parseTimeTicker(fileTime);
         
         DefaultEnvelopedVirtualFile vf = new DefaultEnvelopedVirtualFile();
         vf.setDatasetName(datasetName);
         vf.setDateTime(fileDateTime);
+        vf.setTicker(ticker);
         vf.setDestination(destination);
         vf.setSize(fileSizeBlocks);
         vf.setOriginator(originator);

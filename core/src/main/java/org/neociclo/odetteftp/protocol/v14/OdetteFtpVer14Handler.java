@@ -31,12 +31,14 @@ import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletListener;
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.DefaultDeliveryNotification;
+import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.NegativeResponseReason;
 import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
 import org.neociclo.odetteftp.protocol.v13.OdetteFtpVer13Handler;
 import org.neociclo.odetteftp.util.ProtocolUtil;
+import org.neociclo.odetteftp.util.TimestampTicker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,10 +52,37 @@ public class OdetteFtpVer14Handler extends OdetteFtpVer13Handler {
 
     @Override
     protected CommandExchangeBuffer buildStartFileCommand(OdetteFtpSession session, VirtualFile vf) {
-        return startFile(vf.getDatasetName(), vf.getDateTime(), vf.getUserData(), vf.getDestination(), vf
+        return startFile(vf.getDatasetName(), vf.getDateTime(), vf.getTicker(), vf.getUserData(), vf.getDestination(), vf
                 .getOriginator(), vf.getRecordFormat(), vf.getRecordSize(), vf.getSize(), vf.getRestartOffset());
     }
 
+    @Override
+    protected VirtualFile normalizeVirtualFile(OdetteFtpSession session, VirtualFile vf) {
+
+    	DefaultVirtualFile normalizedVirtualFile = (DefaultVirtualFile) super.normalizeVirtualFile(session, vf);
+
+    	// set API's generated timestamp counter (ticker) if empty
+    	if (vf.getTicker() == null) {
+    		short ticker = (short) TimestampTicker.getInstance().incrementAndGet();
+    		normalizedVirtualFile.setTicker(ticker);
+    	}
+
+    	return normalizedVirtualFile;
+    }
+
+    @Override
+    protected DefaultVirtualFile buildVirtualFileObject(OdetteFtpSession session, CommandExchangeBuffer sfid)
+    		throws OdetteFtpException {
+
+    	DefaultVirtualFile vf = super.buildVirtualFileObject(session, sfid);
+
+    	String fileTime = sfid.getStringAttribute(SFIDTIME_FIELD);
+        short ticker = parseTimeTicker(fileTime);
+
+        vf.setTicker(ticker);
+
+    	return vf;
+    }
 
     @Override
     public void negativeEndReponseReceived(OdetteFtpSession session, CommandExchangeBuffer nerp) throws OdetteFtpException {
@@ -91,10 +120,10 @@ public class OdetteFtpVer14Handler extends OdetteFtpVer13Handler {
     protected CommandExchangeBuffer buildDeliveryNotificationCommand(DeliveryNotification notif) {
 
         if (notif.getType() == EndResponseType.END_TO_END_RESPONSE) {
-            return endToEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getUserData(), notif
+            return endToEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getTicker(), notif.getUserData(), notif
                     .getDestination(), notif.getOriginator());
         } else {
-            return negativeEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getDestination(), notif
+            return negativeEndResponse(notif.getDatasetName(), notif.getDateTime(), notif.getTicker(), notif.getDestination(), notif
                     .getOriginator(), notif.getCreator(), notif.getReason());
         }
 
@@ -114,11 +143,13 @@ public class OdetteFtpVer14Handler extends OdetteFtpVer13Handler {
         NegativeResponseReason reason = NegativeResponseReason.parse(nerp.getStringAttribute(NERPREAS_FIELD));
 
         Date fileDateTime = parseDateTime(fileDate, fileTime);
+        short ticker = parseTimeTicker(fileTime);
 
         /* Prepare the File Delivery acknowledgment data object. */
         DefaultDeliveryNotification notif = new DefaultDeliveryNotification(EndResponseType.NEGATIVE_END_RESPONSE);
         notif.setDatasetName(datasetName);
         notif.setDateTime(fileDateTime);
+        notif.setTicker(ticker);
         notif.setDestination(destination);
         notif.setOriginator(originator);
         notif.setCreator(creator);
@@ -127,19 +158,22 @@ public class OdetteFtpVer14Handler extends OdetteFtpVer13Handler {
         return notif;
     }
 
-    @Override
+	public short parseTimeTicker(String fileTime) {
+		return Short.parseShort(fileTime.substring(6));
+	}
+
+	@Override
     public Date parseDateTime(String sdate, String stime) {
         // date format: yyyymmdd
         int year = Integer.parseInt(sdate.substring(0, 4));
         int month = Integer.parseInt(sdate.substring(4, 6));
         int day = Integer.parseInt(sdate.substring(6, 8));
 
-        // time format: hhmmssSSSS
+        // time format: hhmmss
         int hour = Integer.parseInt(stime.substring(0, 2));
         int minute = Integer.parseInt(stime.substring(2, 4));
         int second = Integer.parseInt(stime.substring(4, 6));
-        int millis = Integer.parseInt(stime.substring(6, 10));
 
-        return ProtocolUtil.createDate(year, month, day, hour, minute, second, millis);
+        return ProtocolUtil.createDate(year, month, day, hour, minute, second, 0);
     }
 }

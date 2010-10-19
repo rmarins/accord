@@ -58,7 +58,7 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
      * 
      * @see SimpleDateFormat#SimpleDateFormat(java.lang.String)
      */
-    public static final String TIME_STAMP_PATTERN = "HHmmssSSSS";
+    public static final String TIME_STAMP_PATTERN = "HHmmss";
 
     public static final int MAX_FILE_DESCRIPTION_LENGTH = 999;
 
@@ -111,17 +111,19 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
         return esid;
     }
 
-    public static CommandExchangeBuffer startFile(String dsn, Date dateTime, String userData, String destination,
+    public static CommandExchangeBuffer startFile(String dsn, Date dateTime, short ticker, String userData, String destination,
             String originator, RecordFormat recordFormat, int recordSize, long fileSize, long originalFileSize,
             long offset, SecurityLevel sec, CipherSuite cipherSuite, FileCompression compressionAlgorithm,
             FileEnveloping envelopingFormat, boolean signedAck, String fileDescription) {
 
         CommandExchangeBuffer sfid = new CommandExchangeBuffer(SFID_V20);
 
+		String timeWithCounter = formatTime(dateTime) + padd(Short.toString(ticker), 4, true, '0');
+
         sfid.setAttribute(SFIDCMD_FIELD, String.valueOf(SFID.getCode()));
         sfid.setAttribute(SFIDDSN_FIELD, dsn);
         sfid.setAttribute(SFIDDATE_FIELD, formatDate(dateTime));
-        sfid.setAttribute(SFIDTIME_FIELD, formatTime(dateTime));
+        sfid.setAttribute(SFIDTIME_FIELD, timeWithCounter);
         sfid.setAttribute(SFIDUSER_FIELD, userData);
         sfid.setAttribute(SFIDDEST_FIELD, destination);
         sfid.setAttribute(SFIDORIG_FIELD, originator);
@@ -181,15 +183,17 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
         return auch;
     }
 
-    public static CommandExchangeBuffer endToEndResponse(String dsn, Date dateTime, String userData,
+    public static CommandExchangeBuffer endToEndResponse(String dsn, Date dateTime, short ticker, String userData,
             String destination, String originator, byte[] fileHash, byte[] signature) {
 
         CommandExchangeBuffer eerp = new CommandExchangeBuffer(EERP_V20);
 
+		String timeWithCounter = formatTime(dateTime) + padd(Short.toString(ticker), 4, true, '0');
+
         eerp.setAttribute(EERPCMD_FIELD, String.valueOf(EERP.getCode()));
         eerp.setAttribute(EERPDSN_FIELD, dsn);
-        eerp.setAttribute(EERPDATE_FIELD, ProtocolUtil.formatDate(DATE_STAMP_PATTERN, dateTime));
-        eerp.setAttribute(EERPTIME_FIELD, ProtocolUtil.formatDate(TIME_STAMP_PATTERN, dateTime));
+        eerp.setAttribute(EERPDATE_FIELD, formatDate(dateTime));
+        eerp.setAttribute(EERPTIME_FIELD, timeWithCounter);
         eerp.setAttribute(EERPUSER_FIELD, userData);
         eerp.setAttribute(EERPDEST_FIELD, destination);
         eerp.setAttribute(EERPORIG_FIELD, originator);
@@ -212,16 +216,18 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
         return eerp;
     }
 
-    public static CommandExchangeBuffer negativeEndResponse(String dataSetName, Date dateTime, String destination,
-            String originator, String creator, NegativeResponseReason reason, String reasonText, byte[] fileHash,
-            byte[] signature) {
+	public static CommandExchangeBuffer negativeEndResponse(String dataSetName, Date dateTime, short ticker,
+			String destination, String originator, String creator, NegativeResponseReason reason, String reasonText,
+			byte[] fileHash, byte[] signature) {
 
         CommandExchangeBuffer nerp = new CommandExchangeBuffer(NERP_V20);
 
+		String timeWithCounter = formatTime(dateTime) + padd(Short.toString(ticker), 4, true, '0');
+
         nerp.setAttribute(NERPCMD_FIELD, String.valueOf(NERP.getCode()));
         nerp.setAttribute(NERPDSN_FIELD, dataSetName);
-        nerp.setAttribute(NERPDATE_FIELD, ProtocolUtil.formatDate(DATE_STAMP_PATTERN, dateTime));
-        nerp.setAttribute(NERPTIME_FIELD, ProtocolUtil.formatDate(TIME_STAMP_PATTERN, dateTime));
+        nerp.setAttribute(NERPDATE_FIELD, formatDate(dateTime));
+        nerp.setAttribute(NERPTIME_FIELD, timeWithCounter);
         nerp.setAttribute(NERPDEST_FIELD, destination);
         nerp.setAttribute(NERPORIG_FIELD, originator);
         nerp.setAttribute(NERPCREA_FIELD, creator);

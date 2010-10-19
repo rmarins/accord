@@ -38,4 +38,6 @@ public interface OdetteFtpObject extends Serializable {
 
     Date getDateTime();
 
+    Short getTicker();
+
 }

@@ -20,6 +20,7 @@
 package org.neociclo.odetteftp.protocol.v14;
 
 import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
+import static org.neociclo.odetteftp.util.ProtocolUtil.*;
 
 import static org.neociclo.odetteftp.OdetteFtpVersion.OFTP_V14;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.EERP;
@@ -39,7 +40,6 @@ import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.NegativeResponseReason;
 import org.neociclo.odetteftp.protocol.RecordFormat;
 import org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13;
-import org.neociclo.odetteftp.util.ProtocolUtil;
 
 /**
  * @author Rafael Marins
@@ -61,7 +61,7 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
      * 
      * @see SimpleDateFormat#SimpleDateFormat(java.lang.String)
      */
-    public static final String TIME_STAMP_PATTERN = "HHmmssSSSS";
+    public static final String TIME_STAMP_PATTERN = "HHmmss";
 
     /**
      * Create the End to End Response command with given parameters.
@@ -71,6 +71,7 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
      * @param dateTime
      *        Virtual File date and time indicating when the file was made
      *        available for transmission.
+     * @param ticker
      * @param userData
      *        May be used by the ODETTE-FTP in any way.
      * @param destination
@@ -81,15 +82,17 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
      *        This is the location that creates the EERP for the received file.
      * @return The End to End Response command with the corresponding values.
      */
-    public static CommandExchangeBuffer endToEndResponse(String dataSetName, Date dateTime, String userData,
+    public static CommandExchangeBuffer endToEndResponse(String dataSetName, Date dateTime, short ticker, String userData,
             String destination, String originator) {
 
         CommandExchangeBuffer eerp = new CommandExchangeBuffer(EERP_V14);
 
+        String timeWithCounter = formatDate(TIME_STAMP_PATTERN, dateTime) + padd(Short.toString(ticker), 4, true, '0');
+
         eerp.setAttribute(EERPCMD_FIELD, String.valueOf(EERP.getCode()));
         eerp.setAttribute(EERPDSN_FIELD, dataSetName);
-        eerp.setAttribute(EERPDATE_FIELD, ProtocolUtil.formatDate(DATE_STAMP_PATTERN, dateTime));
-        eerp.setAttribute(EERPTIME_FIELD, ProtocolUtil.formatDate(TIME_STAMP_PATTERN, dateTime));
+        eerp.setAttribute(EERPDATE_FIELD, formatDate(DATE_STAMP_PATTERN, dateTime));
+        eerp.setAttribute(EERPTIME_FIELD, timeWithCounter);
         eerp.setAttribute(EERPUSER_FIELD, userData);
         eerp.setAttribute(EERPDEST_FIELD, destination);
         eerp.setAttribute(EERPORIG_FIELD, originator);
@@ -105,6 +108,7 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
      * @param dateTime
      *        Virtual File date and time indicating when the file was made
      *        available for transmission.
+     * @param ticker
      * @param destination
      *        Identification code from the Originator of the Virtual File, which
      *        created (mapped) the data for transmission.
@@ -115,15 +119,17 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
      * @param reason
      * @return The End to End Response command with the corresponding values.
      */
-    public static CommandExchangeBuffer negativeEndResponse(String dataSetName, Date dateTime, String destination,
+    public static CommandExchangeBuffer negativeEndResponse(String dataSetName, Date dateTime, short ticker, String destination,
             String originator, String creator, NegativeResponseReason reason) {
 
         CommandExchangeBuffer nerp = new CommandExchangeBuffer(NERP_V14);
 
+        String timeWithCounter = formatDate(TIME_STAMP_PATTERN, dateTime) + padd(Short.toString(ticker), 4, true, '0');
+
         nerp.setAttribute(NERPCMD_FIELD, String.valueOf(NERP.getCode()));
         nerp.setAttribute(NERPDSN_FIELD, dataSetName);
-        nerp.setAttribute(NERPDATE_FIELD, ProtocolUtil.formatDate(DATE_STAMP_PATTERN, dateTime));
-        nerp.setAttribute(NERPTIME_FIELD, ProtocolUtil.formatDate(TIME_STAMP_PATTERN, dateTime));
+        nerp.setAttribute(NERPDATE_FIELD, formatDate(DATE_STAMP_PATTERN, dateTime));
+        nerp.setAttribute(NERPTIME_FIELD, timeWithCounter);
         nerp.setAttribute(NERPDEST_FIELD, destination);
         nerp.setAttribute(NERPORIG_FIELD, originator);
         nerp.setAttribute(NERPCREA_FIELD, creator);
@@ -145,6 +151,7 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
      * @param dateTime
      *        Specific Date and Time assigned by the Virtual File's Originator
      *        indicating when the file was made available for transmission.
+     * @param ticker
      * @param userData
      *        May be used by the ODETTE-FTP in any way. If unused it should be
      *        initialized to spaces. It is expected that a bilateral agreement
@@ -172,16 +179,18 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
      *        Restart position.
      * @return The Start File command with the corresponding values.
      */
-    public static CommandExchangeBuffer startFile(String datasetName, Date dateTime, String userData,
+    public static CommandExchangeBuffer startFile(String datasetName, Date dateTime, short ticker, String userData,
             String destination, String originator, RecordFormat recordFormat, int maxRecordSize, long fileSize,
             long restartOffset) {
 
         CommandExchangeBuffer sfid = new CommandExchangeBuffer(SFID_V14);
 
+        String timeWithCounter = formatDate(TIME_STAMP_PATTERN, dateTime) + padd(Short.toString(ticker), 4, true, '0');
+
         sfid.setAttribute(SFIDCMD_FIELD, String.valueOf(SFID.getCode()));
         sfid.setAttribute(SFIDDSN_FIELD, datasetName);
-        sfid.setAttribute(SFIDDATE_FIELD, ProtocolUtil.formatDate(DATE_STAMP_PATTERN, dateTime));
-        sfid.setAttribute(SFIDTIME_FIELD, ProtocolUtil.formatDate(TIME_STAMP_PATTERN, dateTime));
+        sfid.setAttribute(SFIDDATE_FIELD, formatDate(DATE_STAMP_PATTERN, dateTime));
+        sfid.setAttribute(SFIDTIME_FIELD, timeWithCounter);
         sfid.setAttribute(SFIDUSER_FIELD, userData);
         sfid.setAttribute(SFIDDEST_FIELD, destination);
         sfid.setAttribute(SFIDORIG_FIELD, originator);

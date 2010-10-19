@@ -25,6 +25,7 @@ import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.formatDate
 import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.formatTime;
 import static org.neociclo.odetteftp.protocol.v20.ReleaseFormatVer20.EERP_V20;
 import static org.neociclo.odetteftp.util.SecurityUtil.*;
+import static org.neociclo.odetteftp.util.ProtocolUtil.padd;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -816,10 +817,13 @@ public class EnvelopingUtil {
 
         // use EERP_V20 fields as properties are the same for NERP formatting
 
+    	short ticker = info.getTicker();
+		String timeWithCounter = formatTime(info.getDateTime()) + padd(Short.toString(ticker), 4, true, '0');
+
         StringBuffer sb = new StringBuffer();
         sb.append(formatAttribute(EERP_V20.getField("EERPDSN"), info.getDatasetName()));
         sb.append(formatDate(info.getDateTime()));
-        sb.append(formatTime(info.getDateTime()));
+        sb.append(timeWithCounter);
         sb.append(formatAttribute(EERP_V20.getField("EERPDEST"), info.getDestination()));
         sb.append(formatAttribute(EERP_V20.getField("EERPORIG"), info.getOriginator()));
 

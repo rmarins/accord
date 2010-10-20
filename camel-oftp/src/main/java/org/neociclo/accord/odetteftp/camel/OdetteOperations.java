@@ -426,4 +426,7 @@ public class OdetteOperations implements OftpletEventListener {
 		}
 	}
 
+	public void configure(OdetteFtpSession session) {
+	}
+
 }

@@ -30,6 +30,7 @@ import java.util.Properties;
 
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult;
+import org.neociclo.odetteftp.support.PasswordAuthenticationHandler;
 
 /**
  * @author Rafael Marins

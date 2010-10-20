@@ -29,9 +29,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
-import org.neociclo.odetteftp.examples.support.PasswordAuthenticationHandler;
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult;
+import org.neociclo.odetteftp.support.PasswordAuthenticationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

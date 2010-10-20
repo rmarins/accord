@@ -62,11 +62,16 @@ public class OdetteFtpVer14Handler extends OdetteFtpVer13Handler {
     	DefaultVirtualFile normalizedVirtualFile = (DefaultVirtualFile) super.normalizeVirtualFile(session, vf);
 
     	// set API's generated timestamp counter (ticker) if empty
-    	if (vf.getTicker() == null) {
-    		short ticker = (short) TimestampTicker.getInstance().incrementAndGet();
-    		normalizedVirtualFile.setTicker(ticker);
-    	}
+        Short ticker = vf.getTicker();
+        if (ticker == null) {
+        	ticker = Short.valueOf((short) TimestampTicker.getInstance().incrementAndGet());
+        } else {
+    		if (ticker > TimestampTicker.MAX_COUNTER_VALUE) {
+    			ticker = 1;
+    		}
+        }
 
+        normalizedVirtualFile.setTicker(ticker);
     	return normalizedVirtualFile;
     }
 

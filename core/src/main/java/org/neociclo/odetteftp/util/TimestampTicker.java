@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TimestampTicker {
 
-	private static final int MAX_COUNTER_VALUE = 9999;
+	public static final int MAX_COUNTER_VALUE = 9999;
 
 	private static final long EVERY_SECOND = 1000L;
 

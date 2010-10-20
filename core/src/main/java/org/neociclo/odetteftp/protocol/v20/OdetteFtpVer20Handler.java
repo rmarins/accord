@@ -399,6 +399,10 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
         Short ticker = vf.getTicker();
         if (ticker == null) {
         	ticker = Short.valueOf((short) TimestampTicker.getInstance().incrementAndGet());
+        } else {
+    		if (ticker > TimestampTicker.MAX_COUNTER_VALUE) {
+    			ticker = 1;
+    		}
         }
 
         int dsnLength = ReleaseFormatVer20.SFID_V20.getField(SFIDDSN_FIELD).getSize();

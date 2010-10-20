@@ -19,8 +19,6 @@
  */
 package org.neociclo.odetteftp.util;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -31,8 +29,6 @@ public class TimestampTicker {
 
 	public static final int MAX_COUNTER_VALUE = 9999;
 
-	private static final long EVERY_SECOND = 1000L;
-
 	private static TimestampTicker singleton;
 
 	public static TimestampTicker getInstance() {
@@ -42,38 +38,33 @@ public class TimestampTicker {
 		return singleton;
 	}
 
-	private Timer timer;
-
+	private long lastCallTime;
 	private AtomicInteger counter;
 
 	private TimestampTicker() {
 		super();
-		this.timer = new Timer("OftpTimestampTicker");
 		this.counter = new AtomicInteger();
-
-		TimerTask resetterTask = new TimerTask() {
-			@Override
-			public void run() {
-				synchronized (counter) {
-					counter.set(0);
-				}
-			}
-		};
-
-		timer.scheduleAtFixedRate(resetterTask, EVERY_SECOND, EVERY_SECOND);
+		lastCallTime = System.currentTimeMillis();
 	}
 
 	public int incrementAndGet() {
+		long currentTime = System.currentTimeMillis();
 		int value = 0;
 		synchronized (counter) {
-
 			value = counter.incrementAndGet();
-			if (value >= MAX_COUNTER_VALUE) {
+			if (value >= MAX_COUNTER_VALUE || areSecondsDifferent(lastCallTime, currentTime)) {
 				value = 1;
 				counter.set(value);
 			}
 		}
+		lastCallTime = currentTime;
 		return value;
+	}
+
+	private static boolean areSecondsDifferent(long t1, long t2) {
+		t1 = (t1 / 1000) * 1000;
+		t2 = (t2 / 1000) * 1000;
+		return (t1 != t2);
 	}
 
 	

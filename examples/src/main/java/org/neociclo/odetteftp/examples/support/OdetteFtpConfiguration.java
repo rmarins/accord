@@ -37,6 +37,8 @@ public class OdetteFtpConfiguration implements Serializable {
 
 	private String user;
 	private String password;
+	private MappedCallbackHandler callbackHandler;
+
 	private String userData;
 	private TransferMode transferMode;
 	private Integer dataExchangeBufferSize;
@@ -47,8 +49,6 @@ public class OdetteFtpConfiguration implements Serializable {
 	private Boolean useSecureAuthentication;
 	private CipherSuite cipherSuiteSelection;
 	private OdetteFtpVersion version;
-
-	private MappedCallbackHandler callbackHandler;
 
 	public String getUser() {
 		return user;
@@ -148,16 +148,22 @@ public class OdetteFtpConfiguration implements Serializable {
 
     public void setup(OdetteFtpSession s) {
 
-        s.setUserData(userData);
+    	if (userData != null) {
+    		s.setUserData(userData);
+    	}
 
         if (version == null) {
-            s.setVersion(OdetteFtpVersion.OFTP_V20);
+        	if (s.getVersion() == null) {
+        		s.setVersion(OdetteFtpVersion.OFTP_V20);
+        	}
         } else {
             s.setVersion(version);
         }
 
         if (transferMode == null) {
-        	s.setTransferMode(TransferMode.SENDER_ONLY);
+        	if (s.getTransferMode() == null) {
+        		s.setTransferMode(TransferMode.SENDER_ONLY);
+        	}
         } else {
             s.setTransferMode(transferMode);
         }

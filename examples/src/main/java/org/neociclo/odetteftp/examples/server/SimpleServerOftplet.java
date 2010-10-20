@@ -24,6 +24,7 @@ import static org.neociclo.odetteftp.protocol.DefaultStartFileResponse.*;
 import static org.neociclo.odetteftp.protocol.DefaultEndFileResponse.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.neociclo.odetteftp.OdetteFtpException;
@@ -31,6 +32,7 @@ import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.support.DefaultSecurityContext;
 import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
+import org.neociclo.odetteftp.examples.support.PropertiesBasedConfiguration;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
 import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.OftpletAdapter;
@@ -98,7 +100,19 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 	}
 
 	public void configure() {
-		// TODO add user specific custom session parameters configuration
+
+		// setup custom parameters specific to this user configuration
+		String userCode = session.getUserCode();
+		File configFile = getUserConfigFile(serverBaseDir, userCode);
+		PropertiesBasedConfiguration customConfig = new PropertiesBasedConfiguration();
+
+		try {
+			customConfig.load(new FileInputStream(configFile));
+			customConfig.setup(session);
+		} catch (IOException e) {
+			LOGGER.error("Cannot load user's custom configuration.", e);
+		}
+
 		if (listener != null) {
 			listener.configure(session);
 		}

@@ -67,29 +67,6 @@ public interface Oftplet {
      */
     void destroy();
 
-//    /**
-//     * Callback method used to perform user authentication over the provided
-//     * parameters when this <i>Oftplet</i> is serving as a <i>Responder</i>
-//     * ODETTE-FTP entity type.
-//     * <p/>
-//     * This implementation must throw an {@link AuthenticationException} to
-//     * indicate that the user authentication failed.
-//     * 
-//     * @param oid
-//     *            user ODETTE-FTP identification code.
-//     * @param pwd
-//     *            user password.
-//     * @param userData
-//     *            parameter provided on user initial Start Session (SSID)
-//     *            command.
-//     * @throws AuthenticationException
-//     *             if the requested user validation is not authorized (with the
-//     *             specified failure code.
-//     * @throws OdetteFtpException
-//     *             other error.
-//     */
-//    void onAuthenticate(String oid, String pwd, String userData) throws OdetteFtpException;
-
     void onSessionStart();
 
     /**

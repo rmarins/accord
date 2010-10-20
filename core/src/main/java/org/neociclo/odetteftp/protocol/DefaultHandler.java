@@ -113,7 +113,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
         // Protocol Sequence step 2
         if (session.isResponder()) {
             /* Authenticate the Initiator peer identification. */
-            responderAuthenticate(session, ssid);
+            startSessionPasswordAuthentication(session, ssid, true);
 
             /*
              * After authorization, keep user code in session context.
@@ -1004,7 +1004,6 @@ public abstract class DefaultHandler implements ProtocolHandler {
         int ssidlev = Integer.parseInt(ssid.getStringAttribute(SSIDLEV_FIELD));
         int ssidsdeb = Integer.parseInt(ssid.getStringAttribute(SSIDSDEB_FIELD));
         String ssidcode = ssid.getStringAttribute(SSIDCODE_FIELD);
-//        String ssidpswd = ssid.getStringAttribute(SSIDPSWD_FIELD);
         TransferMode ssidsr = TransferMode.parse(ssid.getStringAttribute(SSIDSR_FIELD));
         boolean ssidcmpr = valueOfYesNo(ssid.getStringAttribute(SSIDCMPR_FIELD));
         boolean ssidrest = valueOfYesNo(ssid.getStringAttribute(SSIDREST_FIELD));
@@ -1067,6 +1066,9 @@ public abstract class DefaultHandler implements ProtocolHandler {
             LOGGER.error("[{}] Session setup failed. {}", session, err);
             abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, err);
         }
+
+        // authenticate responder's ID with the PasswordAuthenticationCallback 
+        startSessionPasswordAuthentication(session, ssid, false);
 
         /* Set up agreed values in preferences of odette-ftp session context. */
 
@@ -1263,7 +1265,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
     }
 
-    protected void responderAuthenticate(OdetteFtpSession session, CommandExchangeBuffer ssid) throws OdetteFtpException {
+    protected void startSessionPasswordAuthentication(OdetteFtpSession session, CommandExchangeBuffer ssid, boolean mandatory) throws OdetteFtpException {
 
         String ssidcode = ssid.getStringAttribute(SSIDCODE_FIELD);
         String ssidpswd = ssid.getStringAttribute(SSIDPSWD_FIELD);
@@ -1272,7 +1274,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         // Perform authentication using CallbackHandler provided by user
         PasswordAuthenticationCallback pwdAuthCallback = new PasswordAuthenticationCallback(ssidcode, ssidpswd);
-        if (!handleCallback(session, pwdAuthCallback)) {
+        if (!handleCallback(session, pwdAuthCallback) && mandatory) {
             // already did logging within handleCallback() method
             abnormalRelease(session, EndSessionReason.RESOURCES_NOT_AVAIABLE,
                     "Password authentication engine not available.");
@@ -1289,8 +1291,10 @@ public abstract class DefaultHandler implements ProtocolHandler {
             // invalid password
             abnormalRelease(session, EndSessionReason.INVALID_PASSWORD, "Authentication error: bad password");
         } else {
-            LOGGER.warn("[{}] SSID received. No result after PasswordAuthenticationCallback processing.", session);
-            abnormalRelease(session, EndSessionReason.UNSPECIFIED_ABORT, "Unknown authentication error.");
+        	if (mandatory) {
+        		LOGGER.warn("[{}] SSID received. No result after PasswordAuthenticationCallback processing.", session);
+        		abnormalRelease(session, EndSessionReason.UNSPECIFIED_ABORT, "Unknown authentication error.");
+        	}
         }
 
     }

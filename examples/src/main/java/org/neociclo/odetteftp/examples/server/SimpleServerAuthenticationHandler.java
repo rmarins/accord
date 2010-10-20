@@ -20,6 +20,7 @@
 package org.neociclo.odetteftp.examples.server;
 
 import static org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult.*;
+import static org.neociclo.odetteftp.examples.server.SimpleServerHelper.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,11 +42,6 @@ import org.slf4j.LoggerFactory;
 class SimpleServerAuthenticationHandler extends PasswordAuthenticationHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleServerAuthenticationHandler.class);
-
-	private static File getUserConfigFile(File baseDir, String userCode) {
-		File userDir = new File(baseDir, userCode.toLowerCase());
-		return new File(userDir, "accord-oftp.conf");
-	}
 
 	private File serverBaseDir;
 	private boolean useMd5Digest;

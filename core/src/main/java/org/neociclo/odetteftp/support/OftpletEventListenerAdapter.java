@@ -88,4 +88,7 @@ public class OftpletEventListenerAdapter implements OftpletEventListener {
 	public void init(OdetteFtpSession session) throws OdetteFtpException {
 	}
 
+	public void configure(OdetteFtpSession session) {
+	}
+
 }

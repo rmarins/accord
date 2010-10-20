@@ -33,7 +33,6 @@ import org.neociclo.odetteftp.examples.support.DefaultSecurityContext;
 import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
 import org.neociclo.odetteftp.oftplet.EndFileResponse;
-import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletAdapter;
 import org.neociclo.odetteftp.oftplet.OftpletListener;
 import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
@@ -51,16 +50,16 @@ import org.slf4j.LoggerFactory;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-class SimpleServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpeaker, OftpletListener {
+class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odetteftp.oftplet.ServerOftplet, OftpletSpeaker, OftpletListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleServerOftplet.class);
 
 	private static final SimpleServerRoutingWorker ROUTING_WORKER = new SimpleServerRoutingWorker();
 
 	private File serverBaseDir;
-	private OdetteFtpConfiguration config;
 	private OftpletEventListener listener;
 	private SecurityContext securityContext;
+	private OdetteFtpConfiguration config;
 	private OdetteFtpSession session;
 
 	public SimpleServerOftplet(File serverBaseDir, OdetteFtpConfiguration config, OftpletEventListener listener) {
@@ -98,9 +97,18 @@ class SimpleServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpea
 		}
 	}
 
+	public void configure() {
+		// TODO add user specific custom session parameters configuration
+		if (listener != null) {
+			listener.configure(session);
+		}
+	}
+
 	@Override
 	public void destroy() {
 		this.config = null;
+		this.session = null;
+		this.securityContext = null;
 		if (listener != null) {
 			listener.destroy();
 		}
@@ -119,6 +127,7 @@ class SimpleServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpea
 
 	@Override
 	public void onExceptionCaught(Throwable cause) {
+		LOGGER.error("Exception Caught.", cause);
 		if (listener != null) {
 			listener.onExceptionCaught(cause);
 		}
@@ -152,9 +161,8 @@ class SimpleServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpea
 		String userCode = session.getUserCode();
 		File[] exchanges = listExchanges(userCode);
 
-		File cur = exchanges[0]; 
-
 		if (exchanges.length > 0) {
+			File cur = exchanges[0]; 
 			try {
 				next = loadObject(cur);
 			} catch (IOException e) {

@@ -75,6 +75,7 @@ import org.neociclo.odetteftp.oftplet.EndSessionReasonInfo;
 import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletListener;
 import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
+import org.neociclo.odetteftp.oftplet.ServerOftplet;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
 import org.neociclo.odetteftp.protocol.data.AbstractMapping;
@@ -110,6 +111,8 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
     public void startSessionReceived(OdetteFtpSession session, CommandExchangeBuffer ssid) throws OdetteFtpException {
 
+        Oftplet oftplet = getSessionOftplet(session);
+
         // Protocol Sequence step 2
         if (session.isResponder()) {
             /* Authenticate the Initiator peer identification. */
@@ -120,6 +123,14 @@ public abstract class DefaultHandler implements ProtocolHandler {
              */
             String ssidcode = ssid.getStringAttribute(SSIDCODE_FIELD);
             session.setUserCode(ssidcode);
+
+			/*
+			 * Let the server Oftplet to setup custom session parameters based
+			 * on authenticated user's OID.
+			 */
+            if (oftplet instanceof ServerOftplet) {
+            	((ServerOftplet) oftplet).configure();
+            }
 
             /*
              * Get and evaluate session parameters from Initiator SSID command,
@@ -137,7 +148,6 @@ public abstract class DefaultHandler implements ProtocolHandler {
             initiatorStartSessionReceived(session, ssid);
         }
 
-        Oftplet oftplet = getSessionOftplet(session);
         oftplet.onSessionStart();
 
     }

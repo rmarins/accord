@@ -1,5 +1,5 @@
 /**
- * Neociclo Accord, Open Source B2Bi Middleware
+ * Neociclo Accord, Open Source B2B Integration Suite
  * Copyright (C) 2005-2010 Neociclo, http://www.neociclo.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,31 +17,15 @@
  *
  * $Id$
  */
-package org.neociclo.odetteftp.support;
+package org.neociclo.odetteftp.oftplet;
 
-import java.util.EventListener;
-
-import org.neociclo.odetteftp.OdetteFtpException;
-import org.neociclo.odetteftp.OdetteFtpSession;
-import org.neociclo.odetteftp.oftplet.OftpletListener;
-import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
 
 /**
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public interface OftpletEventListener extends OftpletSpeaker, OftpletListener, EventListener {
+public interface ServerOftplet extends Oftplet {
 
-	void onExceptionCaught(Throwable cause);
-
-	void onSessionStart();
-
-	void onSessionEnd();
-
-	void destroy();
-
-	void init(OdetteFtpSession session) throws OdetteFtpException;
-
-	void configure(OdetteFtpSession session);
+	void configure();
 
 }

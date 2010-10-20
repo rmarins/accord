@@ -629,9 +629,9 @@ public abstract class DefaultHandler implements ProtocolHandler {
         Oftplet oftplet = getSessionOftplet(session);
         OftpletSpeaker oftpletSpeaker = oftplet.getSpeaker();
 
-        NormalizedVirtualFile virtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
+        NormalizedVirtualFile normalizedVirtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
 
-        long restartOffset = virtualFile.getRestartOffset();
+        long restartOffset = normalizedVirtualFile.getRestartOffset();
 
         /* Validate answer count and restart support. */
         long answerCount = Long.parseLong(sfpa.getStringAttribute(SFPAACNT_FIELD));
@@ -658,15 +658,15 @@ public abstract class DefaultHandler implements ProtocolHandler {
         // Open file channel and keep object in session
         FileChannel fileChannel = null;
         try {
-            fileChannel = (new FileInputStream(virtualFile.getFile())).getChannel();
+            fileChannel = (new FileInputStream(normalizedVirtualFile.getFile())).getChannel();
         } catch (FileNotFoundException e) {
 
             LOGGER.error("[" + session + "] Send File failed. Cannot open file specified in the Virtual File: "
-                    + virtualFile.getFile(), e);
+                    + normalizedVirtualFile.getFile(), e);
 
             String fileNotFoundText = "Cannot open input file on local system.";
 
-			oftpletSpeaker.onSendFileError(virtualFile.getOriginalVirtualFile(), new AnswerReasonInfo(
+			oftpletSpeaker.onSendFileError(normalizedVirtualFile, new AnswerReasonInfo(
 					AnswerReason.ACCESS_METHOD_FAILURE, fileNotFoundText), true);
 
             abnormalRelease(session, EndSessionReason.RESOURCES_NOT_AVAIABLE, fileNotFoundText);
@@ -674,8 +674,8 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         // Position file at the proper restart offset
         if (answerCount > 0) {
-            RecordFormat recordFormat = virtualFile.getRecordFormat();
-            int recordSize = virtualFile.getRecordSize();
+            RecordFormat recordFormat = normalizedVirtualFile.getRecordFormat();
+            int recordSize = normalizedVirtualFile.getRecordSize();
             if (recordSize <= 0 || recordFormat == RecordFormat.TEXTFILE || recordFormat == RecordFormat.UNSTRUCTURED) {
                 recordSize = 1024;
             }
@@ -694,7 +694,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
                     String restartFailedText = "Cannot truncate/position file to restart at: " + fileOffset;
                     LOGGER.error("[" + session + "] SFPA received. Send File failed. " + restartFailedText, e);
     
-					oftpletSpeaker.onSendFileError(virtualFile.getOriginalVirtualFile(), new AnswerReasonInfo(
+					oftpletSpeaker.onSendFileError(normalizedVirtualFile, new AnswerReasonInfo(
 							AnswerReason.ACCESS_METHOD_FAILURE, restartFailedText), true);
     
                     abnormalRelease(session, EndSessionReason.RESOURCES_NOT_AVAIABLE, restartFailedText);
@@ -712,7 +712,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         // Indicate the outgoing Start File to the oftplet
 
-        oftpletSpeaker.onSendFileStart(virtualFile.getOriginalVirtualFile(), answerCount);
+        oftpletSpeaker.onSendFileStart(normalizedVirtualFile, answerCount);
 
         // Begin data buffer transmission
         speakerSendData(session);
@@ -724,7 +724,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         boolean retryLater = valueOfYesNo(sfna.getStringAttribute(SFNARRTR_FIELD));
 
-        NormalizedVirtualFile virtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
+        NormalizedVirtualFile normalizedVirtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
 
         // Clear current odette-ftp outgoing exchange request
         setSessionCurrentRequest(session, null);
@@ -734,7 +734,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
         OftpletSpeaker oftpletSpeaker = oftplet.getSpeaker();
 
         AnswerReasonInfo reasonInfo = buildAnswerReasonInfoObject(sfna);
-        oftpletSpeaker.onSendFileError(virtualFile.getOriginalVirtualFile(), reasonInfo, retryLater);
+        oftpletSpeaker.onSendFileError(normalizedVirtualFile, reasonInfo, retryLater);
 
         /*
          * Perform Speaker's tasks of starting file transmit and acknowledgment
@@ -831,7 +831,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
     public void endFileNegativeAnswerReceived(OdetteFtpSession session, CommandExchangeBuffer efna)
             throws OdetteFtpException {
 
-    	NormalizedVirtualFile virtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
+    	NormalizedVirtualFile normalizedVirtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
 
         // Clear current odette-ftp outgoing exchange request
         setSessionCurrentRequest(session, null);
@@ -842,9 +842,9 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         AnswerReasonInfo reasonInfo = buildAnswerReasonInfoObject(efna);
 
-        LOGGER.info("[{}] EFNA received. Invoking Oftplet onSendFileError() with: {}", session, reasonInfo);
+        LOGGER.info("[{}] EFNA received. Invoking OftpletSpeaker onSendFileError() with: {}", session, reasonInfo);
 
-        oftpletSpeaker.onSendFileError(virtualFile.getOriginalVirtualFile(), reasonInfo, true);
+        oftpletSpeaker.onSendFileError(normalizedVirtualFile, reasonInfo, true);
 
         /*
          * Perform Speaker's tasks of starting file transmit and acknowledgment
@@ -857,13 +857,13 @@ public abstract class DefaultHandler implements ProtocolHandler {
     public void endFilePositiveAnswerReceived(OdetteFtpSession session, CommandExchangeBuffer efpa)
             throws OdetteFtpException {
 
-    	NormalizedVirtualFile virtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
+    	NormalizedVirtualFile normalizedVirtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
 
         // Indicate that the outgoing file transfer has neded to the Oftplet
         Oftplet oftplet = getSessionOftplet(session);
         OftpletSpeaker oftpletSpeaker = oftplet.getSpeaker();
 
-        oftpletSpeaker.onSendFileEnd(virtualFile.getOriginalVirtualFile());
+        oftpletSpeaker.onSendFileEnd(normalizedVirtualFile);
 
         // Clear current odette-ftp outgoing exchange request
         setSessionCurrentRequest(session, null);

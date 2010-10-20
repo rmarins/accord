@@ -44,7 +44,6 @@ public class TimestampTicker {
 	private TimestampTicker() {
 		super();
 		this.counter = new AtomicInteger();
-		lastCallTime = System.currentTimeMillis();
 	}
 
 	public int incrementAndGet() {

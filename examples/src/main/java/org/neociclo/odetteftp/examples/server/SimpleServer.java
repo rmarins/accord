@@ -20,7 +20,6 @@
 package org.neociclo.odetteftp.examples.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -28,9 +27,9 @@ import java.net.URL;
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
+import org.neociclo.odetteftp.examples.support.PasswordHandler;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 import org.neociclo.odetteftp.security.MappedCallbackHandler;
-import org.neociclo.odetteftp.security.OneToOneHandler;
 import org.neociclo.odetteftp.security.PasswordAuthenticationCallback;
 import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpServer;
@@ -65,12 +64,7 @@ public class SimpleServer {
 		// side identification and password
 		//
 		serverSecurityHandler.addHandler(PasswordCallback.class,
-				new OneToOneHandler<PasswordCallback>() {
-					public void handle(PasswordCallback cb) throws IOException {
-						cb.setUsername("O0055MYSERVERID");
-						cb.setPassword("MYPASSWD");
-					}
-				});
+				new PasswordHandler("O0055MYSERVERID", "MYPASSWD"));
 
 		SimpleServerOftpletFactory factory = new SimpleServerOftpletFactory(SERVER_DIR, config, serverSecurityHandler);
 		TcpServer server = new TcpServer(localAddress, factory);

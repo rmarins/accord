@@ -22,6 +22,7 @@ package org.neociclo.odetteftp.examples.server;
 import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.support.OftpletEventListener;
 
 /**
@@ -31,16 +32,18 @@ import org.neociclo.odetteftp.support.OftpletEventListener;
 public class ServerOftpletFactory implements OftpletFactory {
 
 	private OdetteFtpConfiguration config;
+	private MappedCallbackHandler securityHandler;
 	private OftpletEventListener listener;
 
-	public ServerOftpletFactory(OdetteFtpConfiguration config, OftpletEventListener listener) {
+	public ServerOftpletFactory(OdetteFtpConfiguration config, MappedCallbackHandler securityHandler, OftpletEventListener listener) {
 		super();
 		this.config = config;
+		this.securityHandler = securityHandler;
 		this.listener = listener;
 	}
 
 	public Oftplet createProvider() {
-		return new ServerOftplet(config, listener);
+		return new ServerOftplet(config, securityHandler, listener);
 	}
 
 }

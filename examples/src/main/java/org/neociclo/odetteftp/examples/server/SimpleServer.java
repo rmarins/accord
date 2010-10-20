@@ -52,7 +52,6 @@ public class SimpleServer {
 		OdetteFtpConfiguration config = createInitialServerConfig();
 
 		MappedCallbackHandler serverSecurityHandler = new MappedCallbackHandler();
-		config.setCallbackHandler(serverSecurityHandler);
 
 		//
 		// add server password authentication handler based on the users
@@ -73,7 +72,7 @@ public class SimpleServer {
 					}
 				});
 
-		SimpleServerOftpletFactory factory = new SimpleServerOftpletFactory(SERVER_DIR, config);
+		SimpleServerOftpletFactory factory = new SimpleServerOftpletFactory(SERVER_DIR, config, serverSecurityHandler);
 		TcpServer server = new TcpServer(localAddress, factory);
 
 		server.start();

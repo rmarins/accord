@@ -34,6 +34,7 @@ import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.SecurityContext;
 import org.neociclo.odetteftp.support.OftpletEventListener;
 
@@ -47,9 +48,10 @@ class ServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpeaker, O
 	private OftpletEventListener listener;
 	private SecurityContext securityContext;
 
-	public ServerOftplet(OdetteFtpConfiguration config, OftpletEventListener listener) {
+	public ServerOftplet(OdetteFtpConfiguration config, MappedCallbackHandler securityCallbackHandler, OftpletEventListener listener) {
 		super();
 		this.config = config;
+		this.securityContext = new DefaultSecurityContext(securityCallbackHandler);
 		this.listener = listener;
 	}
 
@@ -65,9 +67,6 @@ class ServerOftplet extends OftpletAdapter implements Oftplet, OftpletSpeaker, O
 
 	@Override
 	public SecurityContext getSecurityContext() {
-		if (securityContext == null) {
-			securityContext = new DefaultSecurityContext(config.getCallbackHandler());
-		}
 		return securityContext;
 	}
 

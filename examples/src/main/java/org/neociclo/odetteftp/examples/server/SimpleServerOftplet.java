@@ -43,6 +43,7 @@ import org.neociclo.odetteftp.protocol.AnswerReason;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.SecurityContext;
 import org.neociclo.odetteftp.support.OftpletEventListener;
 import org.slf4j.Logger;
@@ -64,10 +65,11 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 	private OdetteFtpConfiguration config;
 	private OdetteFtpSession session;
 
-	public SimpleServerOftplet(File serverBaseDir, OdetteFtpConfiguration config, OftpletEventListener listener) {
+	public SimpleServerOftplet(File serverBaseDir, OdetteFtpConfiguration config, MappedCallbackHandler securityCallbackHandler, OftpletEventListener listener) {
 		super();
 		this.serverBaseDir = serverBaseDir;
 		this.config = config;
+		this.securityContext = new DefaultSecurityContext(securityCallbackHandler);
 		this.listener = listener;
 	}
 
@@ -83,9 +85,6 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 
 	@Override
 	public SecurityContext getSecurityContext() {
-		if (securityContext == null) {
-			securityContext = new DefaultSecurityContext(config.getCallbackHandler());
-		}
 		return securityContext;
 	}
 

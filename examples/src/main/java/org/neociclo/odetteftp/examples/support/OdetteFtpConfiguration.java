@@ -25,7 +25,6 @@ import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
-import org.neociclo.odetteftp.security.MappedCallbackHandler;
 
 /**
  * @author Rafael Marins
@@ -34,10 +33,6 @@ import org.neociclo.odetteftp.security.MappedCallbackHandler;
 public class OdetteFtpConfiguration implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	private String user;
-	private String password;
-	private MappedCallbackHandler callbackHandler;
 
 	private String userData;
 	private TransferMode transferMode;
@@ -49,22 +44,6 @@ public class OdetteFtpConfiguration implements Serializable {
 	private Boolean useSecureAuthentication;
 	private CipherSuite cipherSuiteSelection;
 	private OdetteFtpVersion version;
-
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
 
 	public String getUserData() {
 		return userData;
@@ -197,13 +176,5 @@ public class OdetteFtpConfiguration implements Serializable {
         }
         
     }
-
-	public MappedCallbackHandler getCallbackHandler() {
-		return callbackHandler;
-	}
-
-	public void setCallbackHandler(MappedCallbackHandler callbackHandler) {
-		this.callbackHandler = callbackHandler;
-	}
 
 }

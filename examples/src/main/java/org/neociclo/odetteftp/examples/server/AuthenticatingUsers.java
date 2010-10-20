@@ -54,7 +54,6 @@ public class AuthenticatingUsers {
 		OdetteFtpConfiguration config = createInitialServerConfig();
 
 		MappedCallbackHandler serverSecurityHandler = new MappedCallbackHandler();
-		config.setCallbackHandler(serverSecurityHandler);
 
 		//
 		// add server password authentication handler based on the users
@@ -78,7 +77,7 @@ public class AuthenticatingUsers {
 
 		SessionFinalizationListener sessionFinalizer = new SessionFinalizationListener(1);
 
-		ServerOftpletFactory factory = new ServerOftpletFactory(config, sessionFinalizer);
+		ServerOftpletFactory factory = new ServerOftpletFactory(config, serverSecurityHandler, sessionFinalizer);
 		TcpServer server = new TcpServer(localAddress, factory);
 
 		server.start();

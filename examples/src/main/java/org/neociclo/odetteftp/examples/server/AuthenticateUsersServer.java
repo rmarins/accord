@@ -26,7 +26,6 @@ import java.net.URL;
 
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.TransferMode;
-import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.examples.support.SessionFinalizationListener;
 import org.neociclo.odetteftp.examples.support.UserPropertiesAutheticationHandler;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
@@ -34,6 +33,7 @@ import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.PasswordAuthenticationCallback;
 import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpServer;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.support.PasswordHandler;
 
 /**

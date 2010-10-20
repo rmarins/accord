@@ -31,8 +31,6 @@ import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.support.DefaultSecurityContext;
-import org.neociclo.odetteftp.examples.support.OdetteFtpConfiguration;
-import org.neociclo.odetteftp.examples.support.PropertiesBasedConfiguration;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
 import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.OftpletAdapter;
@@ -45,7 +43,9 @@ import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.SecurityContext;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.support.OftpletEventListener;
+import org.neociclo.odetteftp.support.PropertiesBasedConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

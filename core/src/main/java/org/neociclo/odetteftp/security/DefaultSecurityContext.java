@@ -17,12 +17,10 @@
  *
  * $Id$
  */
-package org.neociclo.odetteftp.examples.support;
+package org.neociclo.odetteftp.security;
 
 import javax.security.auth.callback.CallbackHandler;
 
-import org.neociclo.odetteftp.security.MappedCallbackHandler;
-import org.neociclo.odetteftp.security.SecurityContext;
 
 /**
  * @author Rafael Marins

@@ -114,17 +114,17 @@ public class PropertiesBasedConfiguration extends OdetteFtpConfiguration {
 
 		String textCompression = props.getProperty(COMPRESSION_PROP);
 		if (textCompression != null) {
-			useCompression(Boolean.parseBoolean(textCompression));
+			setUseCompression(Boolean.parseBoolean(textCompression));
 		}
 
 		String textRestart = props.getProperty(RESTART_PROP);
 		if (textRestart != null) {
-			useRestart(Boolean.parseBoolean(textRestart));
+			setUseRestart(Boolean.parseBoolean(textRestart));
 		}
 
 		String textSpecialLogic = props.getProperty(SPECIAL_LOGIC_PROP);
 		if (textSpecialLogic != null) {
-			hasSpecialLogic(Boolean.parseBoolean(textSpecialLogic));
+			setHasSpecialLogic(Boolean.parseBoolean(textSpecialLogic));
 		}
 
 		String textSecureAuth = props.getProperty(SECURE_AUTHENTICATION_PROP);

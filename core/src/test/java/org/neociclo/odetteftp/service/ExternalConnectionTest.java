@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.neociclo.odetteftp.TransferMode;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 
 /**
  * @author Rafael Marins
@@ -33,9 +33,8 @@ import org.neociclo.odetteftp.support.SessionConfig;
 public class ExternalConnectionTest extends AbstractTcpClientExternal {
 
     @Override
-    protected SessionConfig createSessionConfig() {
-        SessionConfig c = new SessionConfig();
-//        c.setVersion(OdetteFtpVersion.OFTP_V14);
+    protected OdetteFtpConfiguration createSessionConfig() {
+    	OdetteFtpConfiguration c = new OdetteFtpConfiguration();
         c.setTransferMode(TransferMode.SENDER_ONLY);
         return c;
     }

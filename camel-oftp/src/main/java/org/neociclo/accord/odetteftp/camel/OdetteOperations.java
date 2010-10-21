@@ -58,10 +58,13 @@ import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
+import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpClient;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.support.OftpletEventListener;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.PasswordHandler;
 
 public class OdetteOperations implements OftpletEventListener {
 
@@ -134,14 +137,17 @@ public class OdetteOperations implements OftpletEventListener {
 
 		TransferMode identifyTransferMode = identifyTransferMode();
 
-		SessionConfig session = new SessionConfig();
-		session.setUserCode(cfg.getOid());
-		session.setUserPassword(cfg.getPassword());
+		OdetteFtpConfiguration session = new OdetteFtpConfiguration();
 		session.setTransferMode(identifyTransferMode);
 		session.setDataExchangeBufferSize(cfg.getBufferSize());
 		session.setWindowSize(cfg.getWindowSize());
 
-		factory = new InOutSharedQueueOftpletFactory(session, outgoingQueue, null, incomingQueue);
+		MappedCallbackHandler securityCallbacks = new MappedCallbackHandler();
+		securityCallbacks.addHandler(PasswordCallback.class,
+				new PasswordHandler(cfg.getOid(), cfg.getPassword()));
+
+
+		factory = new InOutSharedQueueOftpletFactory(session, securityCallbacks, outgoingQueue, null, incomingQueue);
 		factory.setEventListener(this);
 	}
 

@@ -81,7 +81,7 @@ public class OdetteFtpConfiguration implements Serializable {
 		return useCompression;
 	}
 
-	public void useCompression(Boolean useCompression) {
+	public void setUseCompression(Boolean useCompression) {
 		this.useCompression = useCompression;
 	}
 
@@ -89,7 +89,7 @@ public class OdetteFtpConfiguration implements Serializable {
 		return useRestart;
 	}
 
-	public void useRestart(Boolean useRestart) {
+	public void setUseRestart(Boolean useRestart) {
 		this.useRestart = useRestart;
 	}
 
@@ -97,7 +97,7 @@ public class OdetteFtpConfiguration implements Serializable {
 		return hasSpecialLogic;
 	}
 
-	public void hasSpecialLogic(Boolean hasSpecialLogic) {
+	public void setHasSpecialLogic(Boolean hasSpecialLogic) {
 		this.hasSpecialLogic = hasSpecialLogic;
 	}
 

@@ -24,6 +24,7 @@ import java.util.Queue;
 import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
 
 /**
  * @author Rafael Marins
@@ -31,11 +32,12 @@ import org.neociclo.odetteftp.protocol.OdetteFtpObject;
  */
 public class InOutSharedQueueOftpletFactory implements OftpletFactory {
 
-	private SessionConfig sessionConfig;
+	private OdetteFtpConfiguration config;
 	private Queue<OdetteFtpObject> outgoing;
 	private Queue<OdetteFtpObject> outgoingDone;
 	private Queue<OdetteFtpObject> incoming;
 	private OftpletEventListener eventListener;
+	private MappedCallbackHandler callbackHandler;
 
 	/**
 	 * Constructor for this shared queue Oftplet factory implementation,
@@ -46,7 +48,7 @@ public class InOutSharedQueueOftpletFactory implements OftpletFactory {
 	 * OftpletListener and OftpletSpeaker are respectively will not be provided
 	 * by the created Oftplet implementation.
 	 * 
-	 * @param sessionConfig
+	 * @param config
 	 * @param outgoing
 	 *            queue of Odette FTP objects, Virtual File and Delivery
 	 *            Notifications, for transmission.
@@ -59,17 +61,18 @@ public class InOutSharedQueueOftpletFactory implements OftpletFactory {
 	 *            where incoming Odette FTP objects, received Virtual Files and
 	 *            Delivery Notifications, are kept.
 	 */
-	public InOutSharedQueueOftpletFactory(SessionConfig sessionConfig, Queue<OdetteFtpObject> outgoing,
-			Queue<OdetteFtpObject> outgoingDone, Queue<OdetteFtpObject> incoming) {
+	public InOutSharedQueueOftpletFactory(OdetteFtpConfiguration config, MappedCallbackHandler callbackHandler,
+			Queue<OdetteFtpObject> outgoing, Queue<OdetteFtpObject> outgoingDone, Queue<OdetteFtpObject> incoming) {
 		super();
-		this.sessionConfig = sessionConfig;
+		this.config = config;
+		this.callbackHandler = callbackHandler;
 		this.outgoing = outgoing;
 		this.outgoingDone = outgoingDone;
 		this.incoming = incoming;
 	}
 
 	public Oftplet createProvider() {
-		InOutSharedQueueOftplet oftplet = new InOutSharedQueueOftplet(sessionConfig, outgoing, outgoingDone, incoming);
+		InOutSharedQueueOftplet oftplet = new InOutSharedQueueOftplet(config, callbackHandler, outgoing, outgoingDone, incoming);
 		if (eventListener != null) {
 			oftplet.setEventListener(eventListener);
 		}

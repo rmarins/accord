@@ -27,8 +27,10 @@ import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
 import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
+import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.PasswordHandler;
 
 /**
  * @author Rafael Marins
@@ -42,14 +44,14 @@ public class EstablishSecureConnection {
 
 		String server = ms.get(0);
 		int port = Integer.parseInt(ms.get(1));
-		String oid = ms.get(2);
-		String password = ms.get(3);
+		String userCode = ms.get(2);
+		String userPassword = ms.get(3);
 
-		SessionConfig conf = new SessionConfig();
-		conf.setUserCode(oid);
-		conf.setUserPassword(password);
+		MappedCallbackHandler securityCallbacks = new MappedCallbackHandler();
+		securityCallbacks.addHandler(PasswordCallback.class,
+				new PasswordHandler(userCode, userPassword));
 
-		OftpletFactory factory = new DefaultOftpletFactory(conf);
+		OftpletFactory factory = new DefaultOftpletFactory(securityCallbacks);
 
 		// create the client mode SSL engine
 		SSLEngine sslEngine = SampleOftpSslContextFactory.getClientContext().createSSLEngine();

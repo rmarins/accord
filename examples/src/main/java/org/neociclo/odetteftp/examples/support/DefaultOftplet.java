@@ -23,9 +23,10 @@ import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.oftplet.OftpletAdapter;
 import org.neociclo.odetteftp.protocol.EndSessionException;
+import org.neociclo.odetteftp.security.DefaultSecurityContext;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.SecurityContext;
-import org.neociclo.odetteftp.support.ConfigBasedSecurityContext;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 
 /**
  * @author Rafael Marins
@@ -33,18 +34,20 @@ import org.neociclo.odetteftp.support.SessionConfig;
  */
 public class DefaultOftplet extends OftpletAdapter {
 
-	private SessionConfig conf;
-	private ConfigBasedSecurityContext securityContext;
+	private OdetteFtpConfiguration conf;
+	private SecurityContext securityContext;
 
-	public DefaultOftplet(SessionConfig conf) {
+	public DefaultOftplet(OdetteFtpConfiguration conf, MappedCallbackHandler callbackHandler) {
 		this.conf = conf;
-		this.securityContext = new ConfigBasedSecurityContext(conf);
+		this.securityContext = new DefaultSecurityContext(callbackHandler);
 	}
 
 	@Override
 	public void init(OdetteFtpSession session) throws OdetteFtpException {
 		// use the SessionConfig object to configure session parameters
-		conf.setup(session);
+		if (conf != null) {
+			conf.setup(session);
+		}
 	}
 
 	@Override

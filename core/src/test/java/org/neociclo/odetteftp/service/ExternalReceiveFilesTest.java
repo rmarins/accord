@@ -35,8 +35,8 @@ import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
-import org.neociclo.odetteftp.support.SessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +48,11 @@ public class ExternalReceiveFilesTest extends AbstractTcpClientExternal {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalReceiveFilesTest.class);
 
-    private SessionConfig sessionConfig;
+    private OdetteFtpConfiguration sessionConfig;
 
     @Override
-    protected SessionConfig createSessionConfig() {
-        sessionConfig = new SessionConfig();
+    protected OdetteFtpConfiguration createSessionConfig() {
+        sessionConfig = new OdetteFtpConfiguration();
         sessionConfig.setTransferMode(TransferMode.RECEIVER_ONLY);
         return sessionConfig;
     }

@@ -29,6 +29,8 @@ import org.neociclo.odetteftp.oftplet.OftpletAdapter;
 import org.neociclo.odetteftp.oftplet.OftpletListener;
 import org.neociclo.odetteftp.oftplet.OftpletSpeaker;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
+import org.neociclo.odetteftp.security.DefaultSecurityContext;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.SecurityContext;
 
 /**
@@ -37,18 +39,18 @@ import org.neociclo.odetteftp.security.SecurityContext;
  */
 public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 
-	private SessionConfig config;
+	private OdetteFtpConfiguration config;
 	private SecurityContext securityContext;
 	private SharedQueueOftpletListener listener;
 	private SharedQueueOftpletSpeaker speaker;
 	private OftpletEventListener wrappedListener;
 
-	public InOutSharedQueueOftplet(SessionConfig sessionConfig, Queue<OdetteFtpObject> outgoing,
+	public InOutSharedQueueOftplet(OdetteFtpConfiguration config, MappedCallbackHandler callbackHandler, Queue<OdetteFtpObject> outgoing,
 			Queue<OdetteFtpObject> outgoingDone, Queue<OdetteFtpObject> incoming) {
 
 		super();
-		this.config = sessionConfig;
-		this.securityContext = new ConfigBasedSecurityContext(sessionConfig);
+		this.config = config;
+		this.securityContext = new DefaultSecurityContext(callbackHandler);
 
 		this.listener = new SharedQueueOftpletListener(incoming);
 		this.speaker = new SharedQueueOftpletSpeaker(outgoing, outgoingDone);

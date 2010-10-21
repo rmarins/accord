@@ -21,7 +21,8 @@ package org.neociclo.odetteftp.examples.support;
 
 import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 
 /**
  * @author Rafael Marins
@@ -29,14 +30,20 @@ import org.neociclo.odetteftp.support.SessionConfig;
  */
 public class DefaultOftpletFactory implements OftpletFactory {
 
-	private SessionConfig conf;
+	private OdetteFtpConfiguration conf;
+	private MappedCallbackHandler callbackHandler;
 
-	public DefaultOftpletFactory(SessionConfig conf) {
+	public DefaultOftpletFactory(MappedCallbackHandler callbackHandler) {
+		this(new OdetteFtpConfiguration(), callbackHandler);
+	}
+
+	public DefaultOftpletFactory(OdetteFtpConfiguration conf, MappedCallbackHandler callbackHandler) {
 		this.conf = conf;
+		this.callbackHandler = callbackHandler;
 	}
 
 	public Oftplet createProvider() {
-		Oftplet oftplet = new DefaultOftplet(conf);
+		Oftplet oftplet = new DefaultOftplet(conf, callbackHandler);
 		return oftplet;
 	}
 

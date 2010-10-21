@@ -19,7 +19,7 @@
  */
 package org.neociclo.odetteftp.examples.client;
 
-import static org.neociclo.odetteftp.TransferMode.*;
+import static org.neociclo.odetteftp.TransferMode.SENDER_ONLY;
 
 import java.io.File;
 import java.util.Queue;
@@ -29,9 +29,12 @@ import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
+import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpClient;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
+import org.neociclo.odetteftp.support.PasswordHandler;
 
 /**
  * @author Rafael Marins
@@ -47,15 +50,17 @@ public class SendFile {
 
 		String host = args[0];
 		int port = Integer.parseInt(args[1]);
-		String usercode = args[2];
-		String password = args[3];
+		String userCode = args[2];
+		String userPassword = args[3];
 		File payload = new File(args[4]);
 		String destination = args[5];
 
-		SessionConfig conf = new SessionConfig();
-		conf.setUserCode(usercode);
-		conf.setUserPassword(password);
+		OdetteFtpConfiguration conf = new OdetteFtpConfiguration();
 		conf.setTransferMode(SENDER_ONLY);
+
+		MappedCallbackHandler securityCallbacks = new MappedCallbackHandler();
+		securityCallbacks.addHandler(PasswordCallback.class,
+				new PasswordHandler(userCode, userPassword));
 
 		Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
@@ -66,7 +71,7 @@ public class SendFile {
 
 		filesToSend.offer(vf);
 
-		OftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, filesToSend, null, null);
+		OftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks, filesToSend, null, null);
 		TcpClient oftp = new TcpClient(host, port, factory);
 
 		oftp.connect(true);

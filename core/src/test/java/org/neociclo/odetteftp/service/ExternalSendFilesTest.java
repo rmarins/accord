@@ -31,7 +31,7 @@ import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 
 /**
  * @author Rafael Marins
@@ -39,11 +39,11 @@ import org.neociclo.odetteftp.support.SessionConfig;
  */
 public class ExternalSendFilesTest extends AbstractTcpClientExternal {
 
-    private SessionConfig sessionConfig;
+    private OdetteFtpConfiguration sessionConfig;
 
     @Override
-    protected SessionConfig createSessionConfig() {
-        sessionConfig = new SessionConfig();
+    protected OdetteFtpConfiguration createSessionConfig() {
+        sessionConfig = new OdetteFtpConfiguration();
         sessionConfig.setTransferMode(TransferMode.SENDER_ONLY);
         return sessionConfig;
     }

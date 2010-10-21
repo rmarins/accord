@@ -43,8 +43,11 @@ import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.RecordFormat;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
+import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
+import org.neociclo.odetteftp.support.PasswordHandler;
 import org.neociclo.odetteftp.util.ProtocolUtil;
 
 /**
@@ -118,12 +121,13 @@ public abstract class AbstractTcpClientExternal {
         outgoingDone = new ConcurrentLinkedQueue<OdetteFtpObject>();
         incoming = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
-        SessionConfig c = createSessionConfig();
-        c.setUserCode(userCode);
-        c.setUserPassword(userPswd);
+        OdetteFtpConfiguration c = createSessionConfig();
         c.setUserData(userData);
+
+        MappedCallbackHandler callbackHandler = new MappedCallbackHandler();
+        callbackHandler.addHandler(PasswordCallback.class, new PasswordHandler(userCode, userPswd));
         
-        factory = new InOutSharedQueueOftpletFactory(c, outgoing, outgoingDone, incoming);
+        factory = new InOutSharedQueueOftpletFactory(c, callbackHandler, outgoing, outgoingDone, incoming);
 
         client = new TcpClient(host, portNum, factory);
 
@@ -141,7 +145,7 @@ public abstract class AbstractTcpClientExternal {
         client = null;
     }
 
-    protected abstract SessionConfig createSessionConfig();
+    protected abstract OdetteFtpConfiguration createSessionConfig();
 
     protected VirtualFile createVirtualFile(File payload) {
         String dsn = (datasetName == null ? payload.getName() : datasetName);

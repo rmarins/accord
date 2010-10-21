@@ -46,10 +46,13 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.v20.DefaultSignedDeliveryNotification;
 import org.neociclo.odetteftp.protocol.v20.EnvelopedVirtualFile;
 import org.neociclo.odetteftp.protocol.v20.FileEnveloping;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
+import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpClient;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.PasswordHandler;
 import org.neociclo.odetteftp.util.EnvelopingException;
 import org.neociclo.odetteftp.util.EnvelopingUtil;
 import org.neociclo.odetteftp.util.SecurityUtil;
@@ -73,17 +76,17 @@ public class ReceiveEnvelopedFiles {
 
 		String server = args[0];
 		int port = Integer.parseInt(args[1]);
-		String odetteid = args[2];
-		String password = args[3];
+		String userCode = args[2];
+		String userPassword = args[3];
 		final File directory = new File(args[4]);
 
-		SessionConfig conf = new SessionConfig();
-		conf.setUserCode(odetteid);
-		conf.setUserPassword(password);
-
+		OdetteFtpConfiguration conf = new OdetteFtpConfiguration();
 		conf.setTransferMode(RECEIVER_ONLY);
-		// require an OFTP2 connection
-		conf.setVersion(OdetteFtpVersion.OFTP_V20);
+		conf.setVersion(OdetteFtpVersion.OFTP_V20); // require OFTP2 connection
+
+		MappedCallbackHandler securityCallbacks = new MappedCallbackHandler();
+		securityCallbacks.addHandler(PasswordCallback.class,
+				new PasswordHandler(userCode, userPassword));
 
 		// add signature: pre-load user's private key and certificate
 		KeyStore userKs = SecurityUtil.openKeyStore(new File(USER_KEYSTORE_FILE),
@@ -93,7 +96,8 @@ public class ReceiveEnvelopedFiles {
 
 		final Queue<OdetteFtpObject> outgoingQueue = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
-		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, outgoingQueue, null, null);
+		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks,
+				outgoingQueue, null, null);
 		TcpClient oftp = new TcpClient(server, port, factory);
 
 		// prepare the incoming handler

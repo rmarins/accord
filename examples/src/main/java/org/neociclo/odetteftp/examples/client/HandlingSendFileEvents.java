@@ -19,7 +19,7 @@
  */
 package org.neociclo.odetteftp.examples.client;
 
-import static org.neociclo.odetteftp.TransferMode.*;
+import static org.neociclo.odetteftp.TransferMode.SENDER_ONLY;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,10 +34,13 @@ import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.security.MappedCallbackHandler;
+import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpClient;
-import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
-import org.neociclo.odetteftp.support.SessionConfig;
+import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
+import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
+import org.neociclo.odetteftp.support.PasswordHandler;
 import org.neociclo.odetteftp.util.IoUtil;
 
 /**
@@ -54,14 +57,16 @@ public class HandlingSendFileEvents {
 
 		String server = args[0];
 		int port = Integer.parseInt(args[1]);
-		String odetteid = args[2];
-		String password = args[3];
+		String userCode = args[2];
+		String userPassword = args[3];
 		final File payload = new File(args[4]);
 
-		SessionConfig conf = new SessionConfig();
-		conf.setUserCode(odetteid);
-		conf.setUserPassword(password);
+		OdetteFtpConfiguration conf = new OdetteFtpConfiguration();
 		conf.setTransferMode(SENDER_ONLY);
+
+		MappedCallbackHandler securityCallbacks = new MappedCallbackHandler();
+		securityCallbacks.addHandler(PasswordCallback.class,
+				new PasswordHandler(userCode, userPassword));
 
 		final Queue<OdetteFtpObject> filesToSend = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
@@ -71,7 +76,7 @@ public class HandlingSendFileEvents {
 		filesToSend.offer(vf);
 
 		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(
-				conf, filesToSend, null, null);
+				conf, securityCallbacks, filesToSend, null, null);
 		TcpClient oftp = new TcpClient(server, port, factory);
 
 		factory.setEventListener(new OftpletEventListenerAdapter() {

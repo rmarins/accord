@@ -7,15 +7,14 @@
    but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
    FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
    You should have received a copy of the GNU General Public License along with this 
-   program. If not, see <http://www.gnu.org/licenses/>. $Id: pom.xml 267 2010-04-22 
+   program. If not, see <http://www.gnu.org/licenses />. $Id: pom.xml 267 2010-04-22 
    14:48:04Z brunoborges $ -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
    <parent>
       <groupId>org.neociclo.accord.odetteftp</groupId>
       <artifactId>odetteftp-parent</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>1.2.0.RC1</version>
    </parent>
 
    <modelVersion>4.0.0</modelVersion>

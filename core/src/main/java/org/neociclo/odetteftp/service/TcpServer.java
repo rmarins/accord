@@ -19,8 +19,6 @@
  */
 package org.neociclo.odetteftp.service;
 
-import static org.neociclo.odetteftp.TransportType.*;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.Executors;
@@ -33,6 +31,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.util.Timer;
 import org.neociclo.odetteftp.EntityType;
+import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.netty.OdetteFtpPipelineFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 
@@ -41,6 +40,8 @@ import org.neociclo.odetteftp.oftplet.OftpletFactory;
  * @version $Rev$ $Date$
  */
 public class TcpServer extends Server {
+
+	private static final TransportType TCPIP_TRANSPORT_TYPE = TransportType.TCPIP;
 
     private InetSocketAddress localAddress;
     private SSLEngine sslEngine;
@@ -88,8 +89,11 @@ public class TcpServer extends Server {
         }
 
         OdetteFtpPipelineFactory pipelineFactory = new OdetteFtpPipelineFactory(EntityType.RESPONDER, oftpletFactory,
-                timer, TCPIP, sslHandler, channelGroup);
+                timer, getTransportType(), sslHandler, channelGroup);
         return pipelineFactory;
     }
 
+	public TransportType getTransportType() {
+		return TCPIP_TRANSPORT_TYPE;
+	}
 }

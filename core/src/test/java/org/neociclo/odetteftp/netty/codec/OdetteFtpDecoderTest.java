@@ -23,6 +23,8 @@ import static org.junit.Assert.*;
 import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
 import static org.neociclo.odetteftp.protocol.CommandExchangeBuffer.*;
 
+import java.io.UnsupportedEncodingException;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
@@ -43,7 +45,7 @@ import org.neociclo.odetteftp.protocol.EndSessionReason;
  */
 public class OdetteFtpDecoderTest {
 
-    private static ChannelBuffer command(String text) {
+    private static ChannelBuffer command(String text) throws UnsupportedEncodingException {
         return ChannelBuffers.wrappedBuffer(text.getBytes(DEFAULT_PROTOCOL_CHARSET));
     }
 
@@ -85,7 +87,7 @@ public class OdetteFtpDecoderTest {
      * extended command format of the lastest protocol.
      */
     @Test
-    public void testDecodeVer13EndSessionCommandOnVer20Session() {
+    public void testDecodeVer13EndSessionCommandOnVer20Session() throws Exception {
 
         OdetteFtpSession s = new OdetteFtpSession(EntityType.INITIATOR);
         s.setVersion(OdetteFtpVersion.OFTP_V20);

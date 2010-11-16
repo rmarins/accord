@@ -44,6 +44,8 @@ import org.neociclo.odetteftp.oftplet.OftpletFactory;
  */
 public class TcpClient extends Client {
 
+	private static final TransportType TCPIP_TRANSPORT_TYPE = TransportType.TCPIP;
+
     private static final int DEFAULT_NON_SSL_PORT = 3305;
 	private static final int DEFAULT_SSL_PORT = 6619;
 
@@ -115,7 +117,7 @@ public class TcpClient extends Client {
         }
 
         OdetteFtpPipelineFactory pipelineFactory = new OdetteFtpPipelineFactory(EntityType.INITIATOR, oftpletFactory,
-                timer, TransportType.TCPIP, sslHandler, null);
+                timer, getTransportType(), sslHandler, null);
 
         return pipelineFactory;
     }
@@ -151,4 +153,8 @@ public class TcpClient extends Client {
     	}
     	super.releaseExternalResources();
     }
+
+	protected TransportType getTransportType() {
+		return TCPIP_TRANSPORT_TYPE;
+	}
 }

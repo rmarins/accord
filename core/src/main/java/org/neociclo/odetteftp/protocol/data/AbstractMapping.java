@@ -22,6 +22,7 @@ package org.neociclo.odetteftp.protocol.data;
 import static org.neociclo.odetteftp.protocol.CommandExchangeBuffer.DEFAULT_PROTOCOL_CHARSET;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -31,6 +32,8 @@ import org.neociclo.odetteftp.protocol.DataExchangeBuffer;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.RecordFormat;
 import org.neociclo.odetteftp.protocol.VirtualFileMappingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Rafael Marins
@@ -46,6 +49,8 @@ public abstract class AbstractMapping implements MappingStrategy {
     public static final int TEXTFILE_BLOCK_SIZE = 2048;
 
     public static final int MAX_SUBRECORD_LENGTH = 63;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMapping.class);
 
     protected static final byte[] LINE_SEPARATOR = getProtocolEncodedBytes(System.getProperty("line.separator"));
 
@@ -66,8 +71,12 @@ public abstract class AbstractMapping implements MappingStrategy {
     }
 
     private static byte[] getProtocolEncodedBytes(String text) {
-        byte[] encoded;
-        encoded = text.getBytes(DEFAULT_PROTOCOL_CHARSET);
+        byte[] encoded = null;
+        try {
+			encoded = text.getBytes(DEFAULT_PROTOCOL_CHARSET);
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Cannot decode protocol parameter: " + text, e);
+		}
         return encoded;
     }
 
@@ -76,53 +85,6 @@ public abstract class AbstractMapping implements MappingStrategy {
 
     public abstract long writeData(VirtualFile virtualFile, DataExchangeBuffer dataBuffer, FileChannel fileChannel)
             throws OdetteFtpException;
-
-//    protected ByteBuffer readRecord(FileChannel in, IVirtualFile virtualFile) throws OdetteFtpException {
-//
-//        /* Determine record size according to the Virtual File format. */
-//        int recordSize = DEFAULT_VIRTUAL_FILE_BLOCK_SIZE;
-//        if (virtualFile.getRecordFormat() == TEXTFILE)
-//            recordSize = TEXTFILE_BLOCK_SIZE;
-//        else if (((virtualFile.getRecordFormat() == VARIABLE) || (virtualFile.getRecordFormat() == FIXED)) && virtualFile.getRecordSize() > 0)
-//            recordSize = virtualFile.getRecordSize();
-//
-//        long entryPos;
-//
-//        try {
-//            entryPos = in.position();
-//        } catch (IOException e) {
-//            throw new VirtualFileMappingException("Cannot determine Virtual File current position: " + virtualFile, e);
-//        }
-//
-//        long recordLimit = ((entryPos / recordSize) + 1) * recordSize;
-//        int allocateSize = (int) (recordLimit - entryPos);
-//
-//        if (allocateSize <= 0)
-//            return null;
-//
-//        ByteBuffer buffer = ByteBufferFactory.allocate(allocateSize);
-//
-//        try {
-//            int bytesRead = in.read(buffer);
-//            if (bytesRead == -1) {
-//                return null;
-//            }
-//            buffer.flip();
-//        } catch (IOException e) {
-//            throw new VirtualFileMappingException("Cannot read record from the input Virtual File at " + entryPos + ": "
-//                    + virtualFile, e);
-//        }
-//
-//        try {
-//            in.position(entryPos);
-//        } catch (IOException e) {
-//            throw new VirtualFileMappingException("Cannot discard read bytes on the input Virtual back to " +
-//                    entryPos + ": " + virtualFile, e);
-//        }
-//
-//        return (buffer.limit() == 0 ? null : buffer);
-//    }
-
 
     protected long position(FileChannel in) throws VirtualFileMappingException {
         try {

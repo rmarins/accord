@@ -127,7 +127,7 @@ public class CommandExchangeBufferTest {
      * implementation.
      */
     @Test
-    public void testZeroSizedHashAndSignatureVer20EndResponseBuffer() {
+    public void testZeroSizedHashAndSignatureVer20EndResponseBuffer() throws Exception {
 
         CommandExchangeBuffer eerp = new CommandExchangeBuffer(EERP_V20);
 
@@ -154,7 +154,7 @@ public class CommandExchangeBufferTest {
      * ODETTE FTP v2.0 or above).
      */
     @Test
-    public void testNormalStartSessionVer14() {
+    public void testNormalStartSessionVer14() throws Exception {
 
         // first: test parsing
 

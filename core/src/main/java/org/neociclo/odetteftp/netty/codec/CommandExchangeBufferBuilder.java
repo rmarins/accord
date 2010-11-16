@@ -21,6 +21,7 @@ package org.neociclo.odetteftp.netty.codec;
 
 import static org.neociclo.odetteftp.protocol.CommandExchangeBuffer.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,12 +31,16 @@ import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.CommandFormat;
 import org.neociclo.odetteftp.protocol.CommandFormat.Field;
 import org.neociclo.odetteftp.util.ProtocolUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
 public class CommandExchangeBufferBuilder {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CommandExchangeBufferBuilder.class);
 
     private static class ParamsRead {
         public ParamsRead(int pos, int size) {
@@ -80,13 +85,27 @@ public class CommandExchangeBufferBuilder {
             }
             // UTF-8 encoded text
             else if (field.getType() == Field.ENCODED_TYPE) {
-                String encodedText = new String(octets, UTF8_ENCODED_PROTOCOL_CHARSET);
-                command.setAttribute(fieldName, encodedText);
+                String encodedText = null;
+				try {
+					encodedText = new String(octets, UTF8_ENCODED_PROTOCOL_CHARSET);
+				} catch (UnsupportedEncodingException e) {
+					LOGGER.error("Cannot encode " + UTF8_ENCODED_PROTOCOL_CHARSET + " protocol parameter: " + fieldName, e);
+					continue;
+				}
+
+				command.setAttribute(fieldName, encodedText);
+
             }
             // alphanumeric text
             else {
 
-                String text = new String(octets, DEFAULT_PROTOCOL_CHARSET);
+                String text = null;
+				try {
+					text = new String(octets, DEFAULT_PROTOCOL_CHARSET);
+				} catch (UnsupportedEncodingException e) {
+					LOGGER.error("Cannot encode " + DEFAULT_PROTOCOL_CHARSET + " protocol parameter: " + fieldName, e);
+					continue;
+				}
 
                 if (field.getType() == Field.ALPHANUMERIC_TYPE) {
                     // carriage return fields are settled as alphanumeric and shouldn't be trimmed

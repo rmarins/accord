@@ -58,13 +58,6 @@
       <organization>Neociclo</organization>
       <timezone>BRST</timezone>
     </developer>
-
-    <developer>
-      <id>brunoborges</id>
-      <name>Bruno Borges</name>
-      <organization>Neociclo</organization>
-      <timezone>BRST</timezone>
-    </developer>
   </developers>
 
   <scm>
@@ -193,7 +186,7 @@
   <properties>
 
     <!-- compile dependencies version -->
-    <netty.version>3.2.2.Final</netty.version>
+    <netty.version>3.2.3.Final</netty.version>
     <bouncycastle.version>1.45</bouncycastle.version>
     <slf4j.version>1.6.1</slf4j.version>
 

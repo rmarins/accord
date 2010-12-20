@@ -40,9 +40,9 @@ public class OdetteFtpConstants {
     public static final int MIN_OEB_LENGTH = 128;
 
     /**
-     * Default ODETTE-FTP session timeout of 90 seconds.
+     * Default ODETTE-FTP session timeout of 90 seconds (in millis).
      */
-    public static final int DEFAULT_OFTP_SESSION_TIMEOUT = 90;
+    public static final long DEFAULT_OFTP_SESSION_TIMEOUT = 90000L;
 
     /**
      * Default Data Exchange Buffer size of 4096 octets.

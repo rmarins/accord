@@ -55,10 +55,16 @@
          <artifactId>oftp-core</artifactId>
          <version>${project.version}</version>
       </dependency>
+
+      <dependency>
+         <groupId>org.neociclo.accord.odetteftp</groupId>
+         <artifactId>oftp-examples</artifactId>
+         <version>${project.version}</version>
+      </dependency>
    </dependencies>
 
    <properties>
-      <camel.version>2.4.0</camel.version>
+      <camel.version>2.5.0</camel.version>
       <commons-io.version>1.3.2</commons-io.version>
    </properties>
 

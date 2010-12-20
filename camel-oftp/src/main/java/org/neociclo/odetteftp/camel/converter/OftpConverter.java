@@ -39,10 +39,11 @@ import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 
 /**
- * @author Rafael MariOdetteFtpConvertern $Rev$OdetteFtpConverter09-23 17:49:49 -0300 (Thu, 23 Sep 2010) $
+ * @author Rafael Marins
+ * @version $Rev$ $Date$
  */
 @Converter
-public class OdetteFtpConverter {
+public class OftpConverter {
 
 	@Converter
 	public static OdetteFtpObject genericFileToOdetteFtpObject(GenericFile<?> file, Exchange exchange) throws IOException {
@@ -129,6 +130,6 @@ public class OdetteFtpConverter {
     	return result;
     }
 
-	private OdetteFtpConverter() {
+	private OftpConverter() {
 	}
 }

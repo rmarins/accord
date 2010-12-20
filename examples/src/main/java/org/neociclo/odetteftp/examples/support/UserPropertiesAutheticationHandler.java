@@ -19,8 +19,6 @@
  */
 package org.neociclo.odetteftp.examples.support;
 
-import static org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,7 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
-import org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult;
+import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.support.PasswordAuthenticationHandler;
 
 /**
@@ -41,6 +39,7 @@ public class UserPropertiesAutheticationHandler extends PasswordAuthenticationHa
 
 	private Properties users;
 	private boolean useMd5Digest;
+	private EndSessionReason cause;
 
 	public UserPropertiesAutheticationHandler(File propertiesFile) {
 		this(propertiesFile, false);
@@ -72,11 +71,12 @@ public class UserPropertiesAutheticationHandler extends PasswordAuthenticationHa
 	}
 
 	@Override
-	public AuthenticationResult authenticate(String authenticatingUser, String authenticatingPassword) throws IOException {
+	public boolean authenticate(String authenticatingUser, String authenticatingPassword) throws IOException {
 
 		String oid = authenticatingUser.toUpperCase();
 		if (!users.containsKey(oid)) {
-			return UNKNOWN_USER;
+			cause = EndSessionReason.UNKNOWN_USER_CODE;
+			return false;
 		}
 
 		String pwd = users.getProperty(oid);
@@ -94,7 +94,17 @@ public class UserPropertiesAutheticationHandler extends PasswordAuthenticationHa
 			passwordMatch = (authenticatingPassword.equalsIgnoreCase(pwd));
 		}
 
-		return (passwordMatch ? SUCCESS : INVALID_PASSWORD);
+		if (passwordMatch) {
+			return true;
+		} else {
+			cause = EndSessionReason.INVALID_PASSWORD;
+			return false;
+		}
+	}
+
+	@Override
+	public EndSessionReason getCause() {
+		return cause;
 	}
 
 	private String hash(String text) throws NoSuchAlgorithmException {
@@ -120,4 +130,5 @@ public class UserPropertiesAutheticationHandler extends PasswordAuthenticationHa
 		}
 		return sb.toString();
 	}
+
 }

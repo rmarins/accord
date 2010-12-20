@@ -19,7 +19,6 @@
  */
 package org.neociclo.odetteftp.examples.server;
 
-import static org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult.*;
 import static org.neociclo.odetteftp.examples.server.SimpleServerHelper.*;
 
 import java.io.File;
@@ -31,7 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
-import org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult;
+import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.support.PasswordAuthenticationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +45,7 @@ class SimpleServerAuthenticationHandler extends PasswordAuthenticationHandler {
 
 	private File serverBaseDir;
 	private boolean useMd5Digest;
+	private EndSessionReason cause;
 
 	public SimpleServerAuthenticationHandler(File serverDataDir) {
 		this(serverDataDir, false);
@@ -58,7 +58,7 @@ class SimpleServerAuthenticationHandler extends PasswordAuthenticationHandler {
 	}
 
 	@Override
-	public AuthenticationResult authenticate(String authenticatingUser, String authenticatingPassword) throws IOException {
+	public boolean authenticate(String authenticatingUser, String authenticatingPassword) throws IOException {
 
 		LOGGER.trace("Authenticating user: {}", authenticatingUser);
 
@@ -66,7 +66,8 @@ class SimpleServerAuthenticationHandler extends PasswordAuthenticationHandler {
 
 		if (!cfile.exists()) {
 			LOGGER.warn("User mailbox structure doesn't exist: {}", cfile);
-			return UNKNOWN_USER;
+			cause = EndSessionReason.UNKNOWN_USER_CODE;
+			return false;
 		}
 
 		Properties conf = new Properties();
@@ -76,7 +77,8 @@ class SimpleServerAuthenticationHandler extends PasswordAuthenticationHandler {
 
 		if (pwd == null) {
 			LOGGER.warn("No user password were set in config file: {}", cfile);
-			return INVALID_PASSWORD;
+			cause = EndSessionReason.INVALID_PASSWORD;
+			return false;
 		}
 
 		boolean passwordMatch = false;
@@ -92,7 +94,17 @@ class SimpleServerAuthenticationHandler extends PasswordAuthenticationHandler {
 			passwordMatch = (authenticatingPassword.equalsIgnoreCase(pwd));
 		}
 
-		return (passwordMatch ? SUCCESS : INVALID_PASSWORD);
+		if (passwordMatch) {
+			return true;
+		} else {
+			cause = EndSessionReason.INVALID_PASSWORD;
+			return false;
+		}
+	}
+
+	@Override
+	public EndSessionReason getCause() {
+		return cause;
 	}
 
 	private String hash(String text) throws NoSuchAlgorithmException {

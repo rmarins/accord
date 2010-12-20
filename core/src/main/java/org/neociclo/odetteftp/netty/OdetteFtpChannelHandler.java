@@ -19,7 +19,7 @@
  */
 package org.neociclo.odetteftp.netty;
 
-import static org.neociclo.odetteftp.ProtocolHandlerFactory.*;
+import static org.neociclo.odetteftp.ProtocolHandlerFactory.getProtocolHandlerByVersion;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.AUCH;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.AURP;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.CD;
@@ -39,17 +39,20 @@ import static org.neociclo.odetteftp.protocol.CommandIdentifier.SFPA;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.SSID;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.SSRM;
 import static org.neociclo.odetteftp.util.OdetteFtpConstants.DEFAULT_OFTP_ENTITY_TYPE;
-import static org.neociclo.odetteftp.util.SessionHelper.*;
+import static org.neociclo.odetteftp.util.SessionHelper.getSessionOftplet;
+import static org.neociclo.odetteftp.util.SessionHelper.setSessionOftplet;
+
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
@@ -183,8 +186,9 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
         oftplet.init(session);
 
         // configure channel idle based on configured session timeout
-        int timeoutSeconds = session.getTimeout();
-        ctx.getPipeline().addFirst("Timeout-HANDLER", new IdleStateHandler(timer, timeoutSeconds, timeoutSeconds, 0));
+		long timeoutInMillis = session.getTimeout();
+		ctx.getPipeline().addFirst("Timeout-HANDLER",
+				new IdleStateHandler(timer, timeoutInMillis, timeoutInMillis, 0, TimeUnit.MILLISECONDS));
 
         // Add all accepted channels to the group so that they are closed
         // properly on shutdown. If the added channel is closed before shutdown,

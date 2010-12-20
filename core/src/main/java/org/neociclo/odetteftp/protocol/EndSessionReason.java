@@ -57,12 +57,12 @@ import org.neociclo.odetteftp.OdetteFtpException;
 public enum EndSessionReason {
 
     /**
-     * Command not recognised.
+     * Command not recognized.
      * <p>
      * An Exchange Buffer contains an invalid command identifier (1st octet of
      * the buffer).
      */
-    COMMAND_NOT_RECOGNISED(1),
+    COMMAND_NOT_RECOGNIZED(1),
 
     /**
      * Local site emergency close down.
@@ -203,5 +203,10 @@ public enum EndSessionReason {
      */
     public int getCode() {
         return reasonCode;
+    }
+
+    public String getDescription() {
+    	String text = name();
+    	return text.replaceAll("_", " ");
     }
 }

@@ -45,7 +45,16 @@ public class DefaultVirtualFile implements VirtualFile {
 
     private File file;
 
-    public RecordFormat getRecordFormat() {
+	public DefaultVirtualFile() {
+		super();
+	}
+
+	public DefaultVirtualFile(File file) {
+		super();
+		setFile(file);
+	}
+
+	public RecordFormat getRecordFormat() {
         return recordFormat;
     }
 
@@ -213,7 +222,11 @@ public class DefaultVirtualFile implements VirtualFile {
     public String toString() {
         StringBuffer sb = new StringBuffer(getClass().getSimpleName());
         sb.append("(dsn=").append(getDatasetName());
-        sb.append(", dtm=").append(ProtocolUtil.formatDate("yyyy-MM-dd HH:mm:ss", getDateTime()));
+        if (getDateTime() == null) {
+        	sb.append(", dtm=null");
+        } else {
+        	sb.append(", dtm=").append(ProtocolUtil.formatDate("yyyy-MM-dd HH:mm:ss", getDateTime()));        	
+        }
         if (ticker != null) {
         	sb.append(", ticker=").append(ticker.toString());
         }

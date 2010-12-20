@@ -21,9 +21,9 @@ package org.neociclo.odetteftp.support;
 
 import java.io.IOException;
 
+import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.security.OneToOneHandler;
 import org.neociclo.odetteftp.security.PasswordAuthenticationCallback;
-import org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult;
 
 /**
  * @author Rafael Marins
@@ -37,11 +37,16 @@ public abstract class PasswordAuthenticationHandler implements OneToOneHandler<P
 
 	public void handle(PasswordAuthenticationCallback cb) throws IOException {
 
-		AuthenticationResult result = authenticate(cb.getUser(), cb.getPassword());
-		cb.setResult(result);
+		if (authenticate(cb.getUser(), cb.getPassword())) {
+			cb.setSuccess();
+		} else {
+			cb.setFailed(getCause());
+		}
 
 	}
 
-	public abstract AuthenticationResult authenticate(String user, String password) throws IOException;
+	public abstract boolean authenticate(String user, String password) throws IOException;
+
+	public abstract EndSessionReason getCause();
 
 }

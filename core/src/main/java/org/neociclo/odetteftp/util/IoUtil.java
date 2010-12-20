@@ -105,15 +105,17 @@ public class IoUtil {
 
     }
 
-    public static void delete(File f) {
+    public static boolean delete(File f) {
+    	boolean deleted = true;
         if (f != null && f.exists()) {
             LOGGER.trace("delete() Deleting file: {}", f);
             System.gc();
             System.runFinalization();
-            f.delete();
+            deleted = f.delete();
         } else {
             LOGGER.trace("delete() File doesn't exist: {}", f);
         }
+        return deleted;
     }
 
     public static void move(File src, File dest) throws IOException {
@@ -176,5 +178,9 @@ public class IoUtil {
         delete(dir);
 
     }
+
+	public static boolean existsFile(File file) {
+		return file.exists();
+	}
 
 }

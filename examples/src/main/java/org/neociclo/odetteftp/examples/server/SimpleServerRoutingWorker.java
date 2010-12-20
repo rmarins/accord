@@ -63,6 +63,7 @@ class SimpleServerRoutingWorker {
 			}
 
 			try {
+				LOGGER.trace("EXISTS: {}", sourceFile.exists());
 				IoUtil.move(sourceFile, destFile);
 				LOGGER.info("Delivered to [{}]: ", recipientOid, obj);
 			} catch (IOException e) {

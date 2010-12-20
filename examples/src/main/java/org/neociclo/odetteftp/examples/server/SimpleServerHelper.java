@@ -37,16 +37,37 @@ import org.slf4j.LoggerFactory;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-class SimpleServerHelper {
+public class SimpleServerHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleServerHelper.class);
-	public static final FilenameFilter EXCHANGES_FILENAME_FILTER = new FilenameFilter() {
+
+	private static final FilenameFilter EXCHANGES_FILENAME_FILTER = new FilenameFilter() {
 		public boolean accept(File dir, String name) {
 			return (name.endsWith(".vfile") || name.endsWith(".notif"));
 		}
 	};
 
 	private SimpleServerHelper() {
+	}
+
+	public static void createUserDirStructureIfNotExist(String userCode, File serverBaseDir) {
+
+		File dataDir = getServerDataDir(serverBaseDir);
+		File mailboxDir = getUserMailboxDir(serverBaseDir, userCode);
+		File workDir = getUserWorkDir(serverBaseDir, userCode);
+
+		if (!dataDir.exists()) {
+			dataDir.mkdirs();
+		}
+
+		if (!mailboxDir.exists()) {
+			mailboxDir.mkdirs();
+		}
+
+		if (!workDir.exists()) {
+			workDir.mkdirs();
+		}
+
 	}
 
 	public static String createFileName(OdetteFtpObject obj) {
@@ -129,6 +150,59 @@ class SimpleServerHelper {
 			}
 		}
 	
+	}
+
+	public static File createDataFile(VirtualFile vf, File serverBaseDir) throws IOException {
+		String filename = createFileName(vf);
+		File dataDir = getServerDataDir(serverBaseDir);
+		return File.createTempFile(filename + "_", null, dataDir);
+	}
+
+	public static void storeInWork(String userCode, OdetteFtpObject obj, File serverBaseDir) throws IOException {
+		File workDir = getUserWorkDir(serverBaseDir, userCode);
+		String filename = createFileName(obj);
+
+		File outputFile = new File(workDir, filename);
+		storeObject(outputFile, obj);
+
+	}
+
+	public static void storeInMailbox(String userCode, OdetteFtpObject obj, File serverBaseDir) throws IOException {
+		File mailboxDir = getUserMailboxDir(serverBaseDir, userCode);
+		String filename = createFileName(obj);
+
+		File outputFile = new File(mailboxDir, filename);
+		storeObject(outputFile, obj);
+
+	}
+
+	public static File[] listExchanges(String userCode, File serverBaseDir) {
+		File mailboxDir = getUserMailboxDir(serverBaseDir, userCode);
+		File[] exchanges = mailboxDir.listFiles(EXCHANGES_FILENAME_FILTER);
+		return exchanges;
+	}
+
+	public static boolean hasExchange(String userCode, File serverBaseDir) {
+		File[] exchanges = listExchanges(userCode, serverBaseDir);
+		return (exchanges != null && exchanges.length > 0);
+	}
+
+	public static void deleteExchange(String userCode, OdetteFtpObject obj, File serverBaseDir) {
+		if (obj instanceof VirtualFile) {
+			VirtualFile vf = (VirtualFile) obj;
+			File payloadFile = vf.getFile();
+			if (payloadFile.exists()) {
+				payloadFile.delete();
+			}
+		}
+
+		File mailboxDir = getUserMailboxDir(serverBaseDir, userCode);
+		String filename = createFileName(obj);
+		File mailboxFile = new File(mailboxDir, filename);
+
+		if (mailboxFile.exists()) {
+			mailboxFile.delete();
+		}
 	}
 
 }

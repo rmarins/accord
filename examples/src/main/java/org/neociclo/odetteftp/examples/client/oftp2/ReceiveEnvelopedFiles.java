@@ -37,10 +37,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.MainSupport;
-import org.neociclo.odetteftp.oftplet.EndFileResponse;
-import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
+import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.v20.DefaultSignedDeliveryNotification;

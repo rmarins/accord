@@ -27,7 +27,10 @@ import java.io.File;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.net.ssl.SSLEngine;
+
 import org.neociclo.odetteftp.examples.MainSupport;
+import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
 import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
 import org.neociclo.odetteftp.oftplet.EndFileResponse;
@@ -47,11 +50,11 @@ import org.neociclo.odetteftp.support.PasswordHandler;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class ReceiveAllFiles {
+public class SecureReceiveAllFiles {
 
 	public static void main(String[] args) throws Exception {
 
-		MainSupport ms = new MainSupport(ReceiveAllFiles.class, args, "server", "port", "odetteid", "password",
+		MainSupport ms = new MainSupport(SecureReceiveAllFiles.class, args, "server", "port", "odetteid", "password",
 				"directory");
 		args = ms.args();
 
@@ -70,9 +73,14 @@ public class ReceiveAllFiles {
 
 		final Queue<OdetteFtpObject> outgoingQueue = new ConcurrentLinkedQueue<OdetteFtpObject>();
 
+		// create the client mode SSL engine
+		SSLEngine sslEngine = SampleOftpSslContextFactory.getClientContext().createSSLEngine();
+		sslEngine.setUseClientMode(true);
+		sslEngine.setEnableSessionCreation(true);
+
 		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks,
 				outgoingQueue, null, null);
-		TcpClient oftp = new TcpClient(server, port, factory);
+		TcpClient oftp = new TcpClient(server, port, sslEngine, factory);
 
 		// prepare the incoming handler
 		factory.setEventListener(new OftpletEventListenerAdapter() {

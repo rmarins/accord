@@ -19,16 +19,16 @@
  */
 package org.neociclo.odetteftp.examples.server;
 
-import static org.neociclo.odetteftp.examples.server.SimpleServerHelper.getUserConfigFile;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.KeyStore;
 
-import org.neociclo.odetteftp.OdetteFtpSession;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
@@ -37,19 +37,18 @@ import org.neociclo.odetteftp.security.PasswordAuthenticationCallback;
 import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpServer;
 import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
-import org.neociclo.odetteftp.support.OftpletEventListenerAdapter;
 import org.neociclo.odetteftp.support.PasswordHandler;
-import org.neociclo.odetteftp.support.PropertiesBasedConfiguration;
+import org.neociclo.odetteftp.util.SecurityUtil;
 
 /**
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class SimpleServer {
+public class SecureSimpleServer {
 
-	private static final int SERVER_PORT = 13305;
+	private static final int SERVER_PORT = 6619;
 
-	private static final File SERVER_DIR = new File(".", "simpleserver-data");
+	private static final File SERVER_DIR = new File(".", "data");
 
 	public static void main(String[] args) throws Exception {
 
@@ -71,28 +70,28 @@ public class SimpleServer {
 		// side identification and password
 		//
 		serverSecurityHandler.addHandler(PasswordCallback.class,
-				new PasswordHandler("O0055MYSERVERID", "MYPASSWD"));
+				new PasswordHandler("O1234COMBITRANS", "TARINFO1"));
 
-		SimpleServerOftpletFactory factory = new SimpleServerOftpletFactory(SERVER_DIR, config, serverSecurityHandler,
-				new OftpletEventListenerAdapter() {
+		//
+		// create the SSLEngine
+		//
 
-			@Override
-			public void configure(OdetteFtpSession session) {
-				// setup custom parameters specific to this user configuration
-				String userCode = session.getUserCode();
-				File configFile = getUserConfigFile(SERVER_DIR, userCode);
-				PropertiesBasedConfiguration customConfig = new PropertiesBasedConfiguration();
+		char[] pwd = "tarinfo".toCharArray();
+		String algorithm = "SunX509";
 
-				try {
-					customConfig.load(new FileInputStream(configFile));
-					customConfig.setup(session);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		KeyStore ks = SecurityUtil.openKeyStore(new File("cert/tarinfo.jks"), pwd);
 
-		TcpServer server = new TcpServer(localAddress, factory);
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
+        kmf.init(ks, pwd);
+
+		SSLContext sslContext = SSLContext.getInstance("TLS");
+		sslContext.init(kmf.getKeyManagers(), null, null);
+
+		SSLEngine sslEngine = sslContext.createSSLEngine();
+		sslEngine.setUseClientMode(false);
+		
+		SimpleServerOftpletFactory factory = new SimpleServerOftpletFactory(SERVER_DIR, config, serverSecurityHandler);
+		TcpServer server = new TcpServer(localAddress, sslEngine, factory);
 
 		server.start();
 
@@ -103,7 +102,7 @@ public class SimpleServer {
 		OdetteFtpConfiguration c = new OdetteFtpConfiguration();
 
 		c.setTransferMode(TransferMode.BOTH);
-		c.setVersion(OdetteFtpVersion.OFTP_V14);
+		c.setVersion(OdetteFtpVersion.OFTP_V20);
 		c.setDataExchangeBufferSize(4096);
 		c.setWindowSize(64);
 

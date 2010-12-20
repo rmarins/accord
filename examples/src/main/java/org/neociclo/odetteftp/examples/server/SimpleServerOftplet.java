@@ -20,12 +20,16 @@
 package org.neociclo.odetteftp.examples.server;
 
 import static org.neociclo.odetteftp.examples.server.SimpleServerHelper.*;
-import static org.neociclo.odetteftp.protocol.DefaultStartFileResponse.*;
 import static org.neociclo.odetteftp.protocol.DefaultEndFileResponse.*;
+import static org.neociclo.odetteftp.protocol.DefaultStartFileResponse.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
@@ -45,7 +49,6 @@ import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.SecurityContext;
 import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.support.OftpletEventListener;
-import org.neociclo.odetteftp.support.PropertiesBasedConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +67,8 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 	private SecurityContext securityContext;
 	private OdetteFtpConfiguration config;
 	private OdetteFtpSession session;
+
+	private Map<String, Iterator<File>> outFileIteratorMap = new HashMap<String, Iterator<File>>();
 
 	public SimpleServerOftplet(File serverBaseDir, OdetteFtpConfiguration config, MappedCallbackHandler securityCallbackHandler, OftpletEventListener listener) {
 		super();
@@ -99,19 +104,6 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 	}
 
 	public void configure() {
-
-		// setup custom parameters specific to this user configuration
-		String userCode = session.getUserCode();
-		File configFile = getUserConfigFile(serverBaseDir, userCode);
-		PropertiesBasedConfiguration customConfig = new PropertiesBasedConfiguration();
-
-		try {
-			customConfig.load(new FileInputStream(configFile));
-			customConfig.setup(session);
-		} catch (IOException e) {
-			LOGGER.error("Cannot load user's custom configuration.", e);
-		}
-
 		if (listener != null) {
 			listener.configure(session);
 		}
@@ -172,10 +164,10 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 		OdetteFtpObject next = null;
 
 		String userCode = session.getUserCode();
-		File[] exchanges = listExchanges(userCode);
 
-		if (exchanges.length > 0) {
-			File cur = exchanges[0]; 
+		Iterator<File> filesIt = getUserOutFileIterator(userCode);
+		if (filesIt.hasNext()) {
+			File cur = filesIt.next();
 			try {
 				next = loadObject(cur);
 			} catch (IOException e) {
@@ -184,10 +176,22 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 					cur.delete();
 				}
 			}
+		} else {
+			outFileIteratorMap.remove(userCode);
 		}
 
 		return next;
+	}
 
+	private Iterator<File> getUserOutFileIterator(String userCode) {
+		Iterator<File> it = outFileIteratorMap.get(userCode);
+		if (it == null) {
+			File[] a = listExchanges(userCode);
+			List<File> files = Arrays.asList(a);
+			it = files.iterator();
+			outFileIteratorMap.put(userCode, it);
+		}
+		return it;
 	}
 
 	public void onSendFileStart(VirtualFile virtualFile, long answerCount) {
@@ -230,6 +234,7 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 		File dataFile = null;
 		try {
 			dataFile = createDataFile(vf);
+			LOGGER.trace("Saving to: {}", dataFile);
 		} catch (IOException e) {
 			LOGGER.error("Cannot create data file for object: " + vf, e);
 			return negativeStartFileAnswer(AnswerReason.ACCESS_METHOD_FAILURE, "Couldn't store file in local system.",
@@ -283,40 +288,17 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 	// -------------------------------------------------------------------------
 
 	private void store(OdetteFtpObject obj) throws IOException {
-
 		String userCode = session.getUserCode();
-
-		File workDir = getUserWorkDir(serverBaseDir, userCode);
-		String filename = createFileName(obj);
-
-		File outputFile = new File(workDir, filename);
-		storeObject(outputFile, obj);
-
+		SimpleServerHelper.storeInWork(userCode, obj, serverBaseDir);
 	}
 
 	private void createUserDirStructureIfNotExist(String userCode) {
-
-		File dataDir = getServerDataDir(serverBaseDir);
-		File mailboxDir = getUserMailboxDir(serverBaseDir, userCode);
-		File workDir = getUserWorkDir(serverBaseDir, userCode);
-
-		if (!dataDir.exists()) {
-			dataDir.mkdirs();
-		}
-
-		if (!mailboxDir.exists()) {
-			mailboxDir.mkdirs();
-		}
-
-		if (!workDir.exists()) {
-			workDir.mkdirs();
-		}
-
+		SimpleServerHelper.createUserDirStructureIfNotExist(userCode, serverBaseDir);
 	}
 
 	private boolean recipientExists(String userCode, String recipientOid) {
-		File recipientConf = getUserConfigFile(serverBaseDir, recipientOid);
-		return recipientConf.exists();
+		File recipientDir = getUserDir(serverBaseDir, recipientOid);
+		return recipientDir.exists();
 	}
 
 	/**
@@ -336,9 +318,7 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 	}
 
 	private File createDataFile(VirtualFile vf) throws IOException {
-		String filename = createFileName(vf);
-		File dataDir = getServerDataDir(serverBaseDir);
-		return File.createTempFile(filename + "_", null, dataDir);
+		return SimpleServerHelper.createDataFile(vf, serverBaseDir);
 	}
 
 	/**
@@ -348,34 +328,16 @@ class SimpleServerOftplet extends OftpletAdapter implements org.neociclo.odettef
 	 * @return
 	 */
 	private boolean hasExchange(String userCode) {
-		File[] exchanges = listExchanges(userCode);
-		return (exchanges != null && exchanges.length > 0);
+		return SimpleServerHelper.hasExchange(userCode, serverBaseDir);
 	}
 
 	private File[] listExchanges(String userCode) {
-		File mailboxDir = getUserMailboxDir(serverBaseDir, userCode);
-		File[] exchanges = mailboxDir.listFiles(EXCHANGES_FILENAME_FILTER);
-		return exchanges;
+		return SimpleServerHelper.listExchanges(userCode, serverBaseDir);
 	}
 
 	private void deleteExchange(OdetteFtpObject obj) {
-		
-		if (obj instanceof VirtualFile) {
-			VirtualFile vf = (VirtualFile) obj;
-			File payloadFile = vf.getFile();
-			if (payloadFile.exists()) {
-				payloadFile.delete();
-			}
-		}
-
 		String userCode = session.getUserCode();
-		File mailboxDir = getUserMailboxDir(serverBaseDir, userCode);
-		String filename = createFileName(obj);
-		File mailboxFile = new File(mailboxDir, filename);
-
-		if (mailboxFile.exists()) {
-			mailboxFile.delete();
-		}
+		SimpleServerHelper.deleteExchange(userCode, obj, serverBaseDir);
 	}
 
 }

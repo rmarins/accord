@@ -29,10 +29,10 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.neociclo.odetteftp.TransferMode;
-import org.neociclo.odetteftp.oftplet.EndFileResponse;
-import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.DefaultStartFileResponse;
+import org.neociclo.odetteftp.oftplet.EndFileResponse;
+import org.neociclo.odetteftp.oftplet.StartFileResponse;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.support.OdetteFtpConfiguration;

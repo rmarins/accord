@@ -28,9 +28,9 @@ import javax.security.auth.callback.CallbackHandler;
  */
 public class DefaultSecurityContext implements SecurityContext {
 
-	private MappedCallbackHandler callbackHandler;
+	private CallbackHandler callbackHandler;
 
-	public DefaultSecurityContext(MappedCallbackHandler callbackHandler) {
+	public DefaultSecurityContext(CallbackHandler callbackHandler) {
 		super();
 		this.callbackHandler = callbackHandler;
 	}

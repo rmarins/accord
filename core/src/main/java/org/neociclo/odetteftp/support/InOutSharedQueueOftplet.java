@@ -52,7 +52,7 @@ public class InOutSharedQueueOftplet extends OftpletAdapter implements Oftplet {
 		this.config = config;
 		this.securityContext = new DefaultSecurityContext(callbackHandler);
 
-		this.listener = new SharedQueueOftpletListener(incoming);
+		this.listener = new SharedQueueOftpletListener(incoming, outgoing);
 		this.speaker = new SharedQueueOftpletSpeaker(outgoing, outgoingDone);
 	}
 

@@ -21,22 +21,19 @@ package org.neociclo.odetteftp.security;
 
 import javax.security.auth.callback.Callback;
 
+import org.neociclo.odetteftp.protocol.EndSessionReason;
+
 /**
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
 public class PasswordAuthenticationCallback implements Callback {
 
-    public static enum AuthenticationResult {
-        SUCCESS,
-        UNKNOWN_USER,
-        INVALID_PASSWORD;
-    }
-
     private String user;
     private String password;
 
-    private AuthenticationResult result;
+    private EndSessionReason cause;
+    private boolean success;
 
     public PasswordAuthenticationCallback(String user, String password) {
         super();
@@ -52,11 +49,25 @@ public class PasswordAuthenticationCallback implements Callback {
         return password;
     }
 
-    public AuthenticationResult getResult() {
-        return result;
-    }
+	public EndSessionReason getCause() {
+		return cause;
+	}
 
-    public void setResult(AuthenticationResult result) {
-        this.result = result;
-    }
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess() {
+		this.success = true;
+	}
+
+	public void setFailure() {
+		setFailed(EndSessionReason.UNSPECIFIED_ABORT);
+	}
+
+	public void setFailed(EndSessionReason cause) {
+		this.success = false;
+		this.cause = cause;
+	}
+
 }

@@ -81,7 +81,6 @@ import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
 import org.neociclo.odetteftp.protocol.data.AbstractMapping;
 import org.neociclo.odetteftp.protocol.v13.ReleaseFormatVer13;
 import org.neociclo.odetteftp.security.PasswordAuthenticationCallback;
-import org.neociclo.odetteftp.security.PasswordAuthenticationCallback.AuthenticationResult;
 import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.security.SecurityContext;
 import org.neociclo.odetteftp.util.ProtocolUtil;
@@ -1290,26 +1289,22 @@ public abstract class DefaultHandler implements ProtocolHandler {
                     "Password authentication engine not available.");
         }
 
-        AuthenticationResult result = pwdAuthCallback.getResult();
-        if (result == AuthenticationResult.SUCCESS) {
+        if (pwdAuthCallback.isSuccess()) {
             // authentication succeed
-            return;
-        } else if (result == AuthenticationResult.UNKNOWN_USER) {
-            // unknown user result were specified
-            abnormalRelease(session, EndSessionReason.UNKNOWN_USER_CODE, "Authentication error: unknown user");
-        } else if (result == AuthenticationResult.INVALID_PASSWORD) {
-            // invalid password
-            abnormalRelease(session, EndSessionReason.INVALID_PASSWORD, "Authentication error: bad password");
+        	return;
         } else {
-        	if (mandatory) {
-        		LOGGER.warn("[{}] SSID received. No result after PasswordAuthenticationCallback processing.", session);
-        		abnormalRelease(session, EndSessionReason.UNSPECIFIED_ABORT, "Unknown authentication error.");
+        	// has failed
+        	EndSessionReason cause = pwdAuthCallback.getCause();
+        	if (cause == null) {
+        		cause = EndSessionReason.UNSPECIFIED_ABORT;
         	}
+			abnormalRelease(session, EndSessionReason.UNKNOWN_USER_CODE,
+					"Authentication error: " + cause.getDescription());
         }
 
     }
 
-    protected boolean handleCallback(OdetteFtpSession session, Callback callback) {
+	protected boolean handleCallback(OdetteFtpSession session, Callback callback) {
 
         Oftplet oftplet = getSessionOftplet(session);
         SecurityContext securityContext = oftplet.getSecurityContext();
@@ -1330,7 +1325,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
         try {
             callbackHandler.handle(new Callback[] { callback });
         } catch (Throwable t) {
-            LOGGER.trace("[" + session + "] Callback handler error (type: " + callback.getClass().getName() + ").", t);
+            LOGGER.trace("[" + session + "] Callback handler error (type: " + callback.getClass().getName() + ").");
             return false;
         }
 

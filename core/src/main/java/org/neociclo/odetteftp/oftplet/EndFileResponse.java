@@ -19,9 +19,11 @@
  */
 package org.neociclo.odetteftp.oftplet;
 
+import java.io.Serializable;
+
 import org.neociclo.odetteftp.protocol.AnswerReason;
 
-public interface EndFileResponse {
+public interface EndFileResponse extends Serializable {
 
     /**
      * @return if this is a positive or negative end file esponse

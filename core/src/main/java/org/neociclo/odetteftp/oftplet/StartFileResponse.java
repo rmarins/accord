@@ -20,6 +20,7 @@
 package org.neociclo.odetteftp.oftplet;
 
 import java.io.File;
+import java.io.Serializable;
 
 import org.neociclo.odetteftp.protocol.AnswerReason;
 
@@ -27,7 +28,7 @@ import org.neociclo.odetteftp.protocol.AnswerReason;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public interface StartFileResponse {
+public interface StartFileResponse extends Serializable {
 
     /**
      * @return

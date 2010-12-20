@@ -49,8 +49,8 @@ public class TcpClient extends Client {
     private static final int DEFAULT_NON_SSL_PORT = 3305;
 	private static final int DEFAULT_SSL_PORT = 6619;
 
-	private Executor executor;
-    private boolean instanceManagedExecutor;
+	private Executor bossExecutor;
+	private Executor workerExecutor;
 
     private InetSocketAddress remoteAddress;
     private SSLEngine sslEngine;
@@ -87,15 +87,20 @@ public class TcpClient extends Client {
         this.sslEngine = sslEngine;
     }
 
-    @Override
+	@Override
     protected ChannelFactory createChannelFactory() {
 
-        if (executor == null) {
-            executor = Executors.newCachedThreadPool();
-            instanceManagedExecutor = true;
+        if (bossExecutor == null) {
+            bossExecutor = Executors.newCachedThreadPool();
+            setManaged(bossExecutor);
         }
 
-        ChannelFactory factory = new NioClientSocketChannelFactory(executor, executor);
+        if (workerExecutor == null) {
+        	workerExecutor = Executors.newCachedThreadPool();
+            setManaged(workerExecutor);
+        }
+
+        ChannelFactory factory = new NioClientSocketChannelFactory(bossExecutor, workerExecutor);
         return factory;
     }
 
@@ -119,6 +124,10 @@ public class TcpClient extends Client {
         OdetteFtpPipelineFactory pipelineFactory = new OdetteFtpPipelineFactory(EntityType.INITIATOR, oftpletFactory,
                 timer, getTransportType(), sslHandler, null);
 
+        if (isLoggingDisabled()) {
+        	pipelineFactory.disableLogging();
+        }
+
         return pipelineFactory;
     }
 
@@ -127,8 +136,8 @@ public class TcpClient extends Client {
         return remoteAddress;
     }
 
-    public Executor getExecutor() {
-        return executor;
+    public Executor getBossExecutor() {
+        return bossExecutor;
     }
 
 	/**
@@ -138,18 +147,40 @@ public class TcpClient extends Client {
 	 * 
 	 * @param executor
 	 */
-    public void setExecutor(Executor executor) {
+	public void setWorkerExecutor(Executor workerExecutor) {
         if (getChannel() != null) {
             throw new IllegalStateException("Channel already created. Executor must be set before connect.");
         }
 
-        this.executor = executor;
+		this.workerExecutor = workerExecutor;
+	}
+
+	public Executor getWorkerExecutor() {
+		return workerExecutor;
+	}
+
+	/**
+	 * The Executor which was specified should be terminated manually by calling
+	 * {@link ExecutorUtil#terminate(Executor...)} when your application shuts
+	 * down.
+	 * 
+	 * @param executor
+	 */
+    public void setBossExecutor(Executor executor) {
+        if (getChannel() != null) {
+            throw new IllegalStateException("Channel already created. Executor must be set before connect.");
+        }
+
+        this.bossExecutor = executor;
     }
 
     @Override
     protected void releaseExternalResources() {
-    	if (instanceManagedExecutor) {
-    		ExecutorUtil.terminate(executor);
+    	if (isManaged(bossExecutor)) {
+    		ExecutorUtil.terminate(bossExecutor);
+    	}
+    	if (isManaged(workerExecutor)) {
+    		ExecutorUtil.terminate(workerExecutor);
     	}
     	super.releaseExternalResources();
     }

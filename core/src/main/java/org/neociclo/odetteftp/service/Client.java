@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public abstract class Client {
+public abstract class Client extends BaseService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
 
@@ -47,7 +47,6 @@ public abstract class Client {
 
     private Channel channel;
     private Timer timer;
-    private boolean instanceManagedTimer;
 
     private boolean connected;
 
@@ -70,7 +69,8 @@ public abstract class Client {
 
         if (timer == null) {
             timer = new HashedWheelTimer();
-            instanceManagedTimer = true;
+            setManaged(timer);
+            LOGGER.trace("Managed timer acquired: {}", timer);
         }
 
         ChannelPipelineFactory pipelineFactory = getPipelineFactory(oftpletFactory, timer);
@@ -201,7 +201,8 @@ public abstract class Client {
     }
 
     protected void releaseExternalResources() {
-    	if (instanceManagedTimer) {
+    	if (isManaged(timer)) {
+    		LOGGER.trace("Releasing acquired timer: {}", timer);
     		timer.stop();
     	}
     }

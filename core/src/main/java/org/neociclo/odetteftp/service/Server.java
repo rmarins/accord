@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public abstract class Server {
+public abstract class Server extends BaseService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
@@ -110,7 +110,11 @@ public abstract class Server {
 
         ServerChannelFactory factory = createServerChannelFactory();
 
-        timer = new HashedWheelTimer();
+        if (timer == null) {
+        	timer = new HashedWheelTimer();
+        	setManaged(timer);
+        }
+
         activeChildChannels = new DefaultChannelGroup("activeChildChannels @ Server [id: 0x" + toHexString(getId())
                 + "]");
 
@@ -160,8 +164,7 @@ public abstract class Server {
 
             }
 
-            timer.stop();
-            channel.getFactory().releaseExternalResources();
+            releaseExternalResources();
 
             channel = null;
             timer = null;
@@ -171,7 +174,14 @@ public abstract class Server {
 
     }
 
-    public boolean isStarted() {
+	protected void releaseExternalResources() {
+        if (isManaged(timer)) {
+        	timer.stop();
+        }
+        channel.getFactory().releaseExternalResources();
+	}
+
+	public boolean isStarted() {
         return !isStopped();
     }
 
@@ -193,6 +203,20 @@ public abstract class Server {
     @Override
     protected void finalize() throws Throwable {
         allServers.remove(getId());
+    }
+
+    public Timer getTimer() {
+        return timer;
+    }
+
+	/**
+	 * The Timer which was specified should be stopped manually by calling
+	 * {@link Timer#stop()} when your application shuts down.
+	 * 
+	 * @param timer
+	 */
+    public void setTimer(Timer timer) {
+        this.timer = timer;
     }
 
     protected abstract SocketAddress getAddress();

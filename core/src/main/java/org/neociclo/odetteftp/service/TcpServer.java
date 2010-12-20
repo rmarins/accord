@@ -21,6 +21,7 @@ package org.neociclo.odetteftp.service;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLEngine;
@@ -30,6 +31,7 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.util.Timer;
+import org.jboss.netty.util.internal.ExecutorUtil;
 import org.neociclo.odetteftp.EntityType;
 import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.netty.OdetteFtpPipelineFactory;
@@ -41,11 +43,12 @@ import org.neociclo.odetteftp.oftplet.OftpletFactory;
  */
 public class TcpServer extends Server {
 
-	private static final TransportType TCPIP_TRANSPORT_TYPE = TransportType.TCPIP;
-
     private InetSocketAddress localAddress;
     private SSLEngine sslEngine;
     private Boolean startTls;
+
+    private Executor bossExecutor;
+    private Executor workerExecutor;
 
     public TcpServer(InetSocketAddress localAddress, OftpletFactory oftpletFactory) {
         this(localAddress, null, oftpletFactory);
@@ -64,9 +67,18 @@ public class TcpServer extends Server {
 
     @Override
     protected ServerChannelFactory createServerChannelFactory() {
-        ServerChannelFactory factory = new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool());
+
+    	if (bossExecutor == null) {
+    		bossExecutor = Executors.newCachedThreadPool();
+    		setManaged(bossExecutor);
+    	}
+
+    	if (workerExecutor == null) {
+    		workerExecutor = Executors.newCachedThreadPool();
+    		setManaged(workerExecutor);
+    	}
+
+    	ServerChannelFactory factory = new NioServerSocketChannelFactory(bossExecutor, workerExecutor);
         return factory;
     }
 
@@ -90,10 +102,42 @@ public class TcpServer extends Server {
 
         OdetteFtpPipelineFactory pipelineFactory = new OdetteFtpPipelineFactory(EntityType.RESPONDER, oftpletFactory,
                 timer, getTransportType(), sslHandler, channelGroup);
+
+        if (isLoggingDisabled()) {
+        	pipelineFactory.disableLogging();
+        }
+
         return pipelineFactory;
     }
 
 	public TransportType getTransportType() {
-		return TCPIP_TRANSPORT_TYPE;
+		return TransportType.TCPIP;
+	}
+
+	public Executor getBossExecutor() {
+		return bossExecutor;
+	}
+
+	public void setBossExecutor(Executor bossExecutor) {
+		this.bossExecutor = bossExecutor;
+	}
+
+	public Executor getWorkerExecutor() {
+		return workerExecutor;
+	}
+
+	public void setWorkerExecutor(Executor workerExecutor) {
+		this.workerExecutor = workerExecutor;
+	}
+
+	@Override
+	protected void releaseExternalResources() {
+		if (isManaged(bossExecutor)) {
+			ExecutorUtil.terminate(bossExecutor);
+		}
+		if (isManaged(workerExecutor)) {
+			ExecutorUtil.terminate(workerExecutor);
+		}
+		super.releaseExternalResources();
 	}
 }

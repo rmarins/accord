@@ -44,6 +44,7 @@ public class OdetteFtpConfiguration implements Serializable {
 	private Boolean useSecureAuthentication;
 	private CipherSuite cipherSuiteSelection;
 	private OdetteFtpVersion version;
+	private Long timeout;
 
 	public String getUserData() {
 		return userData;
@@ -125,6 +126,14 @@ public class OdetteFtpConfiguration implements Serializable {
 		this.version = version;
 	}
 
+	public Long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(Long timeout) {
+		this.timeout = timeout;
+	}
+
     public void setup(OdetteFtpSession s) {
 
     	if (userData != null) {
@@ -173,6 +182,10 @@ public class OdetteFtpConfiguration implements Serializable {
 
         if (cipherSuiteSelection != null) {
             s.setCipherSuiteSelection(cipherSuiteSelection);
+        }
+
+        if (timeout != null) {
+        	s.setTimeout(timeout);
         }
         
     }

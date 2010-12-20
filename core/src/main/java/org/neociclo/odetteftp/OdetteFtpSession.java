@@ -142,11 +142,11 @@ public class OdetteFtpSession {
         setAttribute(VERSION_ATTR, version);
     }
 
-    public int getTimeout() {
-        return getTypedAttribute(Integer.class, TIMEOUT_ATTR, DEFAULT_OFTP_SESSION_TIMEOUT);
+    public long getTimeout() {
+        return getTypedAttribute(Long.class, TIMEOUT_ATTR, DEFAULT_OFTP_SESSION_TIMEOUT);
     }
 
-    public void setTimeout(int timeout) {
+    public void setTimeout(long timeout) {
         setAttribute(TIMEOUT_ATTR, timeout);
     }
 

@@ -59,6 +59,8 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
     private SslHandler sslHandler;
     private ChannelGroup channelGroup;
 
+	private boolean loggingEnabled = true;
+
     public OdetteFtpPipelineFactory(EntityType entityType, OftpletFactory oftpletFactory, Timer timer) {
         this(entityType, oftpletFactory, timer, TransportType.TCPIP);
     }
@@ -136,8 +138,10 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
         p.addLast("OdetteExchangeBuffer-ENCODER", new OdetteFtpEncoder());
         LOGGER.debug("Added Odette Exchange Buffer codecs to channel pipeline.");
 
-        p.addLast("logging", new ProtocolLoggingHandler(null));
-        LOGGER.debug("Added Odette FTP protocol logging handler to channel pipeline.");
+        if (isLoggingEnabled()) {
+	        p.addLast("logging", new ProtocolLoggingHandler(null));
+	        LOGGER.debug("Added Odette FTP protocol logging handler to channel pipeline.");
+        }
 
         // add odette-ftp handler
         p.addLast("OdetteFtp-HANDLER", new OdetteFtpChannelHandler(entityType, oftpletFactory, timer, channelGroup));
@@ -146,5 +150,17 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
 
         return p;
     }
+
+	public void disableLogging() {
+		this.loggingEnabled = false;
+	}
+
+	public void enableLogging() {
+		this.loggingEnabled = true;
+	}
+
+	public boolean isLoggingEnabled() {
+		return loggingEnabled;
+	}
 
 }

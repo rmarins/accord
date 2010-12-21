@@ -70,16 +70,16 @@ public class SecureSimpleServer {
 		// side identification and password
 		//
 		serverSecurityHandler.addHandler(PasswordCallback.class,
-				new PasswordHandler("O1234COMBITRANS", "TARINFO1"));
+				new PasswordHandler("O0055NEOCICLO", "NEOCICLO"));
 
 		//
 		// create the SSLEngine
 		//
 
-		char[] pwd = "tarinfo".toCharArray();
+		char[] pwd = "password".toCharArray();
 		String algorithm = "SunX509";
 
-		KeyStore ks = SecurityUtil.openKeyStore(new File("cert/tarinfo.jks"), pwd);
+		KeyStore ks = SecurityUtil.openKeyStore(new File("cert/neociclo.jks"), pwd);
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
         kmf.init(ks, pwd);

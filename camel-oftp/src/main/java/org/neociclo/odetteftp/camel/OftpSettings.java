@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.net.ssl.SSLEngine;
 
+import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.util.ObjectHelper;
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.TransferMode;
@@ -56,6 +57,7 @@ public class OftpSettings implements Cloneable {
 //	private boolean routeFileRequest = false;
 //	private boolean waitForEerp = false;
 //	private long queueOfferDelay = 300;
+
 	private long maxFileSize;
 	private boolean routeCommands = false;
 	private boolean routeEvents = false;
@@ -138,7 +140,7 @@ public class OftpSettings implements Cloneable {
 		setPort(uri.getPort());
 
         sslEngine = component.resolveAndRemoveReferenceParameter(parameters, "sslEngine", SSLEngine.class, null);
-        passphrase = component.resolveAndRemoveReferenceParameter(parameters, "passphrase", String.class, null);
+        passphrase = component.getAndRemoveParameter(parameters, "passphrase", String.class, null);
         keyStoreFormat = component.getAndRemoveParameter(parameters, "keyStoreFormat", String.class, "JKS");
         securityProvider = component.getAndRemoveParameter(parameters, "securityProvider", String.class, "SunX509");
         keyStoreFile = component.resolveAndRemoveReferenceParameter(parameters, "keyStoreFile", File.class, null);
@@ -151,7 +153,9 @@ public class OftpSettings implements Cloneable {
 
         ObjectHelper.notNull(workpath, "workpath");
         if (!workpath.exists()) {
-        	throw new IllegalArgumentException("Workpath location doesn't exist or access not allowed: " + workpath);
+			if (!workpath.mkdirs()) {
+				throw new RuntimeCamelException("Impossible to create workpath: " + workpath);
+			}
         }
 
 	}
@@ -207,6 +211,13 @@ public class OftpSettings implements Cloneable {
 		clone.setCipherSuite(getCipherSuite());
 		clone.setVersion(getVersion());
 		clone.setTimeout(getTimeout());
+		clone.setDowngradeVersion(getDowngradeVersion());
+		clone.setMaxFileSize(getMaxFileSize());
+
+		clone.setCorePoolSize(getCorePoolSize());
+		clone.setMaxPoolSize(getMaxPoolSize());
+		clone.setDelete(isDelete());
+		clone.setOverwrite(isOverwrite());
 
 		return clone;
 	}

@@ -19,9 +19,28 @@
 
    <modelVersion>4.0.0</modelVersion>
    <artifactId>camel-oftp</artifactId>
-   <packaging>jar</packaging>
+   <packaging>bundle</packaging>
    <name>Accord Odette FTP :: Camel OFTP</name>
    <description>Accord Odette FTP Component for Apache Camel</description>
+
+  <properties>
+    <odetteftp.osgi.export.pkg>
+      org.neociclo.odetteftp.camel.*
+    </odetteftp.osgi.export.pkg>
+    <odetteftp.osgi.import>
+      !org.neociclo.odetteftp.camel.*,
+      org.neociclo.odetteftp.*,
+      org.apache.camel.*;version="[2.5.0,3)",
+      org.apache.commons.io.*;version="[1.4.0,2)",
+      *
+    </odetteftp.osgi.import>
+    <odetteftp.osgi.private.pkg>
+      org.neociclo.odetteftp.netty.*
+    </odetteftp.osgi.private.pkg>
+  
+    <camel.version>2.5.0</camel.version>
+    <commons-io.version>1.3.2</commons-io.version>
+  </properties>
 
    <licenses>
       <license>
@@ -62,10 +81,5 @@
          <version>${project.version}</version>
       </dependency>
    </dependencies>
-
-   <properties>
-      <camel.version>2.5.0</camel.version>
-      <commons-io.version>1.3.2</commons-io.version>
-   </properties>
 
 </project>

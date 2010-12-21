@@ -67,6 +67,34 @@
   </scm>
 
   <build>
+
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+      </resource>
+
+      <!--
+          | example additional resource entries, useful when building Eclipse RCP applications
+          -->
+      <resource>
+        <directory>.</directory>
+        <includes>
+          <include>plugin.xml</include>
+          <include>plugin.properties</include>
+          <!-- <include>icons/**</include> -->
+        </includes>
+      </resource>
+    </resources>
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -90,8 +118,139 @@
             <addVersionToProjectName>true</addVersionToProjectName>
           </configuration>
         </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${antrun.version}</version>
+        </plugin>
+
+
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.ops4j</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+        <version>${pax.version}</version>
+        <!--
+           | enable improved OSGi compilation support for the bundle life-cycle.
+           | to switch back to the standard bundle life-cycle, move this setting
+           | down to the maven-bundle-plugin section
+          -->
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${felix.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <excludeDependencies>${odetteftp.osgi.exclude.dependencies}</excludeDependencies>
+          <instructions>
+            <Bundle-Name>${project.artifactId}</Bundle-Name>
+            <Bundle-SymbolicName>${odetteftp.osgi.symbolic.name}</Bundle-SymbolicName>
+            <Bundle-Activator>${odetteftp.osgi.activator}</Bundle-Activator>
+            <Export-Package>${odetteftp.osgi.export}</Export-Package>
+            <Import-Package>${odetteftp.osgi.import}</Import-Package>
+            <DynamicImport-Package>${odetteftp.osgi.dynamic}</DynamicImport-Package>
+            <Private-Package>${odetteftp.osgi.private.pkg}</Private-Package>
+            <Implementation-Title>Accord OFTP2 Library</Implementation-Title>
+            <Implementation-Version>${project.version}</Implementation-Version>
+            <_versionpolicy>${odetteftp.osgi.import.default.version}</_versionpolicy>
+            <_failok>${odetteftp.osgi.failok}</_failok>
+          </instructions>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <id>create-prop</id>
+            <phase>initialize</phase>
+            <configuration>
+              <tasks>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
+                <property name="ant.regexp.regexpimpl" value="org.apache.tools.ant.util.regexp.Jdk14RegexpRegexp" />
+                <property name="mv" value="${project.version}" />
+                <echo message="Maven version: ${mv}" />
+                <propertyregex property="ov.p1" input="${mv}" regexp="(\d+)(?:\.(\d+)(?:\.(\d+))?)?(?:[^a-zA-Z0-9](.*))?" replace="\1" defaultValue="0" />
+                <propertyregex property="ov.p2" input="${mv}" regexp="(\d+)(?:\.(\d+)(?:\.(\d+))?)?(?:[^a-zA-Z0-9](.*))?" replace=".\2" defaultValue=".0" />
+                <propertyregex property="ov.p3" input="${mv}" regexp="(\d+)(?:\.(\d+)(?:\.(\d+))?)?(?:[^a-zA-Z0-9](.*))?" replace=".\3" defaultValue=".0" />
+                <propertyregex property="ov.p4" input="${mv}" regexp="(\d+)(?:\.(\d+)(?:\.(\d+))?)?(?:[^a-zA-Z0-9](.*))?" replace=".\4" defaultValue="" />
+                <propertyregex property="ov.p1a" input="${ov.p1}" regexp="(.+)" replace="\1" defaultValue="0" />
+                <propertyregex property="ov.p2a" input="${ov.p2}" regexp="(\..+)" replace="\1" defaultValue=".0" />
+                <propertyregex property="ov.p3a" input="${ov.p3}" regexp="(\..+)" replace="\1" defaultValue=".0" />
+                <propertyregex property="ov.p4a" input="${ov.p4}" regexp="(\..+)" replace="\1" defaultValue="" />
+                <property name="ov" value="${ov.p1a}${ov.p2a}${ov.p3a}${ov.p4a}" />
+                <property name="os" value="${ov.p1a}${ov.p2a}" />
+                <echo message="OSGi version: ${ov}" />
+                <mkdir dir="target" />
+                <echo file="target/odetteftp.osgi.version.txt">
+                  odetteftp.osgi.version.clean = ${ov}
+                  odetteftp.schema.version = ${os}
+                              </echo>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb-api-version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb-version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-xjc</artifactId>
+            <version>${jaxb-version}</version>
+          </dependency>
+          <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>1.0b3</version>
+          </dependency>
+          <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant-optional</artifactId>
+            <version>1.5.3-1</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>target/odetteftp.osgi.version.txt</file>
+              </files>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
   </build>
 
   <dependencies>
@@ -155,6 +314,7 @@
       <dependency>
         <groupId>org.neociclo.accord.odetteftp</groupId>
         <artifactId>core-oftp</artifactId>
+        <type>bundle</type>
         <version>${project.version}</version>
       </dependency>
 
@@ -167,7 +327,24 @@
       <dependency>
         <groupId>org.neociclo.accord.odetteftp</groupId>
         <artifactId>camel-oftp</artifactId>
+        <type>bundle</type>
         <version>${project.version}</version>
+      </dependency>
+
+      <!-- OSGi dependencies -->
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi_R4_core</artifactId>
+        <version>${osgi.version}</version>
+        <scope>provided</scope>
+        <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi_R4_compendium</artifactId>
+        <version>${osgi.version}</version>
+        <scope>provided</scope>
+        <optional>true</optional>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -188,12 +365,82 @@
     <!-- compile dependencies version -->
     <netty.version>3.2.3.Final</netty.version>
     <bouncycastle.version>1.45</bouncycastle.version>
-    <slf4j.version>1.6.1</slf4j.version>
+    <slf4j.version>1.5.11</slf4j.version>
 
 	<!-- test dependencies version -->
     <log4j.version>1.2.16</log4j.version>
     <junit.version>4.8.2</junit.version>
     <easymock.version>3.0</easymock.version>
+
+    <!-- eclipse plugin need the jaxb in this pom.xml file -->
+    <antrun.version>1.2</antrun.version>
+    <jaxb-version>2.1.13</jaxb-version>
+    <jaxb-api-version>2.1</jaxb-api-version>
+
+    <!-- osgi dependencies & plugins version -->
+    <osgi.version>1.0</osgi.version>
+    <felix.version>2.1.0</felix.version>
+    <pax.version>1.4</pax.version>
+
+    <!-- OSGi bundles properties -->
+    <odetteftp.osgi.import.odetteftp.version>version="[$(version;==;${odetteftp.osgi.version.clean}),$(version;=+;${odetteftp.osgi.version.clean}))"</odetteftp.osgi.import.odetteftp.version>
+    <odetteftp.osgi.import.strict.version>version="[$(version;===;${odetteftp.osgi.version.clean}),$(version;==+;${odetteftp.osgi.version.clean}))"</odetteftp.osgi.import.strict.version>
+    <odetteftp.osgi.import.default.version>[$(version;==;$(@)),$(version;+;$(@)))</odetteftp.osgi.import.default.version>
+    <odetteftp.osgi.import.defaults>
+      org.slf4j.*;version="[1.5,1.6)",
+    </odetteftp.osgi.import.defaults>
+    <odetteftp.osgi.import.before.defaults />
+    <odetteftp.osgi.import.additional />
+    <odetteftp.osgi.import.pkg>
+      !${odetteftp.osgi.export.pkg},     
+      org.neociclo.odetteftp.*;${odetteftp.osgi.import.odetteftp.version},
+      ${odetteftp.osgi.import.before.defaults},
+      ${odetteftp.osgi.import.defaults},
+      ${odetteftp.osgi.import.additional},
+      *
+    </odetteftp.osgi.import.pkg>
+    <odetteftp.osgi.activator />
+    <odetteftp.osgi.failok>false</odetteftp.osgi.failok>
+    <odetteftp.osgi.private.pkg>!*</odetteftp.osgi.private.pkg>
+    <odetteftp.osgi.export>${odetteftp.osgi.export.pkg};${odetteftp.osgi.version}</odetteftp.osgi.export>
+    <odetteftp.osgi.version>version=${project.version}</odetteftp.osgi.version>
+    <odetteftp.osgi.split.pkg>-split-package:=first</odetteftp.osgi.split.pkg>
+    <odetteftp.osgi.import>${odetteftp.osgi.import.pkg}</odetteftp.osgi.import>
+    <odetteftp.osgi.dynamic />
+    <odetteftp.osgi.symbolic.name>${project.groupId}.${project.artifactId}</odetteftp.osgi.symbolic.name>
+    <odetteftp.osgi.exclude.dependencies>false</odetteftp.osgi.exclude.dependencies>
+
   </properties>
+
+  <profiles>
+    <profile>
+      <id>on-sunjdk</id>
+      <activation>
+        <property>
+          <name>java.vendor</name>
+          <value>Sun Microsystems Inc.</value>
+        </property>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <inherited>true</inherited>
+            <dependencies>
+              <dependency>
+                <groupId>com.sun</groupId>
+                <artifactId>tools</artifactId>
+                <version>1.5.0</version>
+                <scope>system</scope>
+                <systemPath>${java.home}/../lib/tools.jar</systemPath>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

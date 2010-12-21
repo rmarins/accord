@@ -29,17 +29,26 @@
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>oftp-core</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <name>Accord Odette FTP :: Core API</name>
   <description>Accord Odette FTP Library</description>
 
-  <build>
-    <resources>
-      <resource>
-        <directory>${basedir}/target/license</directory>
-      </resource>
-    </resources>
+  <properties>
+    <odetteftp.osgi.export.pkg>
+        org.neociclo.odetteftp.*
+    </odetteftp.osgi.export.pkg>
+    <odetteftp.osgi.import>
+        !org.neociclo.odetteftp.*,
+        org.jboss.netty.*;version="[3.2.3,4)",
+        org.bouncycastle.*;version="[1.39.0,2)",
+        *
+    </odetteftp.osgi.import>
+    <odetteftp.osgi.private.pkg>
+        org.neociclo.odetteftp.netty.*
+    </odetteftp.osgi.private.pkg>
+  </properties>
 
+  <build>
     <plugins>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
@@ -138,6 +147,19 @@
       <artifactId>netty</artifactId>
       <version>${netty.version}</version>
     </dependency>
+
+    <!--+
+      | ========  OSGi  ========
+      +-->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_compendium</artifactId>
+    </dependency>
+
   </dependencies>
 
 </project>

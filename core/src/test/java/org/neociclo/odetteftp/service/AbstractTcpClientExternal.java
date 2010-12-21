@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.jboss.netty.util.internal.ExecutorUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -48,6 +47,7 @@ import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.support.InOutSharedQueueOftpletFactory;
 import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 import org.neociclo.odetteftp.support.PasswordHandler;
+import org.neociclo.odetteftp.util.ExecutorUtil;
 import org.neociclo.odetteftp.util.ProtocolUtil;
 
 /**

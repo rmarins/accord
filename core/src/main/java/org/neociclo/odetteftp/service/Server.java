@@ -24,6 +24,7 @@ import static org.neociclo.odetteftp.util.OftpUtil.toHexString;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -37,7 +38,6 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroupFuture;
 import org.jboss.netty.util.HashedWheelTimer;
 import org.jboss.netty.util.Timer;
-import org.jboss.netty.util.internal.ConcurrentHashMap;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

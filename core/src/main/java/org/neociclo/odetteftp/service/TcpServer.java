@@ -31,11 +31,11 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.util.Timer;
-import org.jboss.netty.util.internal.ExecutorUtil;
 import org.neociclo.odetteftp.EntityType;
 import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.netty.OdetteFtpPipelineFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
+import org.neociclo.odetteftp.util.ExecutorUtil;
 
 /**
  * @author Rafael Marins

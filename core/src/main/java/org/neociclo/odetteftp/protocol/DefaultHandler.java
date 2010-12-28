@@ -1298,8 +1298,10 @@ public abstract class DefaultHandler implements ProtocolHandler {
         	if (cause == null) {
         		cause = EndSessionReason.UNSPECIFIED_ABORT;
         	}
-			abnormalRelease(session, EndSessionReason.UNKNOWN_USER_CODE,
-					"Authentication error: " + cause.getDescription());
+        	
+        	if (session.isInitiator()) {
+        		abnormalRelease(session, EndSessionReason.UNKNOWN_USER_CODE, "Authentication error: " + cause.getDescription());
+        	}
         }
 
     }
@@ -1325,7 +1327,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
         try {
             callbackHandler.handle(new Callback[] { callback });
         } catch (Throwable t) {
-            LOGGER.trace("[" + session + "] Callback handler error (type: " + callback.getClass().getName() + ").");
+            LOGGER.trace("[" + session + "] Callback handler error (type: " + callback.getClass().getName() + ")", t);
             return false;
         }
 

@@ -21,6 +21,7 @@ package org.neociclo.odetteftp.camel.jaas;
 
 import java.io.IOException;
 
+import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -33,56 +34,25 @@ import javax.security.auth.login.LoginException;
 import org.apache.camel.util.ObjectHelper;
 import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.support.PasswordAuthenticationHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class JassPasswordAuthenticationHandler extends PasswordAuthenticationHandler implements CallbackHandler {
+public class JaasPasswordAuthenticator extends PasswordAuthenticationHandler implements CallbackHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(JaasPasswordAuthenticator.class);
 
 	private String usercode;
 	private String password;
 	private EndSessionReason cause;
+	private String realm;
 
-	public JassPasswordAuthenticationHandler() {
+	public JaasPasswordAuthenticator(String realm) {
 		super();
-	}
-
-	@Override
-	public boolean authenticate(String user, String password) throws IOException {
-
-		boolean success;
-
-		ObjectHelper.notEmpty(user, "usercode");
-		ObjectHelper.notNull(password, "password");
-
-		this.usercode = user;
-		this.password = password;
-
-		LoginContext lc;
-
-		try {
-			lc = new LoginContext("OftpAuthentication", this);
-		} catch (Throwable t) {
-			throw new IOException("JaasPasswordAuthentication failed to load login context.", t);
-		}
-
-		try {
-			lc.login();
-			success = true;
-		} catch (AccountNotFoundException anfe) {
-			cause = EndSessionReason.UNKNOWN_USER_CODE;
-			success = false;
-		} catch (LoginException le) {
-			// any other LoginException including FailedLoginException
-			cause = EndSessionReason.INVALID_PASSWORD;
-			success = false;
-		}
-
-		this.usercode = null;
-		this.password = null;
-
-		return success;
+		this.realm = realm;
 	}
 
 	@Override
@@ -100,6 +70,46 @@ public class JassPasswordAuthenticationHandler extends PasswordAuthenticationHan
 				throw new UnsupportedCallbackException(cb);
 			}
 		}
+	}
+
+	@Override
+	public boolean authenticate(String user, String password) throws IOException {
+
+		boolean success;
+
+		ObjectHelper.notEmpty(user, "usercode");
+		ObjectHelper.notNull(password, "password");
+
+		this.usercode = user;
+		this.password = password;
+
+		LoginContext lc;
+		Subject subject = new Subject();
+
+		try {
+			lc = new LoginContext(realm, subject, this);
+		} catch (Throwable t) {
+			throw new IOException("JaasPasswordAuthentication failed to load login context; realm=" + realm, t);
+		}
+
+		try {
+			lc.login();
+			success = true;
+		} catch (AccountNotFoundException anfe) {
+			LOGGER.trace("Unknown user code.", anfe);
+			cause = EndSessionReason.UNKNOWN_USER_CODE;
+			success = false;
+		} catch (LoginException le) {
+			// any other LoginException including FailedLoginException
+			LOGGER.trace("Invalid password.", le);
+			cause = EndSessionReason.INVALID_PASSWORD;
+			success = false;
+		}
+
+		this.usercode = null;
+		this.password = null;
+
+		return success;
 	}
 
 }

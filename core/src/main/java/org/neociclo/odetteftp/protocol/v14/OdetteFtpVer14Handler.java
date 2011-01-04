@@ -19,9 +19,18 @@
  */
 package org.neociclo.odetteftp.protocol.v14;
 
-import static org.neociclo.odetteftp.protocol.v14.CommandBuilderVer14.*;
-import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
-import static org.neociclo.odetteftp.util.SessionHelper.*;
+import static org.neociclo.odetteftp.protocol.v14.CommandBuilderVer14.endToEndResponse;
+import static org.neociclo.odetteftp.protocol.v14.CommandBuilderVer14.negativeEndResponse;
+import static org.neociclo.odetteftp.protocol.v14.CommandBuilderVer14.startFile;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPCREA_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPDATE_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPDEST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPDSN_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPORIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPREAS_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPTIME_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDTIME_FIELD;
+import static org.neociclo.odetteftp.util.SessionHelper.getSessionOftplet;
 
 import java.util.Date;
 
@@ -33,9 +42,9 @@ import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.DefaultDeliveryNotification;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
-import org.neociclo.odetteftp.protocol.VirtualFile;
-import org.neociclo.odetteftp.protocol.NegativeResponseReason;
 import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
+import org.neociclo.odetteftp.protocol.NegativeResponseReason;
+import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.v13.OdetteFtpVer13Handler;
 import org.neociclo.odetteftp.util.ProtocolUtil;
 import org.neociclo.odetteftp.util.TimestampTicker;

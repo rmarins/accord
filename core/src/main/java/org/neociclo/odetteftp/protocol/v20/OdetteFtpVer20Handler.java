@@ -19,33 +19,95 @@
  */
 package org.neociclo.odetteftp.protocol.v20;
 
-import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
+import static org.neociclo.odetteftp.protocol.CommandBuilder.readyToReceive;
+import static org.neociclo.odetteftp.protocol.EndSessionReason.INCOMPATIBLE_SECURE_AUTHENTICATION;
+import static org.neociclo.odetteftp.protocol.EndSessionReason.INVALID_CHALLENGE_RESPONSE;
+import static org.neociclo.odetteftp.protocol.EndSessionReason.PROTOCOL_VIOLATION;
+import static org.neociclo.odetteftp.protocol.EndSessionReason.RESOURCES_NOT_AVAIABLE;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.endFilePositiveAnswer;
 import static org.neociclo.odetteftp.protocol.v20.CipherSuite.NO_CIPHER_SUITE_SELECTION;
-import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.*;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.authenticationChallenge;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.authenticationChallengeResponse;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.endFile;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.endFileNegativeAnswer;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.endSession;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.endToEndResponse;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.negativeEndResponse;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.securityChangeDirection;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.startFile;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.startFileNegativeAnswer;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.startFilePositiveAnswer;
+import static org.neociclo.odetteftp.protocol.v20.CommandBuilderVer20.startSession;
 import static org.neociclo.odetteftp.protocol.v20.FileCompression.NO_COMPRESSION;
 import static org.neociclo.odetteftp.protocol.v20.FileEnveloping.NO_ENVELOPE;
 import static org.neociclo.odetteftp.protocol.v20.SecurityLevel.NO_SECURITY_SERVICES;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.AUCHCHAL_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.AURPRSP_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPDATE_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPDEST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPDSN_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPHSH_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPORIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPSIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPTIME_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPUSER_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EFNAREAST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EFNAREAS_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.ESIDREAST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.ESIDREAS_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPCREA_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPDATE_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPDEST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPDSN_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPHSH_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPORIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPREAST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPREAS_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPSIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.NERPTIME_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDCIPH_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDCOMP_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDDATE_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDDESC_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDDEST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDDSN_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDENV_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDFMT_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDFSIZ_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDLRECL_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDORIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDOSIZ_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDREST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDSEC_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDSIGN_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDTIME_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDUSER_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFNAREAST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFNAREAS_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SSIDAUTH_FIELD;
 import static org.neociclo.odetteftp.util.OdetteFtpConstants.AUTHENTICATION_CHALLENGE_SIZE;
-import static org.neociclo.odetteftp.util.SessionHelper.*;
-import static org.neociclo.odetteftp.protocol.EndSessionReason.*;
-import static org.neociclo.odetteftp.util.ProtocolUtil.*;
+import static org.neociclo.odetteftp.util.ProtocolUtil.valueOfYesNo;
+import static org.neociclo.odetteftp.util.SessionHelper.isInitiator;
+import static org.neociclo.odetteftp.util.SessionHelper.isSessionSecureAuthenticated;
+import static org.neociclo.odetteftp.util.SessionHelper.setSessionSecureAuthenticated;
 
 import java.util.Arrays;
 import java.util.Date;
 
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.OdetteFtpSession;
+import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.oftplet.AnswerReasonInfo;
 import org.neociclo.odetteftp.oftplet.EndSessionReasonInfo;
 import org.neociclo.odetteftp.protocol.AnswerReason;
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.CommandIdentifier;
-import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
-import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
+import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.protocol.NegativeResponseReason;
 import org.neociclo.odetteftp.protocol.RecordFormat;
-import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
+import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.v14.OdetteFtpVer14Handler;
 import org.neociclo.odetteftp.security.AuthenticationChallengeCallback;
 import org.neociclo.odetteftp.security.EncryptAuthenticationChallengeCallback;
@@ -502,10 +564,11 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
     @Override
     protected CommandExchangeBuffer buildStartSessionCommand(String code, String pswd, String userData, OdetteFtpSession session) {
 
-        CommandExchangeBuffer ssid = startSession(code, pswd, session.getDataBufferSize(), session.getTransferMode(),
-                session.isCompressionSupported(), session.isRestartSupported(), session.hasSpecialLogic(), session
-                        .getWindowSize(), session.useSecureAuthentication(), userData);
+        OdetteFtpVersion version = session.getVersion();
 
+		CommandExchangeBuffer ssid = startSession(version.getProtocolLevel(), code, pswd, session.getDataBufferSize(),
+				session.getTransferMode(), session.isCompressionSupported(), session.isRestartSupported(),
+				session.hasSpecialLogic(), session.getWindowSize(), session.useSecureAuthentication(), userData);
         return ssid;
     }
 

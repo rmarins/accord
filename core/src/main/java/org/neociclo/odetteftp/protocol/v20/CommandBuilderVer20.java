@@ -21,7 +21,6 @@ package org.neociclo.odetteftp.protocol.v20;
 
 import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
 
-import static org.neociclo.odetteftp.OdetteFtpVersion.OFTP_V20;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.*;
 import static org.neociclo.odetteftp.protocol.v20.ReleaseFormatVer20.*;
 import static org.neociclo.odetteftp.util.ProtocolUtil.*;
@@ -64,14 +63,14 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
 
     public static final int MAX_REASON_TEXT_LENGTH = 999;
 
-    public static CommandExchangeBuffer startSession(String code, String pswd, int sdeb, TransferMode mode,
+    public static CommandExchangeBuffer startSession(int protocolLevel, String code, String pswd, int sdeb, TransferMode mode,
             boolean compression, boolean restart, boolean specialLogic, int credit, boolean authentication,
             String userData) {
 
         CommandExchangeBuffer ssid = new CommandExchangeBuffer(SSID_V20);
 
         ssid.setAttribute(SSIDCMD_FIELD, String.valueOf(SSID.getCode()));
-        ssid.setAttribute(SSIDLEV_FIELD, String.valueOf(OFTP_V20.getProtocolLevel()));
+        ssid.setAttribute(SSIDLEV_FIELD, String.valueOf(protocolLevel));
         ssid.setAttribute(SSIDCODE_FIELD, code);
         ssid.setAttribute(SSIDPSWD_FIELD, pswd);
         ssid.setAttribute(SSIDSDEB_FIELD, String.valueOf(sdeb));
@@ -325,7 +324,6 @@ public class CommandBuilderVer20 extends CommandBuilderVer14 {
      * @param reason
      *            Answer Reason.
      * @param reasonText
-     *            TODO
      * @param retry
      *            <code>true</code> if the transmission may be retried latter,
      *            or <code>false</code> to don't retry again.

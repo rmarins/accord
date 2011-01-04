@@ -22,7 +22,6 @@ package org.neociclo.odetteftp.protocol.v14;
 import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
 import static org.neociclo.odetteftp.util.ProtocolUtil.*;
 
-import static org.neociclo.odetteftp.OdetteFtpVersion.OFTP_V14;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.EERP;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.NERP;
 import static org.neociclo.odetteftp.protocol.CommandIdentifier.SFID;
@@ -202,42 +201,46 @@ public class CommandBuilderVer14 extends CommandBuilderVer13 {
         return sfid;
     }
 
-    /**
-     * Create the Start Session command with given parameters. It belongs to the
-     * Start Session Phase, and is performed in both direction to negotiate
-     * capabilities and session wide parameters between locations.
-     * 
-     * @param code
-     *        Initiator's Identification Code which uniquely identifies the
-     *        Initiator (sender) participating in the Odette FTP session.
-     * @param pswd
-     *        Key to authenticate the sender. Assigned by bilateral agreement.
-     * @param sdeb
-     *        The length, in octets, of the largest Exchange Buffer that can be
-     *        accepted by the location.
-     * @param compression
-     *        Compression indicator. <code>true</code> if the location can
-     *        handle compressed data. Otherwise it should be <code>false</code>.
-     * @param restart
-     *        Restart indication informing whether the location can handle the
-     *        restart of a partially transmitted file.
-     * @param specialLogic
-     *        Special logic indication.
-     * @param credit
-     *        Credit.
-     * @param userData
-     *        User Data.
-     * @param sendReceive
-     *        Sender / Receiver capabilities:
-     * @return The Start Session command with the corresponding values.
-     */
-    public static CommandExchangeBuffer startSession(String code, String pswd, int sdeb, TransferMode mode,
+	/**
+	 * Create the Start Session command with given parameters. It belongs to the
+	 * Start Session Phase, and is performed in both direction to negotiate
+	 * capabilities and session wide parameters between locations.
+	 * 
+	 * @param protocolLevel
+	 *            protocol version
+	 * @param code
+	 *            Initiator's Identification Code which uniquely identifies the
+	 *            Initiator (sender) participating in the Odette FTP session.
+	 * @param pswd
+	 *            Key to authenticate the sender. Assigned by bilateral
+	 *            agreement.
+	 * @param sdeb
+	 *            The length, in octets, of the largest Exchange Buffer that can
+	 *            be accepted by the location.
+	 * @param compression
+	 *            Compression indicator. <code>true</code> if the location can
+	 *            handle compressed data. Otherwise it should be
+	 *            <code>false</code>.
+	 * @param restart
+	 *            Restart indication informing whether the location can handle
+	 *            the restart of a partially transmitted file.
+	 * @param specialLogic
+	 *            Special logic indication.
+	 * @param credit
+	 *            Credit.
+	 * @param userData
+	 *            User Data.
+	 * @param sendReceive
+	 *            Sender / Receiver capabilities:
+	 * @return The Start Session command with the corresponding values.
+	 */
+    public static CommandExchangeBuffer startSession(int protocolLevel, String code, String pswd, int sdeb, TransferMode mode,
             boolean compression, boolean restart, boolean specialLogic, int credit, String userData) {
 
         CommandExchangeBuffer ssid = new CommandExchangeBuffer(SSID_V14);
 
         ssid.setAttribute(SSIDCMD_FIELD, String.valueOf(SSID.getCode()));
-        ssid.setAttribute(SSIDLEV_FIELD, String.valueOf(OFTP_V14.getProtocolLevel()));
+        ssid.setAttribute(SSIDLEV_FIELD, String.valueOf(protocolLevel));
         ssid.setAttribute(SSIDCODE_FIELD, code);
         ssid.setAttribute(SSIDPSWD_FIELD, pswd);
         ssid.setAttribute(SSIDSDEB_FIELD, String.valueOf(sdeb));

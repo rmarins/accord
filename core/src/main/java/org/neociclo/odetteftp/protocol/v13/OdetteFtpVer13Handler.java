@@ -19,10 +19,34 @@
  */
 package org.neociclo.odetteftp.protocol.v13;
 
-import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.*;
-
-import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
-import static org.neociclo.odetteftp.protocol.DeliveryNotification.*;
+import static org.neociclo.odetteftp.protocol.CommandBuilder.readyToReceive;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.endFile;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.endFileNegativeAnswer;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.endSession;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.endToEndResponse;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.startFile;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.startFileNegativeAnswer;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.startFilePositiveAnswer;
+import static org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13.startSession;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPDATE_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPDEST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPDSN_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPORIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPTIME_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EERPUSER_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.EFNAREAS_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.ESIDREAS_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDDATE_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDDEST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDDSN_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDFMT_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDFSIZ_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDLRECL_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDORIG_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDREST_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDTIME_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFIDUSER_FIELD;
+import static org.neociclo.odetteftp.util.CommandFormatConstants.SFNAREAS_FIELD;
 
 import java.util.Date;
 
@@ -37,10 +61,11 @@ import org.neociclo.odetteftp.protocol.CommandIdentifier;
 import org.neociclo.odetteftp.protocol.DefaultDeliveryNotification;
 import org.neociclo.odetteftp.protocol.DefaultHandler;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
-import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.protocol.DeliveryNotification;
-import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.protocol.DeliveryNotification.EndResponseType;
+import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.protocol.RecordFormat;
+import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.util.ProtocolUtil;
 
 

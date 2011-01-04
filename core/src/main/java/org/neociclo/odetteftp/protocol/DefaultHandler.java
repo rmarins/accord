@@ -1289,10 +1289,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
                     "Password authentication engine not available.");
         }
 
-        if (pwdAuthCallback.isSuccess()) {
-            // authentication succeed
-        	return;
-        } else {
+        if (!pwdAuthCallback.isSuccess() && mandatory) {
         	// has failed
         	EndSessionReason cause = pwdAuthCallback.getCause();
         	if (cause == null) {
@@ -1302,6 +1299,9 @@ public abstract class DefaultHandler implements ProtocolHandler {
         	if (session.isInitiator()) {
         		abnormalRelease(session, EndSessionReason.UNKNOWN_USER_CODE, "Authentication error: " + cause.getDescription());
         	}
+        } else {
+            // authentication succeed
+        	return;
         }
 
     }

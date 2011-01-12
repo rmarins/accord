@@ -69,7 +69,6 @@ public class SecureConnectionSendFile {
 
 		DefaultVirtualFile vf = new DefaultVirtualFile();
 		vf.setDatasetName(payload.getName());
-		vf.setDestination("O0942000055610326980VOLVO");
 		vf.setFile(payload);
 
 		filesToSend.offer(vf);

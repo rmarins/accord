@@ -58,6 +58,8 @@ public class OftpSettings implements Cloneable {
 //	private boolean waitForEerp = false;
 //	private long queueOfferDelay = 300;
 
+	private String jaasRealm;
+
 	private long maxFileSize;
 	private boolean routeCommands = false;
 	private boolean routeEvents = false;
@@ -523,6 +525,14 @@ public class OftpSettings implements Cloneable {
 
 	public void setDelete(boolean delete) {
 		this.delete = delete;
+	}
+
+	public String getJaasRealm() {
+		return jaasRealm;
+	}
+
+	public void setJaasRealm(String jaasRealm) {
+		this.jaasRealm = jaasRealm;
 	}
 
 }

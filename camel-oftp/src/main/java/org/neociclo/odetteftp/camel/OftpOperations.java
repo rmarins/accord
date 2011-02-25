@@ -30,7 +30,7 @@ import javax.net.ssl.SSLEngine;
 import org.apache.camel.util.ObjectHelper;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.TransferMode;
-import org.neociclo.odetteftp.camel.jaas.JassPasswordAuthenticationHandler;
+import org.neociclo.odetteftp.camel.jaas.JaasPasswordAuthenticator;
 import org.neociclo.odetteftp.camel.ssl.DefaultSSLEngineFactory;
 import org.neociclo.odetteftp.camel.ssl.SSLEngineFactory;
 import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
@@ -86,7 +86,8 @@ public class OftpOperations {
 				new PasswordHandler(settings.getUsercode(), settings.getPassword()));
 
 		// authentication callback - validate connecting users using JAAS module
-		securityCallbacks.addHandler(PasswordAuthenticationCallback.class, new JassPasswordAuthenticationHandler());
+		securityCallbacks.addHandler(PasswordAuthenticationCallback.class, new JaasPasswordAuthenticator(
+				settings.getJaasRealm()));
 
 		return securityCallbacks;
 	}

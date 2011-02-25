@@ -29,6 +29,8 @@ import org.neociclo.odetteftp.oftplet.StartFileResponse;
  */
 public class DefaultStartFileResponse implements StartFileResponse {
 
+	private static final long serialVersionUID = 1L;
+
 	private boolean accepted;
 	private long restartOffset;
 
@@ -43,6 +45,9 @@ public class DefaultStartFileResponse implements StartFileResponse {
 	}
 
 	public static DefaultStartFileResponse positiveStartFileAnswer(File saveTo, long restartOffset) {
+		if (saveTo == null) {
+			throw new NullPointerException("saveTo");
+		}
 		DefaultStartFileResponse response = new DefaultStartFileResponse(true, restartOffset);
 		response.file = saveTo;
 		return response;

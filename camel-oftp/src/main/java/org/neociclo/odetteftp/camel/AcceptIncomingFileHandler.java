@@ -158,10 +158,11 @@ public class AcceptIncomingFileHandler implements Synchronization {
 		try {
 			response = out.getMandatoryBody(StartFileResponse.class);
 		} catch (InvalidPayloadException ipe) {
-			Object body = out.getBody();
-			setNegativeAnswer(AnswerReason.ACCESS_METHOD_FAILURE, "Invalid payload exchange received.", false);
+			setNegativeAnswer(AnswerReason.ACCESS_METHOD_FAILURE,
+					"Cannot accept file: invalid payload exchange received.", false);
 			exchange.setException(ipe);
 
+			Object body = out.getBody();
 			LOGGER.warn("Invalid payload in response message. A StartFileResponse type were expected. Was: "
 					+ (body == null ? "null" : body.getClass().getName()), ipe);
 

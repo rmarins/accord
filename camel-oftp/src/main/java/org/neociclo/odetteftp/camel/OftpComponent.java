@@ -57,23 +57,22 @@ public class OftpComponent extends DefaultComponent {
 		if (timer == null) {
             timer = new HashedWheelTimer();
 			LOGGER.debug("Created the Odette FTP component timer: {}", timer);
+	    	//
+			// Stop timer used by Netty when shutting down
+			//
+	    	Runtime.getRuntime().addShutdownHook(new Thread() {
+	    		@Override
+	    		public synchronized void start() {
+	    	    	LOGGER.debug("Shutting down Odette FTP component timer: {}", timer);
+	    			timer.stop();
+	    		}
+	    	});
         }
 		super.doStart();
 	}
 
     @Override
     protected void doStop() throws Exception {
-
-    	//
-		// Shutdown timer used by Netty
-		//
-    	Runtime.getRuntime().addShutdownHook(new Thread() {
-    		@Override
-    		public synchronized void start() {
-    	    	LOGGER.debug("Shutting down Odette FTP component timer: {}", timer);
-    			timer.stop();
-    		}
-    	});
 
         super.doStop();
     }

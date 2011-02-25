@@ -114,6 +114,13 @@ public class OftpEndpointUtil {
 	public static List<OdetteFtpObject> askConsumerForUserOutgoingExchanges(IOftpEndpoint endpoint, String userCode,
 			OdetteFtpSession session) {
 
+		OftpSettings endpointSettings = endpoint.getSettings();
+		boolean routeCommands = endpointSettings.isRouteCommands();
+
+		if (!routeCommands) {
+			return null;
+		}
+
 		final List<OdetteFtpObject> result = new ArrayList<OdetteFtpObject>();
 
 		Exchange e = createExchange(endpoint, ExchangePattern.InOut, null, session);

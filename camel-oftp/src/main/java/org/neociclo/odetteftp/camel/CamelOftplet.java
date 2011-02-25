@@ -107,7 +107,11 @@ public class CamelOftplet implements Oftplet, OftpletSpeaker, OftpletListener {
 
 	public void onSessionEnd() {
 		operations.onSessionEnd(session);
-		unregisterOutgoingExchangeObserver(session.getUserCode());
+
+		String userCode = session.getUserCode(); // equals null if not authenticated
+		if (session.getEntityType() == EntityType.RESPONDER && userCode != null) {
+			unregisterOutgoingExchangeObserver(session.getUserCode());
+		}
 	}
 
 	public void onExceptionCaught(Throwable cause) {

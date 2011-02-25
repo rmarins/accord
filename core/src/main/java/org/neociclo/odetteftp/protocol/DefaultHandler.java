@@ -1289,16 +1289,16 @@ public abstract class DefaultHandler implements ProtocolHandler {
                     "Password authentication engine not available.");
         }
 
+        LOGGER.trace("[{}] handled authenticator callback = {}", session, pwdAuthCallback);
+
         if (!pwdAuthCallback.isSuccess() && mandatory) {
         	// has failed
         	EndSessionReason cause = pwdAuthCallback.getCause();
         	if (cause == null) {
         		cause = EndSessionReason.UNSPECIFIED_ABORT;
         	}
-        	
-        	if (session.isInitiator()) {
-        		abnormalRelease(session, EndSessionReason.UNKNOWN_USER_CODE, "Authentication error: " + cause.getDescription());
-        	}
+
+    		abort(session, cause, "Authentication error: " + cause.getDescription());
         } else {
             // authentication succeed
         	return;

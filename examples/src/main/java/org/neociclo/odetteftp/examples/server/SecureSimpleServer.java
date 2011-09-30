@@ -48,7 +48,7 @@ public class SecureSimpleServer {
 
 	private static final int SERVER_PORT = 6619;
 
-	private static final File SERVER_DIR = new File(".", "data");
+	private static final File SERVER_DIR = new File(".", "simpleserver-data");
 
 	public static void main(String[] args) throws Exception {
 
@@ -76,10 +76,10 @@ public class SecureSimpleServer {
 		// create the SSLEngine
 		//
 
-		char[] pwd = "password".toCharArray();
+		char[] pwd = "neociclo".toCharArray();
 		String algorithm = "SunX509";
 
-		KeyStore ks = SecurityUtil.openKeyStore(new File("cert/neociclo.jks"), pwd);
+		KeyStore ks = SecurityUtil.openKeyStore(new File(SERVER_DIR, "cert/rama-dnsdojo-net.ks"), pwd);
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
         kmf.init(ks, pwd);
@@ -87,11 +87,8 @@ public class SecureSimpleServer {
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(kmf.getKeyManagers(), null, null);
 
-		SSLEngine sslEngine = sslContext.createSSLEngine();
-		sslEngine.setUseClientMode(false);
-		
 		SimpleServerOftpletFactory factory = new SimpleServerOftpletFactory(SERVER_DIR, config, serverSecurityHandler);
-		TcpServer server = new TcpServer(localAddress, sslEngine, factory);
+		TcpServer server = new TcpServer(localAddress, sslContext, factory);
 
 		server.start();
 

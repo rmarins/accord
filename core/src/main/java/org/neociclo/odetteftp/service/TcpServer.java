@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import org.jboss.netty.channel.ServerChannelFactory;
@@ -34,6 +35,7 @@ import org.jboss.netty.util.Timer;
 import org.neociclo.odetteftp.EntityType;
 import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.netty.OdetteFtpPipelineFactory;
+import org.neociclo.odetteftp.netty.SslHandlerFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.util.ExecutorUtil;
 
@@ -44,7 +46,7 @@ import org.neociclo.odetteftp.util.ExecutorUtil;
 public class TcpServer extends Server {
 
     private InetSocketAddress localAddress;
-    private SSLEngine sslEngine;
+    private SSLContext sslContext;
     private Boolean startTls;
 
     private Executor bossExecutor;
@@ -54,13 +56,13 @@ public class TcpServer extends Server {
         this(localAddress, null, oftpletFactory);
     }
 
-    public TcpServer(InetSocketAddress localAddress, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
-        this(localAddress, sslEngine, null, oftpletFactory);
+    public TcpServer(InetSocketAddress localAddress, SSLContext sslContext, OftpletFactory oftpletFactory) {
+        this(localAddress, sslContext, null, oftpletFactory);
     }
 
-    public TcpServer(InetSocketAddress localAddress, SSLEngine sslEngine, Boolean startTls, OftpletFactory oftpletFactory) {
+    public TcpServer(InetSocketAddress localAddress, SSLContext sslContext, Boolean startTls, OftpletFactory oftpletFactory) {
         super(oftpletFactory);
-        this.sslEngine = sslEngine;
+        this.sslContext = sslContext;
         this.startTls = startTls;
         this.localAddress = localAddress;
     }
@@ -91,17 +93,24 @@ public class TcpServer extends Server {
     protected OdetteFtpPipelineFactory getPipelineFactory(OftpletFactory oftpletFactory, Timer timer,
             ChannelGroup channelGroup) {
 
-        SslHandler sslHandler = null;
-        if (sslEngine != null) {
-            if (startTls == null) {
-                sslHandler = new SslHandler(sslEngine);
-            } else {
-                sslHandler = new SslHandler(sslEngine, startTls.booleanValue());
-            }
-        }
+    	SslHandlerFactory sslHandlerFactory = new SslHandlerFactory() {
+			public SslHandler createSslHandler() {
+		        SslHandler sslHandler = null;
+		        if (sslContext != null) {
+		        	SSLEngine engine = sslContext.createSSLEngine();
+		        	engine.setUseClientMode(false);
+		            if (startTls == null) {
+		                sslHandler = new SslHandler(engine);
+		            } else {
+		                sslHandler = new SslHandler(engine, startTls.booleanValue());
+		            }
+		        }
+				return sslHandler;
+			}
+		};
 
-        OdetteFtpPipelineFactory pipelineFactory = new OdetteFtpPipelineFactory(EntityType.RESPONDER, oftpletFactory,
-                timer, getTransportType(), sslHandler, channelGroup);
+		OdetteFtpPipelineFactory pipelineFactory = new OdetteFtpPipelineFactory(EntityType.RESPONDER, oftpletFactory,
+				timer, getTransportType(), sslHandlerFactory, channelGroup);
 
         if (isLoggingDisabled()) {
         	pipelineFactory.disableLogging();

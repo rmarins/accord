@@ -28,7 +28,7 @@ import java.net.InetSocketAddress;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.examples.MainSupport;
@@ -92,12 +92,10 @@ public class SendFileCompressed {
 
 		OftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks, filesToSend, null, null);
 
-		// create the client mode SSL engine
-		SSLEngine sslEngine = SampleOftpSslContextFactory.getClientContext().createSSLEngine();
-		sslEngine.setUseClientMode(true);
-		sslEngine.setEnableSessionCreation(true);
+		// create the client mode SSL context
+		SSLContext sslContext = SampleOftpSslContextFactory.getClientContext();
 
-		TcpClient oftp = new TcpClient(new InetSocketAddress(host, port), sslEngine, factory);
+		TcpClient oftp = new TcpClient(new InetSocketAddress(host, port), sslContext, factory);
 
 		oftp.connect(true);
 

@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import org.jboss.netty.channel.Channel;
@@ -35,6 +36,7 @@ import org.jboss.netty.util.Timer;
 import org.neociclo.odetteftp.EntityType;
 import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.netty.OdetteFtpPipelineFactory;
+import org.neociclo.odetteftp.netty.SslHandlerFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
 import org.neociclo.odetteftp.util.ExecutorUtil;
 
@@ -53,7 +55,7 @@ public class TcpClient extends Client {
 	private Executor workerExecutor;
 
     private InetSocketAddress remoteAddress;
-    private SSLEngine sslEngine;
+    private SSLContext sslContext;
 
     public TcpClient(String host, OftpletFactory oftpletFactory) {
         super(oftpletFactory);
@@ -61,30 +63,30 @@ public class TcpClient extends Client {
         this.remoteAddress = new InetSocketAddress(host, DEFAULT_NON_SSL_PORT);
     }
 
-    public TcpClient(String host, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
+    public TcpClient(String host, SSLContext sslContext, OftpletFactory oftpletFactory) {
         super(oftpletFactory);
 
         this.remoteAddress = new InetSocketAddress(host, DEFAULT_SSL_PORT);
-        this.sslEngine = sslEngine;
+        this.sslContext = sslContext;
     }
 
     public TcpClient(String host, int port, OftpletFactory oftpletFactory) {
         this(host, port, null, oftpletFactory);
     }
 
-    public TcpClient(String host, int port, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
-        this(new InetSocketAddress(host, port), sslEngine, oftpletFactory);
+    public TcpClient(String host, int port, SSLContext sslContext, OftpletFactory oftpletFactory) {
+        this(new InetSocketAddress(host, port), sslContext, oftpletFactory);
     }
 
     public TcpClient(InetSocketAddress remoteAddress, OftpletFactory oftpletFactory) {
         this(remoteAddress, null, oftpletFactory);
     }
 
-    public TcpClient(InetSocketAddress remoteAddress, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
+    public TcpClient(InetSocketAddress remoteAddress, SSLContext sslContext, OftpletFactory oftpletFactory) {
         super(oftpletFactory);
 
         this.remoteAddress = remoteAddress;
-        this.sslEngine = sslEngine;
+        this.sslContext = sslContext;
     }
 
 	@Override
@@ -116,13 +118,21 @@ public class TcpClient extends Client {
     @Override
     protected ChannelPipelineFactory getPipelineFactory(OftpletFactory oftpletFactory, Timer timer) {
 
-        SslHandler sslHandler = null;
-        if (sslEngine != null) {
-            sslHandler = new SslHandler(sslEngine);
-        }
+        SslHandlerFactory sslHandlerFactory = new SslHandlerFactory() {
+			public SslHandler createSslHandler() {
+				SslHandler sslHandler = null;
+		        if (sslContext != null) {
+		        	SSLEngine engine = sslContext.createSSLEngine();
+		    		engine.setUseClientMode(true);
+		    		engine.setEnableSessionCreation(true);
+		            sslHandler = new SslHandler(engine);
+		        }
+				return sslHandler;
+			}
+		};
 
         OdetteFtpPipelineFactory pipelineFactory = new OdetteFtpPipelineFactory(EntityType.INITIATOR, oftpletFactory,
-                timer, getTransportType(), sslHandler, null);
+                timer, getTransportType(), sslHandlerFactory, null);
 
         if (isLoggingDisabled()) {
         	pipelineFactory.disableLogging();

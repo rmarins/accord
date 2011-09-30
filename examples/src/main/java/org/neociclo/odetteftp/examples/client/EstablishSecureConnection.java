@@ -21,7 +21,7 @@ package org.neociclo.odetteftp.examples.client;
 
 import java.net.InetSocketAddress;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
@@ -54,11 +54,9 @@ public class EstablishSecureConnection {
 		OftpletFactory factory = new DefaultOftpletFactory(securityCallbacks);
 
 		// create the client mode SSL engine
-		SSLEngine sslEngine = SampleOftpSslContextFactory.getClientContext().createSSLEngine();
-		sslEngine.setUseClientMode(true);
-		sslEngine.setEnableSessionCreation(true);
+		SSLContext sslContext = SampleOftpSslContextFactory.getClientContext();
 
-		TcpClient oftp = new TcpClient(new InetSocketAddress(server, port), sslEngine, factory);
+		TcpClient oftp = new TcpClient(new InetSocketAddress(server, port), sslContext, factory);
 
 		oftp.connect(true);
 

@@ -26,7 +26,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.TransferMode;
@@ -139,12 +139,10 @@ public class PerformSecureAuthentication {
 
 		OftpletFactory factory = new DefaultOftpletFactory(conf, secureAuthenticationHandler);
 
-		// create the client mode SSL engine
-		SSLEngine sslEngine = SampleOftpSslContextFactory.getClientContext().createSSLEngine();
-		sslEngine.setUseClientMode(true);
-		sslEngine.setEnableSessionCreation(true);
+		// create the client mode SSL context
+		SSLContext sslContext = SampleOftpSslContextFactory.getClientContext();
 
-		TcpClient oftp = new TcpClient(new InetSocketAddress(server, port), sslEngine, factory);
+		TcpClient oftp = new TcpClient(new InetSocketAddress(server, port), sslContext, factory);
 
 		oftp.connect(true);
 

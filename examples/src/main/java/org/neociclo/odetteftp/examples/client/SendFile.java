@@ -44,7 +44,7 @@ public class SendFile {
 
 	public static void main(String[] args) throws Exception {
 
-		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
+		MainSupport ms = new MainSupport(SendFile.class, args, "server", "port", "odetteid", "password",
 				"payload", "destination");
 		args = ms.args();
 

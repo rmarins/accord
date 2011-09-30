@@ -21,7 +21,7 @@ package org.neociclo.odetteftp.service;
 
 import java.net.InetSocketAddress;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
@@ -38,13 +38,13 @@ public class X25MoreDataBitServer extends TcpServer {
 		super(localAddress, oftpletFactory);
 	}
 
-	public X25MoreDataBitServer(InetSocketAddress localAddress, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
-		super(localAddress, sslEngine, oftpletFactory);
+	public X25MoreDataBitServer(InetSocketAddress localAddress, SSLContext sslContext, OftpletFactory oftpletFactory) {
+		super(localAddress, sslContext, oftpletFactory);
 	}
 
-	public X25MoreDataBitServer(InetSocketAddress localAddress, SSLEngine sslEngine, Boolean startTls,
+	public X25MoreDataBitServer(InetSocketAddress localAddress, SSLContext sslContext, Boolean startTls,
 			OftpletFactory oftpletFactory) {
-		super(localAddress, sslEngine, startTls, oftpletFactory);
+		super(localAddress, sslContext, startTls, oftpletFactory);
 	}
 
 	@Override

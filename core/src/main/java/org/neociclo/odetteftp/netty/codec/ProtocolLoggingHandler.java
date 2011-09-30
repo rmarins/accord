@@ -101,6 +101,10 @@ public class ProtocolLoggingHandler extends SimpleChannelHandler {
                     if (LOGGER.isTraceEnabled(marker)) {
                         traceData(oeb);
                     }
+                } else {
+                    if (LOGGER.isTraceEnabled(marker) && future.getCause() != null) {
+                    	LOGGER.trace(marker, "Failed to send message.", future.getCause());
+                    }
                 }
             }
 

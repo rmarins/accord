@@ -21,7 +21,7 @@ package org.neociclo.odetteftp.service;
 
 import java.net.InetSocketAddress;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.neociclo.odetteftp.TransportType;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
@@ -38,24 +38,24 @@ public class X25MoreDataBitClient extends TcpClient {
 		super(host, oftpletFactory);
 	}
 
-	public X25MoreDataBitClient(String host, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
-		super(host, sslEngine, oftpletFactory);
+	public X25MoreDataBitClient(String host, SSLContext sslContext, OftpletFactory oftpletFactory) {
+		super(host, sslContext, oftpletFactory);
 	}
 
 	public X25MoreDataBitClient(String host, int port, OftpletFactory oftpletFactory) {
 		super(host, port, oftpletFactory);
 	}
 
-	public X25MoreDataBitClient(String host, int port, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
-		super(host, port, sslEngine, oftpletFactory);
+	public X25MoreDataBitClient(String host, int port, SSLContext sslContext, OftpletFactory oftpletFactory) {
+		super(host, port, sslContext, oftpletFactory);
 	}
 
 	public X25MoreDataBitClient(InetSocketAddress remoteAddress, OftpletFactory oftpletFactory) {
 		super(remoteAddress, oftpletFactory);
 	}
 
-	public X25MoreDataBitClient(InetSocketAddress remoteAddress, SSLEngine sslEngine, OftpletFactory oftpletFactory) {
-		super(remoteAddress, sslEngine, oftpletFactory);
+	public X25MoreDataBitClient(InetSocketAddress remoteAddress, SSLContext sslContext, OftpletFactory oftpletFactory) {
+		super(remoteAddress, sslContext, oftpletFactory);
 	}
 	
 	@Override

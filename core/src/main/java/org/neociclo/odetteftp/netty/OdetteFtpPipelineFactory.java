@@ -56,7 +56,7 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
     private OftpletFactory oftpletFactory;
     private Timer timer;
     private TransportType transport;
-    private SslHandler sslHandler;
+    private SslHandlerFactory sslHandlerFactory;
     private ChannelGroup channelGroup;
 
 	private boolean loggingEnabled = true;
@@ -69,11 +69,11 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
         this(entityType, oftpletFactory, timer, transport, null);
     }
 
-    public OdetteFtpPipelineFactory(EntityType entityType, OftpletFactory oftpletFactory, Timer timer, TransportType transport, SslHandler sslHandler) {
+    public OdetteFtpPipelineFactory(EntityType entityType, OftpletFactory oftpletFactory, Timer timer, TransportType transport, SslHandlerFactory sslHandlerFactory) {
         this(entityType, oftpletFactory, timer, transport, null, null);
     }
 
-    public OdetteFtpPipelineFactory(EntityType entityType, OftpletFactory oftpletFactory, Timer timer, TransportType transport, SslHandler sslHandler, ChannelGroup channelGroup) {
+    public OdetteFtpPipelineFactory(EntityType entityType, OftpletFactory oftpletFactory, Timer timer, TransportType transport, SslHandlerFactory sslHandlerFactory, ChannelGroup channelGroup) {
         super();
 
         if (entityType == null) {
@@ -90,7 +90,7 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
         this.oftpletFactory = oftpletFactory;
         this.timer = timer;
         this.transport = transport;
-        this.sslHandler = sslHandler;
+        this.sslHandlerFactory = sslHandlerFactory;
         this.channelGroup = channelGroup;
 
     }
@@ -99,7 +99,8 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
 
         final ChannelPipeline p = pipeline();
 
-        if (sslHandler != null) {
+        if (sslHandlerFactory != null) {
+        	final SslHandler sslHandler = sslHandlerFactory.createSslHandler();
             if (entityType == EntityType.INITIATOR) {
                 p.addLast("sslHandshaker", new SimpleChannelHandler() {
                 	@Override

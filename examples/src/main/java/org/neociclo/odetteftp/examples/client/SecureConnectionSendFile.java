@@ -26,7 +26,7 @@ import java.net.InetSocketAddress;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.SampleOftpSslContextFactory;
@@ -48,7 +48,7 @@ public class SecureConnectionSendFile {
 
 	public static void main(String[] args) throws Exception {
 
-		MainSupport ms = new MainSupport(HandlingSendFileEvents.class, args, "server", "port", "odetteid", "password",
+		MainSupport ms = new MainSupport(SecureConnectionSendFile.class, args, "server", "port", "odetteid", "password",
 				"payload");
 		args = ms.args();
 
@@ -73,13 +73,11 @@ public class SecureConnectionSendFile {
 
 		filesToSend.offer(vf);
 
-		// create the client mode SSL engine
-		SSLEngine sslEngine = SampleOftpSslContextFactory.getClientContext().createSSLEngine();
-		sslEngine.setUseClientMode(true);
-		sslEngine.setEnableSessionCreation(true);
+		// create the client mode SSL context
+		SSLContext sslContext = SampleOftpSslContextFactory.getClientContext();
 
 		OftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks, filesToSend, null, null);
-		TcpClient oftp = new TcpClient(new InetSocketAddress(host, port), sslEngine, factory);
+		TcpClient oftp = new TcpClient(new InetSocketAddress(host, port), sslContext, factory);
 
 		oftp.connect(true);
 

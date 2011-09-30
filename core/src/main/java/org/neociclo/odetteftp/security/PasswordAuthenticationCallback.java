@@ -61,7 +61,7 @@ public class PasswordAuthenticationCallback implements Callback {
 		this.success = true;
 	}
 
-	public void setFailure() {
+	public void setFailed() {
 		setFailed(EndSessionReason.UNSPECIFIED_ABORT);
 	}
 
@@ -70,4 +70,8 @@ public class PasswordAuthenticationCallback implements Callback {
 		this.cause = cause;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("PasswordAuthenticationCallback[%s, %s, %s]", success, user, cause);
+	}
 }

@@ -21,20 +21,18 @@ package org.neociclo.odetteftp.camel.ssl;
 
 import java.io.File;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 /**
  * 
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public interface SSLEngineFactory {
+public interface SSLContextFactory {
 
-    SSLEngineFactory setup(String keyStoreFormat, String securityProvider, File keyStoreFile, File trustStoreFile,
+    SSLContextFactory setup(String keyStoreFormat, String securityProvider, File keyStoreFile, File trustStoreFile,
             char[] passphrase) throws Exception;
 
-    SSLEngine createClientSSLEngine();
-
-    SSLEngine createServerSSLEngine();
+    SSLContext createSSLContext();
 
 }

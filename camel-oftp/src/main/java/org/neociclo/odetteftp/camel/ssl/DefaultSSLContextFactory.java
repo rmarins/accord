@@ -24,7 +24,6 @@ import java.security.KeyStore;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.camel.converter.IOConverter;
@@ -34,12 +33,12 @@ import org.apache.camel.converter.IOConverter;
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
-public class DefaultSSLEngineFactory implements SSLEngineFactory {
+public class DefaultSSLContextFactory implements SSLContextFactory {
 
 	private String SSL_PROTOCOL = "TLS";
 	private static SSLContext sslContext;
 
-	public SSLEngineFactory setup(String keyStoreFormat, String securityProvider, File keyStoreFile,
+	public SSLContextFactory setup(String keyStoreFormat, String securityProvider, File keyStoreFile,
 			File trustStoreFile, char[] passphrase) throws Exception {
 
 		KeyManager[] keyManagers = null;
@@ -68,18 +67,8 @@ public class DefaultSSLEngineFactory implements SSLEngineFactory {
 		return this;
 	}
 
-	public SSLEngine createServerSSLEngine() {
-		SSLEngine serverEngine = sslContext.createSSLEngine();
-		serverEngine.setUseClientMode(false);
-		serverEngine.setNeedClientAuth(true);
-		return serverEngine;
-	}
-
-	public SSLEngine createClientSSLEngine() {
-		SSLEngine clientEngine = sslContext.createSSLEngine();
-		clientEngine.setUseClientMode(true);
-		clientEngine.setEnableSessionCreation(true);
-		return clientEngine;
+	public SSLContext createSSLContext() {
+		return sslContext;
 	}
 
 }

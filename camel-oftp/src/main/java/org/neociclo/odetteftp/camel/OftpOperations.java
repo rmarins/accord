@@ -19,23 +19,25 @@
  */
 package org.neociclo.odetteftp.camel;
 
-import static org.neociclo.odetteftp.camel.OftpEndpointUtil.*;
+import static org.neociclo.odetteftp.camel.OftpEndpointUtil.askConsumerForIncomingFile;
+import static org.neociclo.odetteftp.camel.OftpEndpointUtil.askConsumerForUserOutgoingExchanges;
+import static org.neociclo.odetteftp.camel.OftpEndpointUtil.notifyConsumerOf;
 
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.apache.camel.util.ObjectHelper;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.TransferMode;
 import org.neociclo.odetteftp.camel.jaas.JaasPasswordAuthenticator;
-import org.neociclo.odetteftp.camel.ssl.DefaultSSLEngineFactory;
-import org.neociclo.odetteftp.camel.ssl.SSLEngineFactory;
-import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
+import org.neociclo.odetteftp.camel.ssl.DefaultSSLContextFactory;
+import org.neociclo.odetteftp.camel.ssl.SSLContextFactory;
 import org.neociclo.odetteftp.oftplet.EndFileResponse;
 import org.neociclo.odetteftp.oftplet.StartFileResponse;
+import org.neociclo.odetteftp.protocol.DefaultEndFileResponse;
 import org.neociclo.odetteftp.protocol.OdetteFtpObject;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.security.MappedCallbackHandler;
@@ -131,9 +133,9 @@ public class OftpOperations {
 		OftpSettings settings = getSettings();
 
 		// should it listen with secure connection enabled
-		SSLEngine sslEngine = null;
+		SSLContext sslContext = null;
 		if (settings.isSsl()) {
-			sslEngine = createClientSSLEngine();
+			sslContext = createClientSSLContext();
 		}
 
 		OdetteFtpConfiguration config = settings.asOftpletConfiguration();
@@ -151,7 +153,7 @@ public class OftpOperations {
 		CamelOftpletFactory factory = new CamelOftpletFactory(config, createClientSecurityHandler(), this);
 
 		InetSocketAddress address = new InetSocketAddress(settings.getHost(), settings.getPort());
-		TcpClient client = new TcpClient(address, sslEngine, factory);
+		TcpClient client = new TcpClient(address, sslContext, factory);
 
 		// provide resources to setup the asynchronous networking framework
 		client.setBossExecutor(getEndpoint().getBossExecutor());
@@ -161,12 +163,12 @@ public class OftpOperations {
 		return client;
 	}
 
-	private SSLEngine createClientSSLEngine() throws Exception {
-		SSLEngine sslEngine;
+	private SSLContext createClientSSLContext() throws Exception {
+		SSLContext sslContext;
 		OftpSettings settings = getSettings();
 
-		if (settings.getSslEngine() != null) {
-			sslEngine = settings.getSslEngine();
+		if (settings.getSslContext() != null) {
+			sslContext = settings.getSslContext();
 		} else {
 
 			// validate mandatory endpoint parameters to enable SSL
@@ -180,17 +182,17 @@ public class OftpOperations {
 				passphrase = settings.getPassphrase().toCharArray();
 			}
 
-			SSLEngineFactory sslEngineFactory = new DefaultSSLEngineFactory();
-			sslEngineFactory.setup(
+			SSLContextFactory sslContextFactory = new DefaultSSLContextFactory();
+			sslContextFactory.setup(
 					settings.getKeyStoreFormat(),
 					settings.getSecurityProvider(),
 					null,
 					settings.getTrustStoreFile(),
 					passphrase);
 
-			sslEngine = sslEngineFactory.createClientSSLEngine();
+			sslContext = sslContextFactory.createSSLContext();
 		}
-		return sslEngine;
+		return sslContext;
 	}
 
 	public void runClient() throws Exception {
@@ -244,9 +246,9 @@ public class OftpOperations {
 		OftpSettings settings = getSettings();
 
 		// should it listen with secure connection enabled
-		SSLEngine sslEngine = null;
+		SSLContext sslContext = null;
 		if (settings.isSsl()) {
-			sslEngine = createServerSSLEngine();
+			sslContext = createServerSSLContext();
 		}
 
 		// Using the framework support Oftplet factory working with Queues
@@ -254,7 +256,7 @@ public class OftpOperations {
 				createServerSecurityHandler(), this);
 
 		InetSocketAddress address = new InetSocketAddress(settings.getHost(), settings.getPort());
-		TcpServer server = new TcpServer(address, sslEngine, factory);
+		TcpServer server = new TcpServer(address, sslContext, factory);
 
 		// provide resources to setup the asynchronous networking framework
 		server.setBossExecutor(getEndpoint().getBossExecutor());
@@ -264,13 +266,13 @@ public class OftpOperations {
 		return server;
 	}
 
-	private SSLEngine createServerSSLEngine() throws Exception {
+	private SSLContext createServerSSLContext() throws Exception {
 
-		SSLEngine sslEngine;
+		SSLContext sslContext;
 		OftpSettings settings = getSettings();
 
-		if (settings.getSslEngine() != null) {
-			sslEngine = settings.getSslEngine();
+		if (settings.getSslContext() != null) {
+			sslContext = settings.getSslContext();
 		} else {
 
 			// validate mandatory endpoint parameters to enable SSL
@@ -280,7 +282,7 @@ public class OftpOperations {
 			ObjectHelper.notNull(settings.getTrustStoreFile(), "trustStoreFile", endpoint);
 			ObjectHelper.notNull(settings.getPassphrase(), "passphrase", endpoint);
 
-			SSLEngineFactory sslEngineFactory = new DefaultSSLEngineFactory();
+			SSLContextFactory sslEngineFactory = new DefaultSSLContextFactory();
 			sslEngineFactory.setup(
 					settings.getKeyStoreFormat(),
 					settings.getSecurityProvider(),
@@ -288,9 +290,9 @@ public class OftpOperations {
 					settings.getTrustStoreFile(),
 					settings.getPassphrase().toCharArray());
 
-			sslEngine = sslEngineFactory.createServerSSLEngine();
+			sslContext = sslEngineFactory.createSSLContext();
 		}
-		return sslEngine;
+		return sslContext;
 	}
 
 	public boolean deleteFile(File file) {

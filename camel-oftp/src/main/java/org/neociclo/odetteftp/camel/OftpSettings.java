@@ -23,7 +23,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.Map;
 
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLContext;
 
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.util.ObjectHelper;
@@ -80,7 +80,7 @@ public class OftpSettings implements Cloneable {
     private File trustStoreFile;
     private String keyStoreFormat;
     private String securityProvider;
-    private SSLEngine sslEngine;
+    private SSLContext sslContext;
     private boolean ssl = false;
 
     // OFTP session parameters 
@@ -141,7 +141,7 @@ public class OftpSettings implements Cloneable {
 		setHost(uri.getHost());
 		setPort(uri.getPort());
 
-        sslEngine = component.resolveAndRemoveReferenceParameter(parameters, "sslEngine", SSLEngine.class, null);
+        sslContext = component.resolveAndRemoveReferenceParameter(parameters, "sslContext", SSLContext.class, null);
         passphrase = component.getAndRemoveParameter(parameters, "passphrase", String.class, null);
         keyStoreFormat = component.getAndRemoveParameter(parameters, "keyStoreFormat", String.class, "JKS");
         securityProvider = component.getAndRemoveParameter(parameters, "securityProvider", String.class, "SunX509");
@@ -199,7 +199,7 @@ public class OftpSettings implements Cloneable {
 		clone.setTrustStoreFile(getTrustStoreFile());
 		clone.setKeyStoreFormat(getKeyStoreFormat());
 		clone.setSecurityProvider(getSecurityProvider());
-		clone.setSslEngine(getSslEngine());
+		clone.setSslContext(getSslContext());
 		clone.setSsl(isSsl());
 
 		clone.setUserData(getUserData());
@@ -327,12 +327,12 @@ public class OftpSettings implements Cloneable {
 		this.securityProvider = securityProvider;
 	}
 
-	public SSLEngine getSslEngine() {
-		return sslEngine;
+	public SSLContext getSslContext() {
+		return sslContext;
 	}
 
-	public void setSslEngine(SSLEngine sslEngine) {
-		this.sslEngine = sslEngine;
+	public void setSslContext(SSLContext sslContext) {
+		this.sslContext = sslContext;
 	}
 
 	public boolean isSsl() {

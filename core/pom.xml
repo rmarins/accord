@@ -39,7 +39,7 @@
     </odetteftp.osgi.export.pkg>
     <odetteftp.osgi.import>
         !org.neociclo.odetteftp.*,
-        org.jboss.netty.*;version="[3.2.3,4)",
+        org.jboss.netty.*;version="[3.2.5,4)",
         org.bouncycastle.*;version="[1.39.0,2)",
         *
     </odetteftp.osgi.import>

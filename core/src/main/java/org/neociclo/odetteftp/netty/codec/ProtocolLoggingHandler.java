@@ -46,6 +46,10 @@ public class ProtocolLoggingHandler extends SimpleChannelHandler {
 
     private Marker marker;
 
+    public ProtocolLoggingHandler() {
+	    this(null);
+    }
+
     public ProtocolLoggingHandler(Marker marker) {
         super();
         this.marker = marker;

@@ -33,7 +33,13 @@ public enum TransportType {
     /**
      * X.25 Microtronix More-Data-Bit Gateway transport type.
      */
-    X25_MBGW;
+    X25_MBGW,
+
+    /**
+     * Integrated Services Digital Network - CAPI 2.0 enabled - transport type
+     * (both native or remote CAPI are supported).
+     */
+    ISDN_CAPI20;
 
 //    /**
 //     * Packet Switched Networks where the Stream Transmission Buffer shouldn't

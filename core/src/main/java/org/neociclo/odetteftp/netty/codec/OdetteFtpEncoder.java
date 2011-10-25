@@ -37,7 +37,7 @@ public class OdetteFtpEncoder extends OneToOneEncoder {
     protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
 
         if (!(msg instanceof OdetteFtpExchangeBuffer)) {
-            return null;
+            return msg;
         }
 
         OdetteFtpExchangeBuffer oeb = (OdetteFtpExchangeBuffer) msg;

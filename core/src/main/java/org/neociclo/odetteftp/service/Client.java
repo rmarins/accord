@@ -85,8 +85,8 @@ public abstract class Client extends BaseService {
         ChannelFutureListener setConnectedOnOpen = new ChannelFutureListener() {
             public void operationComplete(ChannelFuture f) throws Exception {
                 if (f.isSuccess()) {
-                    LOGGER.info("Connected.");
                     setConnected();
+                    LOGGER.info("Connected.");
                 }
             }
         };
@@ -113,8 +113,8 @@ public abstract class Client extends BaseService {
         ChannelFuture closeFuture = c.getCloseFuture();
         ChannelFutureListener setDisconnectedOnClose = new ChannelFutureListener() {
             public void operationComplete(ChannelFuture future) throws Exception {
-                LOGGER.info("Disconnected.");
                 setDisconnected();
+                LOGGER.info("Disconnected.");
                 if (getDisconnectListener() != null) {
                 	getDisconnectListener().run();
                 }
@@ -125,7 +125,6 @@ public abstract class Client extends BaseService {
         // need await disconnect
         if (await) {
             awaitDisconnect();
-            releaseExternalResources();
         }
 
     }
@@ -136,6 +135,8 @@ public abstract class Client extends BaseService {
         }
         ChannelFuture closeFuture = channel.getCloseFuture();
         closeFuture.awaitUninterruptibly();
+
+        releaseExternalResources();
     }
 
     public boolean isConnected() {

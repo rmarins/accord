@@ -44,6 +44,12 @@
       <artifactId>oftp-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <artifactId>oftp-isdn</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
 </project>

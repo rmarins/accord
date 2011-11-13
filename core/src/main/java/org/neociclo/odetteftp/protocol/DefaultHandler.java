@@ -115,7 +115,10 @@ public abstract class DefaultHandler implements ProtocolHandler {
         // Protocol Sequence step 2
         if (session.isResponder()) {
             /* Authenticate the Initiator peer identification. */
-            startSessionPasswordAuthentication(session, ssid, true);
+            boolean authenticated = startSessionPasswordAuthentication(session, ssid, true);
+            if (!authenticated) {
+            	return;
+            }
 
             /*
              * After authorization, keep user code in session context.
@@ -1121,16 +1124,16 @@ public abstract class DefaultHandler implements ProtocolHandler {
             abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, err);
         }
 
-        /*
-         * FALSE is the only is valid value for TCP. The Special Logic
-         * extensions are only useful in an X.25 environment and are not
-         * supported for TCP/IP.
-         */
-        if (ssidspec) {
-            err = "Special Logic is not supported.";
-            LOGGER.error("[{}] Session setup failed. {}", session, err);
-            abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, err);
-        }
+//        /*
+//         * FALSE is the only is valid value for TCP. The Special Logic
+//         * extensions are only useful in an X.25 environment and are not
+//         * supported for TCP/IP.
+//         */
+//        if (ssidspec) {
+//            err = "Special Logic is not supported.";
+//            LOGGER.error("[{}] Session setup failed. {}", session, err);
+//            abnormalRelease(session, EndSessionReason.INCOMPATIBLE_MODE, err);
+//        }
 
     }
 
@@ -1274,7 +1277,7 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
     }
 
-    protected void startSessionPasswordAuthentication(OdetteFtpSession session, CommandExchangeBuffer ssid, boolean mandatory) throws OdetteFtpException {
+    protected boolean startSessionPasswordAuthentication(OdetteFtpSession session, CommandExchangeBuffer ssid, boolean mandatory) throws OdetteFtpException {
 
         String ssidcode = ssid.getStringAttribute(SSIDCODE_FIELD);
         String ssidpswd = ssid.getStringAttribute(SSIDPSWD_FIELD);
@@ -1299,10 +1302,11 @@ public abstract class DefaultHandler implements ProtocolHandler {
         	}
 
     		abort(session, cause, "Authentication error: " + cause.getDescription());
-        } else {
-            // authentication succeed
-        	return;
+    		return false;
         }
+
+        // authentication succeed
+    	return true;
 
     }
 

@@ -56,6 +56,9 @@ public class OdetteFtpDecoder extends OneToOneDecoder {
         OdetteFtpExchangeBuffer oftpExchangeBuffer;
 
         // incoming buffer raw data
+        if (!(msg instanceof ChannelBuffer)) {
+            return msg;
+        }
         ChannelBuffer in = (ChannelBuffer) msg;
 
         /* Identify the command identifier in ODETTE-FTP Exchange Buffer. */

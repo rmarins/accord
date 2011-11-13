@@ -50,6 +50,7 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -63,6 +64,8 @@ import org.neociclo.odetteftp.EntityType;
 import org.neociclo.odetteftp.OdetteFtpSession;
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.ProtocolHandler;
+import org.neociclo.odetteftp.netty.codec.SpecialLogicDecoder;
+import org.neociclo.odetteftp.netty.codec.SpecialLogicEncoder;
 import org.neociclo.odetteftp.oftplet.ChannelCallback;
 import org.neociclo.odetteftp.oftplet.Oftplet;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
@@ -288,6 +291,8 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
         else if (SSID == identifier) {
             handler.startSessionReceived(session, (CommandExchangeBuffer) message);
 
+            setUpSpecialLogicWhenAgreed(session, ctx);
+
             ProtocolHandler h = getProtocolHandlerByVersion(session.getVersion());
             h.afterStartSession(session);
         }
@@ -327,7 +332,19 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
         super.messageReceived(ctx, e);
     }
 
-    @Override
+	private void setUpSpecialLogicWhenAgreed(OdetteFtpSession session, ChannelHandlerContext ctx) {
+		if (session.hasSpecialLogic()) {
+			ChannelPipeline p = ctx.getPipeline();
+
+			String baseHandlerName = "OdetteExchangeBuffer-DECODER";
+
+			p.addBefore(baseHandlerName, "SpecialLogic-ENCODER", new SpecialLogicEncoder());
+			p.addBefore(baseHandlerName, "SpecialLogic-DECODER", new SpecialLogicDecoder());
+
+		}
+	}
+
+	@Override
     public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 
         if (!(e.getMessage() instanceof OdetteFtpExchangeBuffer)) {

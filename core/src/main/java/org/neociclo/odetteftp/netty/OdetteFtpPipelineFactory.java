@@ -45,6 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The default OFTP channel pipeline factory: works for TCPIP and X25
+ * MoreDataBit Gateway protocol.
+ * 
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
@@ -134,13 +137,12 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
         }
 
         // add odette-ftp exchange buffer codecs
-        // XXX non-STB nor -MBGW decoder may require a Oftp decoder specialized from FrameDecoder
         p.addLast("OdetteExchangeBuffer-DECODER", new OdetteFtpDecoder());
         p.addLast("OdetteExchangeBuffer-ENCODER", new OdetteFtpEncoder());
         LOGGER.debug("Added Odette Exchange Buffer codecs to channel pipeline.");
 
         if (isLoggingEnabled()) {
-	        p.addLast("logging", new ProtocolLoggingHandler(null));
+	        p.addLast("OdetteFtp-LOGGING", new ProtocolLoggingHandler(null));
 	        LOGGER.debug("Added Odette FTP protocol logging handler to channel pipeline.");
         }
 

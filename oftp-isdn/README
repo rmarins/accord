@@ -1,0 +1,12 @@
+JAICO FIRST STEPS
+
+Before working with Jaico, you must install JCapi.
+
+Go to http://jcapi.sourceforge.net
+Download jcapi.jar
+Rename it to jcapi-1.2.1.jar
+Execute the following Maven command-line:
+
+   mvn install:install-file -DgroupId=jcapi -DartifactId=jcapi -Dversion=1.2.1 -Dpackaging=jar -Dfile=jcapi-1.2.1.jar
+
+You are ready to build Jaico.

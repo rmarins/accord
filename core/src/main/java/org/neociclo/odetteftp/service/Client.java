@@ -131,7 +131,8 @@ public abstract class Client extends BaseService {
 
     public synchronized void awaitDisconnect() {
         if (channel == null) {
-            throw new IllegalStateException("The connect() method were not invoked.");
+//            throw new IllegalStateException("The connect() method were not invoked.");
+        	return;
         }
         ChannelFuture closeFuture = channel.getCloseFuture();
         closeFuture.awaitUninterruptibly();

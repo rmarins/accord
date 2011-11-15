@@ -49,7 +49,7 @@ public class ExecutorUtil {
     /**
      * Shuts down the specified executors.
      */
-    public static void terminate(Executor... executors) {
+    public static void terminate(long timeoutMillis, Executor... executors) {
         Executor[] executorsCopy = new Executor[executors.length];
         for (int i = 0; i < executors.length; i ++) {
             if (executors[i] == null) {
@@ -59,13 +59,15 @@ public class ExecutorUtil {
         }
 
         boolean interrupted = false;
+        int loopCount = (int) (timeoutMillis / 100);
         for (Executor e: executorsCopy) {
             if (!(e instanceof ExecutorService)) {
                 continue;
             }
 
             ExecutorService es = (ExecutorService) e;
-            for (;;) {
+            
+            for (int a=0; a<loopCount; a++) {
                 try {
                     es.shutdownNow();
                 } catch (SecurityException ex) {

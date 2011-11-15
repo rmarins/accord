@@ -45,6 +45,8 @@ import org.neociclo.odetteftp.util.ExecutorUtil;
  */
 public class TcpServer extends Server {
 
+	private static final long EXECUTOR_SHUTDOWN_TIMEOUT = 10000;
+
     private InetSocketAddress localAddress;
     private SSLContext sslContext;
     private Boolean startTls;
@@ -142,10 +144,10 @@ public class TcpServer extends Server {
 	@Override
 	protected void releaseExternalResources() {
 		if (isManaged(bossExecutor)) {
-			ExecutorUtil.terminate(bossExecutor);
+			ExecutorUtil.terminate(EXECUTOR_SHUTDOWN_TIMEOUT, bossExecutor);
 		}
 		if (isManaged(workerExecutor)) {
-			ExecutorUtil.terminate(workerExecutor);
+			ExecutorUtil.terminate(EXECUTOR_SHUTDOWN_TIMEOUT, workerExecutor);
 		}
 		super.releaseExternalResources();
 	}

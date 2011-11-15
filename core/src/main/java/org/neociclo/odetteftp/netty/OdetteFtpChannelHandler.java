@@ -225,6 +225,10 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 
         /* Cast received message to Odette Exchange Buffer object. */
+    	if (!(e.getMessage() instanceof OdetteFtpExchangeBuffer)) {
+    		ctx.sendUpstream(e);
+    		return;
+    	}
         OdetteFtpExchangeBuffer message = (OdetteFtpExchangeBuffer) e.getMessage();
 
         OdetteFtpSession session = ChannelContext.SESSION.get(ctx.getChannel());

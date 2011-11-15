@@ -28,6 +28,8 @@ import java.util.Set;
  */
 abstract class BaseService {
 
+	protected static final long DEFAULT_EXECUTOR_SHUTDOWN_TIMEOUT = 10000;
+
     private Set<Object> instanceManagedBeans = new HashSet<Object>();
 	private boolean loggingDisabled;
 

@@ -46,9 +46,6 @@ import org.neociclo.odetteftp.util.ExecutorUtil;
  */
 public class TcpClient extends Client {
 
-	private static final long EXECUTOR_SHUTDOWN_TIMEOUT = 10000;
-	private static final TransportType TCPIP_TRANSPORT_TYPE = TransportType.TCPIP;
-
     private static final int DEFAULT_NON_SSL_PORT = 3305;
 	private static final int DEFAULT_SSL_PORT = 6619;
 
@@ -188,15 +185,15 @@ public class TcpClient extends Client {
     @Override
     protected void releaseExternalResources() {
     	if (isManaged(bossExecutor)) {
-    		ExecutorUtil.terminate(EXECUTOR_SHUTDOWN_TIMEOUT, bossExecutor);
+    		ExecutorUtil.terminate(DEFAULT_EXECUTOR_SHUTDOWN_TIMEOUT, bossExecutor);
     	}
     	if (isManaged(workerExecutor)) {
-    		ExecutorUtil.terminate(EXECUTOR_SHUTDOWN_TIMEOUT, workerExecutor);
+    		ExecutorUtil.terminate(DEFAULT_EXECUTOR_SHUTDOWN_TIMEOUT, workerExecutor);
     	}
     	super.releaseExternalResources();
     }
 
 	protected TransportType getTransportType() {
-		return TCPIP_TRANSPORT_TYPE;
+		return TransportType.TCPIP;
 	}
 }

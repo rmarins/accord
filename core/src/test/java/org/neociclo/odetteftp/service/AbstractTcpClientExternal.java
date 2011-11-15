@@ -67,7 +67,7 @@ public abstract class AbstractTcpClientExternal {
 
     @AfterClass
     public static void destroy() {
-        ExecutorUtil.terminate(executor);
+        ExecutorUtil.terminate(10000, executor);
     }
 
     protected boolean runTests;

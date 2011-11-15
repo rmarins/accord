@@ -31,6 +31,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ExecutorUtil {
 
+	public static final long DEFAULT_EXECUTOR_SHUTDOWN_TIMEOUT = 5000;
+
     /**
      * Returns {@code true} if and only if the specified {@code executor}
      * is an {@link ExecutorService} and is shut down.  Please note that this
@@ -44,6 +46,10 @@ public class ExecutorUtil {
             }
         }
         return false;
+    }
+
+    public static void terminate(Executor... executors) {
+    	terminate(DEFAULT_EXECUTOR_SHUTDOWN_TIMEOUT, executors);
     }
 
     /**

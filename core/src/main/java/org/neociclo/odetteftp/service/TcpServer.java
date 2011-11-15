@@ -142,10 +142,10 @@ public class TcpServer extends Server {
 	@Override
 	protected void releaseExternalResources() {
 		if (isManaged(bossExecutor)) {
-			ExecutorUtil.terminate(DEFAULT_EXECUTOR_SHUTDOWN_TIMEOUT, bossExecutor);
+			ExecutorUtil.terminate(bossExecutor);
 		}
 		if (isManaged(workerExecutor)) {
-			ExecutorUtil.terminate(DEFAULT_EXECUTOR_SHUTDOWN_TIMEOUT, workerExecutor);
+			ExecutorUtil.terminate(workerExecutor);
 		}
 		super.releaseExternalResources();
 	}

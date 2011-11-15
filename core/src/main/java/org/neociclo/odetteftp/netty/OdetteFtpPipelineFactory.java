@@ -104,20 +104,23 @@ public class OdetteFtpPipelineFactory implements ChannelPipelineFactory {
 
         if (sslHandlerFactory != null) {
         	final SslHandler sslHandler = sslHandlerFactory.createSslHandler();
-            if (sslHandler != null && entityType == EntityType.INITIATOR) {
-                p.addLast("sslHandshaker", new SimpleChannelHandler() {
-                	@Override
-                	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-                        LOGGER.debug("Starting SSL/TLS client (Initiator) handshake.");
-                        sslHandler.handshake();
-                        p.remove("sslHandshaker");
-                        
-                        super.channelConnected(ctx, e);
-                    }
-                });
-                p.addLast("ssl", sslHandler);
-                LOGGER.debug("Added the SSL Handler to channel pipeline: {}", sslHandler);
-            }
+        	if (sslHandler != null) {
+		        if (entityType == EntityType.INITIATOR) {
+		            p.addLast("sslHandshaker", new SimpleChannelHandler() {
+		            	@Override
+		            	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+		                    LOGGER.debug("Starting SSL/TLS client (Initiator) handshake.");
+		                    sslHandler.handshake();
+		                    p.remove("sslHandshaker");
+		                    
+		                    super.channelConnected(ctx, e);
+		                }
+		            });
+		        }
+
+		        p.addLast("ssl", sslHandler);
+		        LOGGER.debug("Added the SSL Handler to channel pipeline: {}", sslHandler);
+        	}
         }
 
         // add transport type based codecs

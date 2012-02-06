@@ -21,6 +21,8 @@ package org.neociclo.odetteftp.service;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -123,6 +125,21 @@ public class TcpClient extends Client {
 		        	SSLEngine engine = sslContext.createSSLEngine();
 		    		engine.setUseClientMode(true);
 		    		engine.setEnableSessionCreation(true);
+		    		
+		    		
+		    		//MPA - contrib. from Mathieu Pasture
+					String[] protocols = sslContext.getSupportedSSLParameters().getProtocols();
+	                List<String> newProtocolList = new ArrayList<String>();
+	                for (String protocol : protocols) {
+	                    if( !protocol.equalsIgnoreCase("SSLv2Hello")){
+	                        newProtocolList.add( protocol );
+	                    }
+	                }
+	                String[] newProtocolArray = newProtocolList.toArray(new String[newProtocolList.size()]); 
+	                engine.setEnabledProtocols(newProtocolArray);
+	                
+		    		
+		    		
 		            sslHandler = new SslHandler(engine);
 		        }
 				return sslHandler;

@@ -19,6 +19,11 @@
  */
 package org.neociclo.odetteftp.examples.client;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import org.jboss.netty.util.HashedWheelTimer;
+import org.jboss.netty.util.Timer;
 import org.neociclo.odetteftp.examples.MainSupport;
 import org.neociclo.odetteftp.examples.support.DefaultOftpletFactory;
 import org.neociclo.odetteftp.oftplet.OftpletFactory;
@@ -26,6 +31,7 @@ import org.neociclo.odetteftp.security.MappedCallbackHandler;
 import org.neociclo.odetteftp.security.PasswordCallback;
 import org.neociclo.odetteftp.service.TcpClient;
 import org.neociclo.odetteftp.support.PasswordHandler;
+import org.neociclo.odetteftp.util.ExecutorUtil;
 
 /**
  * @author Rafael Marins
@@ -46,10 +52,41 @@ public class ConnectAndDisconnect {
 		securityCallbacks.addHandler(PasswordCallback.class,
 				new PasswordHandler(userCode, userPassword));
 
-		OftpletFactory factory = new DefaultOftpletFactory(securityCallbacks);
-		TcpClient oftp = new TcpClient(server, port, factory);
+		Executor bossExecutor = Executors.newCachedThreadPool();
+		Executor workerExecutor = Executors.newCachedThreadPool();
+		Timer timer = new HashedWheelTimer();
 
-		oftp.connect(true);
+		OftpletFactory factory = new DefaultOftpletFactory(securityCallbacks);
+
+		TcpClient oftp = new TcpClient();
+		oftp.setBossExecutor(bossExecutor);
+		oftp.setWorkerExecutor(workerExecutor);
+		oftp.setTimer(timer);
+
+		try {
+			for (int i=0; i<1000; i++) {
+				long t0 = System.currentTimeMillis();
+	
+				try {
+					oftp.setOftpletFactory(factory);
+					oftp.connect(server, port, true);
+				} catch (Exception e) {
+					continue;
+				}
+	
+				long t1 = System.currentTimeMillis();
+				long delta = t1 - t0;
+				if (delta < 1000) {
+					Thread.sleep(1000 - delta);
+				}
+
+				System.gc();
+
+			}
+		} finally {
+			timer.stop();
+			ExecutorUtil.terminate(bossExecutor, workerExecutor);
+		}
 
 	}
 

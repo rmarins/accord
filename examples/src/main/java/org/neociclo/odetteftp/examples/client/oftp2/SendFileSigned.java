@@ -110,9 +110,10 @@ public class SendFileSigned {
 		// create the client mode SSL context
 		SSLContext sslContext = SampleOftpSslContextFactory.getClientContext();
 
-		TcpClient oftp = new TcpClient(new InetSocketAddress(host, port), sslContext, factory);
+		TcpClient oftp = new TcpClient(sslContext);
+		oftp.setOftpletFactory(factory);
 
-		oftp.connect(true);
+		oftp.connect(new InetSocketAddress(host, port), true);
 
 		signedFile.delete();
 	}

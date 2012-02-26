@@ -77,7 +77,8 @@ public class HandlingSendFileEvents {
 
 		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(
 				conf, securityCallbacks, filesToSend, null, null);
-		TcpClient oftp = new TcpClient(server, port, factory);
+		TcpClient oftp = new TcpClient();
+		oftp.setOftpletFactory(factory);
 
 		factory.setEventListener(new OftpletEventListenerAdapter() {
 
@@ -136,7 +137,7 @@ public class HandlingSendFileEvents {
 		});
 
 		// perform connection and transfer
-		oftp.connect(true);
+		oftp.connect(server, port, true);
 
 	}
 

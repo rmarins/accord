@@ -56,9 +56,10 @@ public class EstablishSecureConnection {
 		// create the client mode SSL engine
 		SSLContext sslContext = SampleOftpSslContextFactory.getClientContext();
 
-		TcpClient oftp = new TcpClient(new InetSocketAddress(server, port), sslContext, factory);
+		TcpClient oftp = new TcpClient(sslContext);
+		oftp.setOftpletFactory(factory);
 
-		oftp.connect(true);
+		oftp.connect(new InetSocketAddress(server, port), true);
 
 	}
 

@@ -77,9 +77,10 @@ public class SecureConnectionSendFile {
 		SSLContext sslContext = SampleOftpSslContextFactory.getClientContext();
 
 		OftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks, filesToSend, null, null);
-		TcpClient oftp = new TcpClient(new InetSocketAddress(host, port), sslContext, factory);
+		TcpClient oftp = new TcpClient(sslContext);
+		oftp.setOftpletFactory(factory);
 
-		oftp.connect(true);
+		oftp.connect(new InetSocketAddress(host, port), true);
 
 	}
 

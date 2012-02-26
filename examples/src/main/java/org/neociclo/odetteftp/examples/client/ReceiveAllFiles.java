@@ -72,7 +72,8 @@ public class ReceiveAllFiles {
 
 		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks,
 				outgoingQueue, null, null);
-		TcpClient oftp = new TcpClient(server, port, factory);
+		TcpClient oftp = new TcpClient();
+		oftp.setOftpletFactory(factory);
 
 		// prepare the incoming handler
 		factory.setEventListener(new OftpletEventListenerAdapter() {
@@ -115,7 +116,7 @@ public class ReceiveAllFiles {
 
 		});
 
-		oftp.connect(true);
+		oftp.connect(server, port, true);
 
 	}
 

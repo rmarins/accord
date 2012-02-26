@@ -72,9 +72,10 @@ public class SendFile {
 		filesToSend.offer(vf);
 
 		OftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks, filesToSend, null, null);
-		TcpClient oftp = new TcpClient(host, port, factory);
+		TcpClient oftp = new TcpClient();
+		oftp.setOftpletFactory(factory);
 
-		oftp.connect(true);
+		oftp.connect(host, port, true);
 
 	}
 

@@ -78,7 +78,8 @@ public class SecureReceiveAllFiles {
 
 		InOutSharedQueueOftpletFactory factory = new InOutSharedQueueOftpletFactory(conf, securityCallbacks,
 				outgoingQueue, null, null);
-		TcpClient oftp = new TcpClient(server, port, sslContext, factory);
+		TcpClient oftp = new TcpClient(sslContext);
+		oftp.setOftpletFactory(factory);
 
 		// prepare the incoming handler
 		factory.setEventListener(new OftpletEventListenerAdapter() {
@@ -121,7 +122,7 @@ public class SecureReceiveAllFiles {
 
 		});
 
-		oftp.connect(true);
+		oftp.connect(server, port, true);
 
 	}
 

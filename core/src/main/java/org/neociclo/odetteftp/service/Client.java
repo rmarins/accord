@@ -23,6 +23,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
+import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
@@ -76,6 +77,9 @@ public abstract class Client extends BaseService {
         ChannelPipelineFactory pipelineFactory = getPipelineFactory(oftpletFactory, timer);
 
         ClientBootstrap bootstrap = new ClientBootstrap(factory);
+        if (isExplicitUseHeapBufferFactory()) {
+        	bootstrap.setOption("bufferFactory", HeapChannelBufferFactory.class.getName());
+        }
         bootstrap.setPipelineFactory(pipelineFactory);
 
         LOGGER.info("Connecting to ODETTE-FTP service on {}...", getRemoteAddress());

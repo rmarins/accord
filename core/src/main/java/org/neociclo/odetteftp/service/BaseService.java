@@ -30,6 +30,7 @@ abstract class BaseService {
 
     private Set<Object> instanceManagedBeans = new HashSet<Object>();
 	private boolean loggingDisabled;
+	private boolean explicitUseHeapBufferFactory = true;
 
     public void disableLogging() {
     	loggingDisabled = true;
@@ -54,4 +55,14 @@ abstract class BaseService {
     protected boolean isManaged(Object bean) {
     	return instanceManagedBeans.contains(bean);
     }
+
+	public boolean isExplicitUseHeapBufferFactory() {
+		return explicitUseHeapBufferFactory;
+	}
+
+	public void setExplicitUseHeapBufferFactory(boolean heapChannelBufferFactory) {
+		this.explicitUseHeapBufferFactory = heapChannelBufferFactory;
+	}
+
+    
 }

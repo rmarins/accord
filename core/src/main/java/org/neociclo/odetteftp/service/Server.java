@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -122,6 +123,9 @@ public abstract class Server extends BaseService {
                 timer, activeChildChannels);
 
         ServerBootstrap bootstrap = new ServerBootstrap(factory);
+        if (isExplicitUseHeapBufferFactory()) {
+        	bootstrap.setOption("child.bufferFactory", HeapChannelBufferFactory.class.getName());
+        }
         bootstrap.setPipelineFactory(pipelineFactory);
 
         channel = bootstrap.bind(getAddress());

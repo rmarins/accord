@@ -51,6 +51,8 @@ public class TcpClient extends Client {
     private static final int DEFAULT_NON_SSL_PORT = 3305;
 	private static final int DEFAULT_SSL_PORT = 6619;
 
+	private ChannelFactory channelFactory;
+
 	private Executor bossExecutor;
 	private Executor workerExecutor;
 
@@ -92,18 +94,22 @@ public class TcpClient extends Client {
 	@Override
     protected ChannelFactory createChannelFactory() {
 
-        if (bossExecutor == null) {
-            bossExecutor = Executors.newCachedThreadPool();
-            setManaged(bossExecutor);
+        if (channelFactory == null) {
+
+        	if (bossExecutor == null) {
+                bossExecutor = Executors.newCachedThreadPool();
+                setManaged(bossExecutor);
+            }
+
+            if (workerExecutor == null) {
+            	workerExecutor = Executors.newCachedThreadPool();
+                setManaged(workerExecutor);
+            }
+
+        	channelFactory = new NioClientSocketChannelFactory(bossExecutor, workerExecutor);
         }
 
-        if (workerExecutor == null) {
-        	workerExecutor = Executors.newCachedThreadPool();
-            setManaged(workerExecutor);
-        }
-
-        ChannelFactory factory = new NioClientSocketChannelFactory(bossExecutor, workerExecutor);
-        return factory;
+        return channelFactory;
     }
 
     @Override

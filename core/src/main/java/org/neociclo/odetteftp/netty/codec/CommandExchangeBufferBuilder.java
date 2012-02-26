@@ -86,12 +86,7 @@ public class CommandExchangeBufferBuilder {
             // UTF-8 encoded text
             else if (field.getType() == Field.ENCODED_TYPE) {
                 String encodedText = null;
-				try {
-					encodedText = new String(octets, UTF8_ENCODED_PROTOCOL_CHARSET);
-				} catch (UnsupportedEncodingException e) {
-					LOGGER.error("Cannot encode " + UTF8_ENCODED_PROTOCOL_CHARSET + " protocol parameter: " + fieldName, e);
-					continue;
-				}
+				encodedText = new String(octets, UTF8_ENCODED_PROTOCOL_CHARSET);
 
 				command.setAttribute(fieldName, encodedText);
 
@@ -100,12 +95,7 @@ public class CommandExchangeBufferBuilder {
             else {
 
                 String text = null;
-				try {
-					text = new String(octets, DEFAULT_PROTOCOL_CHARSET);
-				} catch (UnsupportedEncodingException e) {
-					LOGGER.error("Cannot encode " + DEFAULT_PROTOCOL_CHARSET + " protocol parameter: " + fieldName, e);
-					continue;
-				}
+				text = new String(octets, DEFAULT_PROTOCOL_CHARSET);
 
                 if (field.getType() == Field.ALPHANUMERIC_TYPE) {
                     // carriage return fields are settled as alphanumeric and shouldn't be trimmed

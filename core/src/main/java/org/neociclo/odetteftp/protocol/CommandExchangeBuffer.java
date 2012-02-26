@@ -22,6 +22,7 @@ package org.neociclo.odetteftp.protocol;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,12 +48,12 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
     /**
      * Default charset defined in Odette FTP protocol specification.
      */
-    public static final String DEFAULT_PROTOCOL_CHARSET = "ISO_646.IRV:1991";
+    public static final Charset DEFAULT_PROTOCOL_CHARSET = Charset.forName("ISO_646.IRV:1991");
 
     /**
      * UTF-8 charset encoding used in text description in the new OFTP 2.0.
      */
-    public static final String UTF8_ENCODED_PROTOCOL_CHARSET = "UTF-8";
+    public static final Charset UTF8_ENCODED_PROTOCOL_CHARSET = Charset.forName("UTF-8");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandExchangeBuffer.class);
 
@@ -184,14 +185,10 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
                     continue;
                 }
 
-                try {
-	                if (field.getType() == Field.ENCODED_TYPE) {
-	                    octets = text.getBytes(UTF8_ENCODED_PROTOCOL_CHARSET);
-	                } else {
-	                    octets = text.getBytes(DEFAULT_PROTOCOL_CHARSET);
-	                }
-                } catch (UnsupportedEncodingException uee) {
-                	LOGGER.error("getBuffer() - Cannot format protocol parameter value, field: " + fieldName, uee);
+                if (field.getType() == Field.ENCODED_TYPE) {
+                    octets = text.getBytes(UTF8_ENCODED_PROTOCOL_CHARSET);
+                } else {
+                    octets = text.getBytes(DEFAULT_PROTOCOL_CHARSET);
                 }
             }
 

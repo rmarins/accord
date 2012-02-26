@@ -72,11 +72,7 @@ public abstract class AbstractMapping implements MappingStrategy {
 
     private static byte[] getProtocolEncodedBytes(String text) {
         byte[] encoded = null;
-        try {
-			encoded = text.getBytes(DEFAULT_PROTOCOL_CHARSET);
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Cannot decode protocol parameter: " + text, e);
-		}
+		encoded = text.getBytes(DEFAULT_PROTOCOL_CHARSET);
         return encoded;
     }
 

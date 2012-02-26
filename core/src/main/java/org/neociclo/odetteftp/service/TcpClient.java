@@ -20,7 +20,6 @@
 package org.neociclo.odetteftp.service;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -29,7 +28,6 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
-import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
@@ -51,50 +49,45 @@ public class TcpClient extends Client {
     private static final int DEFAULT_NON_SSL_PORT = 3305;
 	private static final int DEFAULT_SSL_PORT = 6619;
 
-	private ChannelFactory channelFactory;
-
 	private Executor bossExecutor;
 	private Executor workerExecutor;
 
-    private InetSocketAddress remoteAddress;
     private SSLContext sslContext;
 
-    public TcpClient(String host, OftpletFactory oftpletFactory) {
-        super(oftpletFactory);
+	public TcpClient() {
+		this(null);
+	}
 
-        this.remoteAddress = new InetSocketAddress(host, DEFAULT_NON_SSL_PORT);
+    public TcpClient(SSLContext sslContext) {
+    	super();
+    	this.sslContext = sslContext;
     }
 
-    public TcpClient(String host, SSLContext sslContext, OftpletFactory oftpletFactory) {
-        super(oftpletFactory);
-
-        this.remoteAddress = new InetSocketAddress(host, DEFAULT_SSL_PORT);
-        this.sslContext = sslContext;
+    public synchronized void connect(String host, boolean await) throws Exception {
+    	connect(host, -1, await);
     }
 
-    public TcpClient(String host, int port, OftpletFactory oftpletFactory) {
-        this(host, port, null, oftpletFactory);
-    }
+    public synchronized void connect(String host, int port, boolean await) throws Exception {
+    	InetSocketAddress remoteAddress;
+    	
+    	if (port > 0) {
+    		remoteAddress = new InetSocketAddress(host, port);
+    	} else {
+    		if (sslContext == null) {
+	    		remoteAddress = new InetSocketAddress(host, DEFAULT_NON_SSL_PORT);
+	    	} else {
+	    		remoteAddress = new InetSocketAddress(host, DEFAULT_SSL_PORT);
+	    	}
+    	}
 
-    public TcpClient(String host, int port, SSLContext sslContext, OftpletFactory oftpletFactory) {
-        this(new InetSocketAddress(host, port), sslContext, oftpletFactory);
-    }
-
-    public TcpClient(InetSocketAddress remoteAddress, OftpletFactory oftpletFactory) {
-        this(remoteAddress, null, oftpletFactory);
-    }
-
-    public TcpClient(InetSocketAddress remoteAddress, SSLContext sslContext, OftpletFactory oftpletFactory) {
-        super(oftpletFactory);
-
-        this.remoteAddress = remoteAddress;
-        this.sslContext = sslContext;
+    	connect(remoteAddress, await);
     }
 
 	@Override
-    protected ChannelFactory createChannelFactory() {
+    public ChannelFactory getChannelFactory() {
 
-        if (channelFactory == null) {
+		// creates one channel-factory per object instance
+        if (super.getChannelFactory() == null) {
 
         	if (bossExecutor == null) {
                 bossExecutor = Executors.newCachedThreadPool();
@@ -106,19 +99,10 @@ public class TcpClient extends Client {
                 setManaged(workerExecutor);
             }
 
-        	channelFactory = new NioClientSocketChannelFactory(bossExecutor, workerExecutor);
+        	setChannelFactory(new NioClientSocketChannelFactory(bossExecutor, workerExecutor));
         }
 
-        return channelFactory;
-    }
-
-    @Override
-    protected SocketAddress getLocalAddress() {
-        Channel c = getChannel();
-        if (c == null) {
-            return null;
-        }
-        return c.getLocalAddress();
+        return super.getChannelFactory();
     }
 
     @Override
@@ -160,11 +144,6 @@ public class TcpClient extends Client {
         }
 
         return pipelineFactory;
-    }
-
-    @Override
-    protected SocketAddress getRemoteAddress() {
-        return remoteAddress;
     }
 
     public Executor getBossExecutor() {

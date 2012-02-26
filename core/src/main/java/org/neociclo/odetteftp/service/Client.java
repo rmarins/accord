@@ -20,6 +20,8 @@
 package org.neociclo.odetteftp.service;
 
 import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -53,20 +55,35 @@ public abstract class Client extends BaseService {
 
     protected Runnable disconnectListener;
 
+	private SocketAddress remoteAddress;
+
+	private SocketAddress localAddress;
+
+	private ChannelFactory channelFactory;
+
+	private Map<String, Object> clientOptions = new HashMap<String, Object>();
+
+    public Client() {
+    	super();
+    }
+
     public Client(OftpletFactory oftpletFactory) {
-    	if (oftpletFactory == null) {
-    		throw new IllegalArgumentException("OftpletFactory cannot be null");
-    	}
-        this.oftpletFactory = oftpletFactory;
+    	super();
+    	setOftpletFactory(oftpletFactory);
     }
 
-    public synchronized void connect() throws Exception {
-        connect(false);
+    public synchronized void connect(SocketAddress remoteAddress) throws Exception {
+        connect(remoteAddress, null, false);
     }
 
-    public synchronized void connect(boolean await) throws Exception {
+    public synchronized void connect(SocketAddress remoteAddress, boolean await) throws Exception {
+        connect(remoteAddress, null, await);
+    }
 
-        ChannelFactory factory = createChannelFactory();
+    public synchronized void connect(SocketAddress remoteAddress, SocketAddress localAddress, boolean await)
+    		throws Exception {
+
+        ChannelFactory factory = getChannelFactory();
 
         if (timer == null) {
             timer = new HashedWheelTimer();
@@ -77,14 +94,15 @@ public abstract class Client extends BaseService {
         ChannelPipelineFactory pipelineFactory = getPipelineFactory(oftpletFactory, timer);
 
         ClientBootstrap bootstrap = new ClientBootstrap(factory);
-        if (isExplicitUseHeapBufferFactory()) {
-        	bootstrap.setOption("bufferFactory", HeapChannelBufferFactory.getInstance());
-        }
+        bootstrap.setOptions(clientOptions);
         bootstrap.setPipelineFactory(pipelineFactory);
 
-        LOGGER.info("Connecting to ODETTE-FTP service on {}...", getRemoteAddress());
+        this.remoteAddress = remoteAddress;
+        this.localAddress = localAddress;
 
-        ChannelFuture connectFuture = bootstrap.connect(getRemoteAddress(), getLocalAddress());
+        LOGGER.info("Connecting to ODETTE-FTP service on {}...", remoteAddress);
+
+        ChannelFuture connectFuture = bootstrap.connect(remoteAddress, localAddress);
 
         ChannelFutureListener setConnectedOnOpen = new ChannelFutureListener() {
             public void operationComplete(ChannelFuture f) throws Exception {
@@ -171,14 +189,36 @@ public abstract class Client extends BaseService {
 
     }
 
-    protected abstract SocketAddress getRemoteAddress();
+	public OftpletFactory getOftpletFactory() {
+		return oftpletFactory;
+	}
 
-    protected abstract SocketAddress getLocalAddress();
+	public void setOftpletFactory(OftpletFactory oftpletFactory) {
+		this.oftpletFactory = oftpletFactory;
+	}
+
+    protected SocketAddress getRemoteAddress() {
+    	return remoteAddress;
+    }
+
+    protected SocketAddress getLocalAddress() {
+        Channel c = getChannel();
+        if (c == null) {
+            return localAddress;
+        }
+        return c.getLocalAddress();
+    }
 
     protected abstract ChannelPipelineFactory getPipelineFactory(OftpletFactory oftpletFactory,
             Timer timer);
 
-    protected abstract ChannelFactory createChannelFactory();
+    public ChannelFactory getChannelFactory() {
+    	return channelFactory;
+    }
+
+	public void setChannelFactory(ChannelFactory channelFactory) {
+		this.channelFactory = channelFactory;
+	}
 
     public Runnable getDisconnectListener() {
         return disconnectListener;
@@ -205,6 +245,22 @@ public abstract class Client extends BaseService {
     public void setTimer(Timer timer) {
         this.timer = timer;
     }
+
+    public void setOption(String key, Object value) {
+    	clientOptions.put(key, value);
+    }
+
+	public void setOptions(Map<String, Object> clientOptions) {
+		this.clientOptions = clientOptions;
+	}
+
+	public Map<String, Object> getOptions() {
+		return clientOptions;
+	}
+
+	public Object getOption(String key) {
+		return clientOptions.get(key);
+	}
 
     protected void releaseExternalResources() {
     	if (isManaged(timer)) {

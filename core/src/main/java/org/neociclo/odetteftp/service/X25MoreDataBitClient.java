@@ -19,12 +19,9 @@
  */
 package org.neociclo.odetteftp.service;
 
-import java.net.InetSocketAddress;
-
 import javax.net.ssl.SSLContext;
 
 import org.neociclo.odetteftp.TransportType;
-import org.neociclo.odetteftp.oftplet.OftpletFactory;
 
 /**
  * @author Rafael Marins
@@ -34,30 +31,14 @@ public class X25MoreDataBitClient extends TcpClient {
 
 	private static final TransportType X25_MBGW_TRANSPORT_TYPE = TransportType.X25_MBGW;
 
-	public X25MoreDataBitClient(String host, OftpletFactory oftpletFactory) {
-		super(host, oftpletFactory);
+	public X25MoreDataBitClient() {
+		super();
 	}
 
-	public X25MoreDataBitClient(String host, SSLContext sslContext, OftpletFactory oftpletFactory) {
-		super(host, sslContext, oftpletFactory);
+	public X25MoreDataBitClient(SSLContext sslContext) {
+		super(sslContext);
 	}
 
-	public X25MoreDataBitClient(String host, int port, OftpletFactory oftpletFactory) {
-		super(host, port, oftpletFactory);
-	}
-
-	public X25MoreDataBitClient(String host, int port, SSLContext sslContext, OftpletFactory oftpletFactory) {
-		super(host, port, sslContext, oftpletFactory);
-	}
-
-	public X25MoreDataBitClient(InetSocketAddress remoteAddress, OftpletFactory oftpletFactory) {
-		super(remoteAddress, oftpletFactory);
-	}
-
-	public X25MoreDataBitClient(InetSocketAddress remoteAddress, SSLContext sslContext, OftpletFactory oftpletFactory) {
-		super(remoteAddress, sslContext, oftpletFactory);
-	}
-	
 	@Override
 	protected TransportType getTransportType() {
 		return X25_MBGW_TRANSPORT_TYPE;

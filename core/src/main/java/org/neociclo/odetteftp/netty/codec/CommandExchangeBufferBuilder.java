@@ -21,26 +21,21 @@ package org.neociclo.odetteftp.netty.codec;
 
 import static org.neociclo.odetteftp.protocol.CommandExchangeBuffer.*;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.buffer.ChannelBufferFactory;
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.CommandFormat;
 import org.neociclo.odetteftp.protocol.CommandFormat.Field;
 import org.neociclo.odetteftp.util.ProtocolUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Rafael Marins
  * @version $Rev$ $Date$
  */
 public class CommandExchangeBufferBuilder {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CommandExchangeBufferBuilder.class);
 
     private static class ParamsRead {
         public ParamsRead(int pos, int size) {
@@ -51,7 +46,8 @@ public class CommandExchangeBufferBuilder {
         private int size;
     }
 
-    public static CommandExchangeBuffer create(CommandFormat format, ChannelBuffer in) {
+    public static CommandExchangeBuffer create(CommandFormat format, ChannelBuffer in,
+    		ChannelBufferFactory bufferFactory) {
 
         CommandExchangeBuffer command = new CommandExchangeBuffer(format);
 
@@ -64,7 +60,7 @@ public class CommandExchangeBufferBuilder {
             Field field = format.getField(fieldName);
 
             int pos = computePosition(field, fieldsRead);
-            int size = computeSize(field, fieldsRead, in);
+            int size = computeSize(field, fieldsRead, in, bufferFactory);
 
             fieldsRead.put(fieldName, new ParamsRead(pos, size));
 
@@ -114,7 +110,8 @@ public class CommandExchangeBufferBuilder {
         return command;
     }
 
-    private static int computeSize(Field field, Map<String, ParamsRead> fieldsRead, ChannelBuffer in) {
+    private static int computeSize(Field field, Map<String, ParamsRead> fieldsRead, ChannelBuffer in,
+    		ChannelBufferFactory bufferFactory) {
 
         int size = 0;
 
@@ -129,7 +126,7 @@ public class CommandExchangeBufferBuilder {
                 in.getBytes(params.position, bin);
                 size = ProtocolUtil.parseBinaryNumber(bin);
             } else {
-                ChannelBuffer buf = ChannelBuffers.buffer(params.size);
+                ChannelBuffer buf = bufferFactory.getBuffer(params.size);
                 in.getBytes(params.position, buf);
                 String lengthValue = buf.toString(DEFAULT_PROTOCOL_CHARSET);
                 size = Integer.parseInt(lengthValue);

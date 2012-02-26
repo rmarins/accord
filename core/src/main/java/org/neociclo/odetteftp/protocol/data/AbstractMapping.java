@@ -22,7 +22,6 @@ package org.neociclo.odetteftp.protocol.data;
 import static org.neociclo.odetteftp.protocol.CommandExchangeBuffer.DEFAULT_PROTOCOL_CHARSET;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -32,8 +31,6 @@ import org.neociclo.odetteftp.protocol.DataExchangeBuffer;
 import org.neociclo.odetteftp.protocol.VirtualFile;
 import org.neociclo.odetteftp.protocol.RecordFormat;
 import org.neociclo.odetteftp.protocol.VirtualFileMappingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Rafael Marins
@@ -49,8 +46,6 @@ public abstract class AbstractMapping implements MappingStrategy {
     public static final int TEXTFILE_BLOCK_SIZE = 2048;
 
     public static final int MAX_SUBRECORD_LENGTH = 63;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMapping.class);
 
     protected static final byte[] LINE_SEPARATOR = getProtocolEncodedBytes(System.getProperty("line.separator"));
 

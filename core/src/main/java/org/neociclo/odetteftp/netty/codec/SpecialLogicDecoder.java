@@ -19,8 +19,7 @@
  */
 package org.neociclo.odetteftp.netty.codec;
 
-import static org.jboss.netty.buffer.ChannelBuffers.dynamicBuffer;
-
+import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -63,7 +62,7 @@ public class SpecialLogicDecoder extends FrameDecoder {
 
 		int L = buffer.readableBytes();
 
-		ChannelBuffer plainBuffer = dynamicBuffer(L - 5);
+		ChannelBuffer plainBuffer = channel.getConfig().getBufferFactory().getBuffer(ByteOrder.BIG_ENDIAN, L - 5);
 
 		int c0 = 0;
 		int c1 = 0;

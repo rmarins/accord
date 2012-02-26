@@ -93,7 +93,7 @@ public class OdetteFtpDecoder extends OneToOneDecoder {
         }
         /* Same as above for ODETTE-FTP versions 1.2, 1.3 and 1.4. */
         else {
-            oftpExchangeBuffer = CommandExchangeBufferBuilder.create(commandFormat, in);
+            oftpExchangeBuffer = CommandExchangeBufferBuilder.create(commandFormat, in, channel.getConfig().getBufferFactory());
         }
 
         return oftpExchangeBuffer;

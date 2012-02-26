@@ -19,7 +19,6 @@
  */
 package org.neociclo.odetteftp.netty.codec;
 
-import static org.jboss.netty.buffer.ChannelBuffers.*;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelHandler.Sharable;
@@ -41,7 +40,7 @@ public class OdetteFtpEncoder extends OneToOneEncoder {
         }
 
         OdetteFtpExchangeBuffer oeb = (OdetteFtpExchangeBuffer) msg;
-        return wrappedBuffer(oeb.getRawBuffer());
+        return channel.getConfig().getBufferFactory().getBuffer(oeb.getRawBuffer());
     }
 
 }

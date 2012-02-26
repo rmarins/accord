@@ -19,12 +19,12 @@
  */
 package org.neociclo.odetteftp.netty.codec;
 
-import static org.jboss.netty.buffer.ChannelBuffers.*;
 import static org.jboss.netty.channel.Channels.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelDownstreamHandler;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -63,7 +63,8 @@ public class SpecialLogicEncoder implements ChannelDownstreamHandler {
 //        }
 
         // prepare the extended exchange buffer & synchronization character
-        ChannelBuffer extendedBuffer = dynamicBuffer(oeb.readableBytes() + 5);
+        Channel channel = e.getChannel();
+        ChannelBuffer extendedBuffer = channel.getConfig().getBufferFactory().getBuffer(oeb.readableBytes() + 5);
         extendedBuffer.writeByte(STX);
 
         // get the block sequence number

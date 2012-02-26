@@ -22,7 +22,6 @@ package org.neociclo.odetteftp.examples.support;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
@@ -109,11 +108,7 @@ public class UserPropertiesAutheticationHandler extends PasswordAuthenticationHa
 
 	private String hash(String text) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("MD5");
-		try {
-			md.update(text.getBytes(CommandExchangeBuffer.DEFAULT_PROTOCOL_CHARSET));
-		} catch (UnsupportedEncodingException e) {
-			// do nothing
-		}
+		md.update(text.getBytes(CommandExchangeBuffer.DEFAULT_PROTOCOL_CHARSET));
 		byte[] digest = md.digest();
 		return toHexString(digest);
 	}

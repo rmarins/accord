@@ -92,7 +92,7 @@ public class ExternalReceiveFilesTest extends AbstractTcpClientExternal {
             }
         });
 
-        client.connect(true);
+        connect(true);
 
         VirtualFile vf = (VirtualFile) incoming.poll();
 

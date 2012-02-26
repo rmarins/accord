@@ -94,28 +94,17 @@ public abstract class AbstractTcpClientExternal {
             return;
         }
 
-        String host = System.getProperty("oftp.server");
-        String port = System.getProperty("oftp.port");
-        boolean useSsl = Boolean.parseBoolean(System.getProperty("oftp.ssl", "false"));
-
         String userCode = System.getProperty("oftp.userCode");
         String userPswd = System.getProperty("oftp.userPassword");
         String userData = System.getProperty("oftp.userData");
 
-        datasetName = System.getProperty("oftp.dsn");
-        originator = System.getProperty("oftp.originator");
-        destination = System.getProperty("oftp.destination");
-
-        if (host == null || "".equals(host.trim())) {
-            throw new IllegalArgumentException("oftp.server");
-        } else if (userCode == null || "".equals(userCode.trim())) {
+        if (userCode == null || "".equals(userCode.trim())) {
             throw new IllegalArgumentException("oftp.userCode");
         }
 
-        int portNum = Integer.parseInt(port);
-        if (portNum <= 0) {
-            portNum = (useSsl ? DEFAULT_SECURE_OFTP_PORT : DEFAULT_OFTP_PORT);
-        }
+        datasetName = System.getProperty("oftp.dsn");
+        originator = System.getProperty("oftp.originator");
+        destination = System.getProperty("oftp.destination");
 
         outgoing = new ConcurrentLinkedQueue<OdetteFtpObject>();
         outgoingDone = new ConcurrentLinkedQueue<OdetteFtpObject>();
@@ -129,8 +118,31 @@ public abstract class AbstractTcpClientExternal {
         
         factory = new InOutSharedQueueOftpletFactory(c, callbackHandler, outgoing, outgoingDone, incoming);
 
-        client = new TcpClient(host, portNum, factory);
+        client = new TcpClient();
+        client.setOftpletFactory(factory);
 
+    }
+
+    protected void connect() throws Exception {
+    	connect(true);
+    }
+
+    protected void connect(boolean await) throws Exception {
+
+    	String host = System.getProperty("oftp.server");
+        String port = System.getProperty("oftp.port");
+        boolean useSsl = Boolean.parseBoolean(System.getProperty("oftp.ssl", "false"));
+
+        if (host == null || "".equals(host.trim())) {
+            throw new IllegalArgumentException("oftp.server");
+        }
+
+        int portNum = Integer.parseInt(port);
+        if (portNum <= 0) {
+            portNum = (useSsl ? DEFAULT_SECURE_OFTP_PORT : DEFAULT_OFTP_PORT);
+        }
+
+        client.connect(host, portNum, await);
     }
 
     @After

@@ -81,7 +81,7 @@ public class ExternalSendFilesTest extends AbstractTcpClientExternal {
 
         outgoing.offer(fileToSend);
 
-        client.connect(true);
+        connect(true);
 
         OdetteFtpObject obj = incoming.poll();
         if (obj instanceof DeliveryNotification) {

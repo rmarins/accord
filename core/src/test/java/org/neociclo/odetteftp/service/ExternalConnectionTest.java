@@ -46,7 +46,7 @@ public class ExternalConnectionTest extends AbstractTcpClientExternal {
             return;
         }
 
-        client.connect();
+        connect();
         assertTrue(client.isConnected());
 
         client.awaitDisconnect();

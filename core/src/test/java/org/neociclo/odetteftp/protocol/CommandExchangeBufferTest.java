@@ -35,6 +35,7 @@ import java.util.Calendar;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.junit.Test;
 import org.neociclo.odetteftp.netty.codec.CommandExchangeBufferBuilder;
 import org.neociclo.odetteftp.protocol.v13.CommandBuilderVer13;
@@ -97,7 +98,8 @@ public class CommandExchangeBufferTest {
         ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(eerpCmdBeginning, formatBinaryNumber(hash.length, 2), hash,
                 formatBinaryNumber(signature.length, 2), signature);
 
-        CommandExchangeBuffer eerp = CommandExchangeBufferBuilder.create(EERP_V20, buffer.duplicate());
+        CommandExchangeBuffer eerp = CommandExchangeBufferBuilder.create(EERP_V20, buffer.duplicate(),
+        		HeapChannelBufferFactory.getInstance());
 
         assertEquals("Invalid command identifier.", String.valueOf(EERP.getCode()), eerp.getStringAttribute(EERPCMD_FIELD));
         assertEquals("Invalid dataset name.", "MyFileDatasetName", eerp.getStringAttribute(EERPDSN_FIELD));
@@ -159,7 +161,8 @@ public class CommandExchangeBufferTest {
         // first: test parsing
 
         ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(NORMAL_VER14_SSID_TEXT.getBytes(DEFAULT_PROTOCOL_CHARSET));
-        CommandExchangeBuffer ssid = CommandExchangeBufferBuilder.create(SSID_V14, buffer.duplicate());
+        CommandExchangeBuffer ssid = CommandExchangeBufferBuilder.create(SSID_V14, buffer.duplicate(),
+        		HeapChannelBufferFactory.getInstance());
 
         assertEquals("Invalid command identifier.", String.valueOf(SSID.getCode()), ssid.getStringAttribute(SSIDCMD_FIELD));
         assertEquals("Invalid protocol level.", 4, Integer.parseInt(ssid.getStringAttribute(SSIDLEV_FIELD)));
@@ -206,7 +209,8 @@ public class CommandExchangeBufferTest {
     public void testParseNormalVer20StartFileBuffer() throws Exception {
 
         ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(NORMAL_VER20_SFID_TEXT.getBytes(DEFAULT_PROTOCOL_CHARSET));
-        CommandExchangeBuffer sfid = CommandExchangeBufferBuilder.create(SFID_V20, buffer);
+        CommandExchangeBuffer sfid = CommandExchangeBufferBuilder.create(SFID_V20, buffer,
+        		HeapChannelBufferFactory.getInstance());
 
         // compare buffers text
         String createdBufferText = new String(sfid.getRawBuffer().array(), DEFAULT_PROTOCOL_CHARSET);
@@ -224,7 +228,8 @@ public class CommandExchangeBufferTest {
         ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(BEGIN_VER20_ESID_WITH_DESCRIPTION_TEXT
                 .getBytes(DEFAULT_PROTOCOL_CHARSET), encodedDesc, cr);
 
-        CommandExchangeBuffer esid = CommandExchangeBufferBuilder.create(ESID_V20, buffer.duplicate());
+        CommandExchangeBuffer esid = CommandExchangeBufferBuilder.create(ESID_V20, buffer.duplicate(),
+        		HeapChannelBufferFactory.getInstance());
 
         byte[] expected = buffer.toByteBuffer().array();
         byte[] result = esid.getRawBuffer().array();

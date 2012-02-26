@@ -349,9 +349,10 @@
   <modules>
     <module>core</module>
     <module>camel-oftp</module>
-    <module>oftp-spring-integration</module>
     <module>examples</module>
 <!--
+    <module>oftp-isdn</module>
+    <module>oftp-spring-integration</module>
     <module>forby-oftp</module>
     <module>cli-oftp</module>
 -->
@@ -361,13 +362,13 @@
   <properties>
 
     <!-- compile dependencies version -->
-    <netty.version>3.2.5.Final</netty.version>
+    <netty.version>3.3.1.Final</netty.version>
     <bouncycastle.version>1.45</bouncycastle.version>
     <slf4j.version>1.5.11</slf4j.version>
 
 	<!-- test dependencies version -->
     <log4j.version>1.2.16</log4j.version>
-    <junit.version>4.8.2</junit.version>
+    <junit.version>4.10</junit.version>
     <easymock.version>3.0</easymock.version>
 
     <!-- eclipse plugin need the jaxb in this pom.xml file -->

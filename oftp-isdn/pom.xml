@@ -95,16 +95,6 @@
 
   </build>
 
-  <repositories>
-    <repository>
-      <id>repository.jboss.org</id>
-      <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>org.neociclo.accord.odetteftp</groupId>
@@ -130,7 +120,7 @@
       | ========  JBoss Netty  ========
       +-->
     <dependency>
-      <groupId>org.jboss.netty</groupId>
+      <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
       <version>${netty.version}</version>
     </dependency>

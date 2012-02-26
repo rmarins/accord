@@ -78,7 +78,7 @@ public abstract class Client extends BaseService {
 
         ClientBootstrap bootstrap = new ClientBootstrap(factory);
         if (isExplicitUseHeapBufferFactory()) {
-        	bootstrap.setOption("bufferFactory", HeapChannelBufferFactory.class.getName());
+        	bootstrap.setOption("bufferFactory", HeapChannelBufferFactory.getInstance());
         }
         bootstrap.setPipelineFactory(pipelineFactory);
 

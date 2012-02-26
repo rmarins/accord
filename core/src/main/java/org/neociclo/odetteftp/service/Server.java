@@ -124,7 +124,7 @@ public abstract class Server extends BaseService {
 
         ServerBootstrap bootstrap = new ServerBootstrap(factory);
         if (isExplicitUseHeapBufferFactory()) {
-        	bootstrap.setOption("child.bufferFactory", HeapChannelBufferFactory.class.getName());
+        	bootstrap.setOption("child.bufferFactory", HeapChannelBufferFactory.getInstance());
         }
         bootstrap.setPipelineFactory(pipelineFactory);
 

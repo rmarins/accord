@@ -58,6 +58,13 @@ public class CompressionMapping extends AbstractMapping {
          */
         deb.clear();
 
+        long fileSize;
+        try {
+        	fileSize = in.size();
+		} catch (IOException e) {
+            throw new VirtualFileMappingException("Could not retrieve Virtual File size.", e);
+		}
+
         /*
          * Loop until the Data Exchange Buffer is fulfilled (and there are still
          * some space available). Drain data stream of read records into Data
@@ -115,7 +122,7 @@ public class CompressionMapping extends AbstractMapping {
             subrecord = new byte[subrecordSize];
             buffer.get(subrecord);
 
-            if (bytesRead < buffer.capacity()) {
+            if (bytesRead < buffer.capacity() || ((entryPosition + bytesRead) >= fileSize)) {
                 eof = true;
             }
 

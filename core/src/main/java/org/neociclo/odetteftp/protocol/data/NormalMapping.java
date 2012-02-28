@@ -56,6 +56,13 @@ public class NormalMapping extends AbstractMapping {
          */
         deb.clear();
 
+        long fileSize;
+        try {
+        	fileSize = in.size();
+		} catch (IOException e) {
+            throw new VirtualFileMappingException("Could not retrieve Virtual File size.", e);
+		}
+
         /*
          * Loop until the Data Exchange Buffer is fulfilled (and there are still
          * some space available). Drain data stream of read records into Data
@@ -71,6 +78,7 @@ public class NormalMapping extends AbstractMapping {
             long entryPosition = position(in);
             int bytesRead = read(in, buffer);
 
+            
             // reached the end of stream
             if (bytesRead == -1) {
                 eof = true;
@@ -102,7 +110,7 @@ public class NormalMapping extends AbstractMapping {
             subrecord = new byte[subrecordSize];
             buffer.get(subrecord);
 
-            if (bytesRead < buffer.capacity()) {
+            if (bytesRead < buffer.capacity() || ((entryPosition + bytesRead) >= fileSize)) {
                 eof = true;
             }
 

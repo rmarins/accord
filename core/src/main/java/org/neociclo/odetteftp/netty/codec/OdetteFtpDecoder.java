@@ -91,6 +91,16 @@ public class OdetteFtpDecoder extends OneToOneDecoder {
         if (identifier == CommandIdentifier.DATA) {
             oftpExchangeBuffer = new DataExchangeBuffer(in.toByteBuffer());
         }
+        /*
+         * The RFC5024 spec is not clear on which ESID format to return when
+         * starting and OFTP2 session. This addition helps to keep it compatible
+         * with other implementations.
+         */
+        else if (version.isEqualOrOlder(OdetteFtpVersion.OFTP_V20) && identifier == CommandIdentifier.ESID) {
+        	version = OdetteFtpVersion.OFTP_V14;
+        	commandFormat = CommandFormatHelper.resolveByVersion(version, identifier);
+        	oftpExchangeBuffer = CommandExchangeBufferBuilder.create(commandFormat, in, channel.getConfig().getBufferFactory());
+        }
         /* Same as above for ODETTE-FTP versions 1.2, 1.3 and 1.4. */
         else {
             oftpExchangeBuffer = CommandExchangeBufferBuilder.create(commandFormat, in, channel.getConfig().getBufferFactory());

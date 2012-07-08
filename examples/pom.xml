@@ -50,6 +50,14 @@
       <artifactId>oftp-isdn</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
 </project>

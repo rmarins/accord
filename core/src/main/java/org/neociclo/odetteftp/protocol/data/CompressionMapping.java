@@ -19,7 +19,7 @@
  */
 package org.neociclo.odetteftp.protocol.data;
 
-import static org.neociclo.odetteftp.protocol.RecordFormat.TEXTFILE;
+import static org.neociclo.odetteftp.protocol.RecordFormat.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -65,6 +65,8 @@ public class CompressionMapping extends AbstractMapping {
             throw new VirtualFileMappingException("Could not retrieve Virtual File size.", e);
 		}
 
+        RecordFormat recordFormat = virtualFile.getRecordFormat();
+
         /*
          * Loop until the Data Exchange Buffer is fulfilled (and there are still
          * some space available). Drain data stream of read records into Data
@@ -92,7 +94,7 @@ public class CompressionMapping extends AbstractMapping {
             int posRepetition = BufferUtil.seekRepeatSequence(buffer, subrecordSize, COMPRESSION_MIN_SEQUENCE_LENGTH);
 
             // on TEXTFILE convert lineSeparator when to set the endOfRecord flag
-            if (virtualFile.getRecordFormat() == TEXTFILE) {
+            if (recordFormat == TEXTFILE) {
                 int posLineSep = BufferUtil.seekWithinBuffer(LINE_SEPARATOR, buffer, subrecordSize);
                 if (posLineSep != -1) {
                     subrecordSize = posLineSep;
@@ -100,7 +102,7 @@ public class CompressionMapping extends AbstractMapping {
                 }
             }
             // determine end of record 
-            else if (virtualFile.getRecordFormat() != RecordFormat.UNSTRUCTURED && entryPosition > 0) {
+            else if (recordFormat != UNSTRUCTURED && entryPosition > 0) {
                 long currentOffset = ProtocolUtil.computeVirtualFileOffset(entryPosition, virtualFile.getRecordFormat(), virtualFile.getRecordSize());
                 long recordLimit = virtualFile.getRecordSize() * (currentOffset + 1);
 
@@ -138,7 +140,7 @@ public class CompressionMapping extends AbstractMapping {
              * the remaining bytes left and re-read the record and continue the
              * loop while (until DEB is full or End Of Stream is reached).
              */
-            if ((virtualFile.getRecordFormat() == TEXTFILE) && endOfRecord) {
+            if ((recordFormat == TEXTFILE) && endOfRecord) {
                 skip(in, LINE_SEPARATOR.length);
             }
 
@@ -146,12 +148,12 @@ public class CompressionMapping extends AbstractMapping {
              * Unstructured files are transmitted as a single record; in this
              * case, the flag acts as an end-of-file marker.
              */
-            if (virtualFile.getRecordFormat() == RecordFormat.UNSTRUCTURED && eof) {
+            if ((recordFormat == UNSTRUCTURED || recordFormat == FIXED)  && eof) {
                 endOfRecord = true;
             }
 
             // need compression
-            if (posRepetition != -1 && subrecordSize == 0 && (virtualFile.getRecordFormat() == TEXTFILE && !endOfRecord)) {
+            if (posRepetition != -1 && subrecordSize == 0 && (recordFormat == TEXTFILE && !endOfRecord)) {
               buffer.position(posRepetition);
               byte repeatOctet = buffer.get(posRepetition);
               int count = BufferUtil.getRepeatSequenceCount(buffer, MAX_SUBRECORD_LENGTH);

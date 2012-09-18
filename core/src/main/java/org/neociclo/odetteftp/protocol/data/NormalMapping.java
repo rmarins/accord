@@ -19,11 +19,12 @@
  */
 package org.neociclo.odetteftp.protocol.data;
 
-import static org.neociclo.odetteftp.protocol.RecordFormat.TEXTFILE;
+import static org.neociclo.odetteftp.protocol.RecordFormat.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.neociclo.odetteftp.OdetteFtpException;
@@ -63,6 +64,8 @@ public class NormalMapping extends AbstractMapping {
             throw new VirtualFileMappingException("Could not retrieve Virtual File size.", e);
 		}
 
+        RecordFormat recordFormat = virtualFile.getRecordFormat();
+
         /*
          * Loop until the Data Exchange Buffer is fulfilled (and there are still
          * some space available). Drain data stream of read records into Data
@@ -70,10 +73,10 @@ public class NormalMapping extends AbstractMapping {
          */
         int freeSpace;
         ByteBuffer buffer = ByteBufferFactory.allocate(virtualFile.getRecordFormat() == TEXTFILE ? MAX_SUBRECORD_LENGTH + 1: MAX_SUBRECORD_LENGTH);
+        byte[] subrecord = null;
         while ((freeSpace = deb.availableBytes()) > 0) {
 
             boolean endOfRecord = false;
-            byte[] subrecord = null;
 
             long entryPosition = position(in);
             int bytesRead = read(in, buffer);
@@ -88,7 +91,7 @@ public class NormalMapping extends AbstractMapping {
             int subrecordSize = Math.min(Math.min(bytesRead, MAX_SUBRECORD_LENGTH), freeSpace - 1);
 
             // on TEXTFILE convert lineSeparator when to set the endOfRecord flag
-            if (virtualFile.getRecordFormat() == TEXTFILE) {
+            if (recordFormat == TEXTFILE) {
                 int countPos = BufferUtil.seekWithinBuffer(LINE_SEPARATOR, buffer, subrecordSize);
                 if (countPos > 0) {
                     subrecordSize = countPos;
@@ -96,7 +99,7 @@ public class NormalMapping extends AbstractMapping {
                 }
             }
             // determine end of record 
-            else if (virtualFile.getRecordFormat() != RecordFormat.UNSTRUCTURED && entryPosition > 0) {
+            else if (recordFormat != RecordFormat.UNSTRUCTURED && entryPosition > 0) {
                 long currentOffset = ProtocolUtil.computeVirtualFileOffset(entryPosition, virtualFile.getRecordFormat(), virtualFile.getRecordSize());
                 long recordLimit = virtualFile.getRecordSize() * (currentOffset + 1);
 
@@ -107,7 +110,12 @@ public class NormalMapping extends AbstractMapping {
             }
 
             // read buffer into subrecord array
-            subrecord = new byte[subrecordSize];
+            if (subrecord == null || subrecord.length != subrecordSize) {
+            	subrecord = new byte[subrecordSize];
+            } else {
+            	// total perfumery - since all buffer will be consumed
+            	Arrays.fill(subrecord, (byte) 0);
+            }
             buffer.get(subrecord);
 
             if (bytesRead < buffer.capacity() || ((entryPosition + bytesRead) >= fileSize)) {
@@ -126,7 +134,7 @@ public class NormalMapping extends AbstractMapping {
              * the remaining bytes left and re-read the record and continue the
              * loop while (until DEB is full or End Of Stream is reached).
              */
-            if ((virtualFile.getRecordFormat() == TEXTFILE) && endOfRecord) {
+            if (recordFormat == TEXTFILE && endOfRecord) {
                 skip(in, LINE_SEPARATOR.length);
             }
 
@@ -134,7 +142,7 @@ public class NormalMapping extends AbstractMapping {
              * Unstructured files are transmitted as a single record; in this
              * case, the flag acts as an end-of-file marker.
              */
-            if (virtualFile.getRecordFormat() == RecordFormat.UNSTRUCTURED && eof) {
+            if ((recordFormat == RecordFormat.UNSTRUCTURED || recordFormat == FIXED) && eof) {
                 endOfRecord = true;
             }
 

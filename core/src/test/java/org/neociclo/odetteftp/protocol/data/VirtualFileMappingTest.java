@@ -124,6 +124,14 @@ public class VirtualFileMappingTest {
     }
 
     @Test
+    public void testReadingDataFixedPayload() throws Exception {
+
+        mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 256, false, "testReadingDataFixedPayload");
+        mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 256, true, "testReadingDataFixedPayload");
+
+    }
+
+    @Test
     public void testReadingDataVariable() throws Exception {
 
         mappingRead("data/AGPLV3", RecordFormat.VARIABLE, 250, 217, false, "testReadingDataVariable");

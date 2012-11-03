@@ -783,29 +783,31 @@ public abstract class DefaultHandler implements ProtocolHandler {
             /* Read data buffer from the stream. */
             boolean endOfStream = mapping.readData(virtualFile, fileChannel, dataBuffer);
 
-            final long overallSentBytes = session.getOutgoingBytesTransfered() + dataBuffer.getUnitCount();
-
-            // Update the Oftplet on each data transmission (total bytes sent)
-            Runnable progressCallback = new Runnable() {
-                public void run() {
-                    oftpletSpeaker.onDataSent(virtualFile.getOriginalVirtualFile(), overallSentBytes);
-                }
-            };
-
-            /* Transmit the data exchange buffer. */
-            session.write(dataBuffer, progressCallback);
-
-            /*
-             * After data buffer transmit, update the total bytes sent in the
-             * context.
-             */
-            session.setOutgoingBytesTransfered(overallSentBytes);
+            if (dataBuffer.getUnitCount() > 0 ) {
+	            final long overallSentBytes = session.getOutgoingBytesTransfered() + dataBuffer.getUnitCount();
+	
+	            // Update the Oftplet on each data transmission (total bytes sent)
+	            Runnable progressCallback = new Runnable() {
+	                public void run() {
+	                    oftpletSpeaker.onDataSent(virtualFile.getOriginalVirtualFile(), overallSentBytes);
+	                }
+	            };
+	
+	            /* Transmit the data exchange buffer. */
+	            session.write(dataBuffer, progressCallback);
+	
+	            /*
+	             * After data buffer transmit, update the total bytes sent in the
+	             * context.
+	             */
+	            session.setOutgoingBytesTransfered(overallSentBytes);
+            }
 
             /*
              * Submit the End File indication when reach the end of stream, even
              * though there are still credits. So stop looping.
              */
-            if (endOfStream) {
+            if (endOfStream && session.getOutgoingCredits() > 0) {
                 speakerEndFile(session, virtualFile);
                 break;
             }

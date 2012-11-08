@@ -53,6 +53,7 @@ import static org.neociclo.odetteftp.util.SessionHelper.isSendingSupported;
 import static org.neociclo.odetteftp.util.SessionHelper.setSessionCurrentRequest;
 import static org.neociclo.odetteftp.util.SessionHelper.setSessionFileChannel;
 import static org.neociclo.odetteftp.util.SessionHelper.setSessionOutgoingDataExchangeBuffer;
+import static org.neociclo.odetteftp.util.OdetteFtpConstants.DEFAULT_RECORD_SIZE;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -601,12 +602,12 @@ public abstract class DefaultHandler implements ProtocolHandler {
         String dest = (vf.getDestination() == null ? session.getUserCode() : vf.getDestination());
 
         RecordFormat recordFormat = (vf.getRecordFormat() == null ? RecordFormat.UNSTRUCTURED : vf.getRecordFormat());
-        int recordSize = (recordFormat == RecordFormat.UNSTRUCTURED || recordFormat == RecordFormat.TEXTFILE ? 0 : Math
-                .max(vf.getRecordSize(), 0));
+        int recordSize = (recordFormat == RecordFormat.UNSTRUCTURED || recordFormat == RecordFormat.TEXTFILE ? 0 :
+        	Math.abs( Math.min(vf.getRecordSize(), DEFAULT_RECORD_SIZE) ) );
         long restartOffset = (session.isRestartSupported() ? Math.max(vf.getRestartOffset(), 0) : 0);
 
         long unitCount = (vf.getFile() == null ? 0 : vf.getFile().length());
-        long fileSize = Math.max(vf.getSize(), ProtocolUtil.computeVirtualFileSize(unitCount, recordFormat, recordSize));
+        long fileSize = Math.max(vf.getSize(), ProtocolUtil.computeVirtualFileSize(unitCount));
 
 
         // return the normalized virtual file

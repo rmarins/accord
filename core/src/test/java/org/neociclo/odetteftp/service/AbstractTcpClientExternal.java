@@ -205,7 +205,7 @@ public abstract class AbstractTcpClientExternal {
             vf.setDestination(destination);
         }
 
-        vf.setSize(ProtocolUtil.computeVirtualFileSize(payload.length(), vf.getRecordFormat(), vf.getRecordSize()));
+        vf.setSize(ProtocolUtil.computeVirtualFileSize(payload.length()));
 
         return vf;
     }

@@ -162,23 +162,18 @@ public class ProtocolUtil {
 
     }
 
-    public static long computeVirtualFileSize(long unitCount, RecordFormat recordFormat, int recordSize) {
-
-        int blockSize = OdetteFtpConstants.DEFAULT_RECORD_SIZE;
-        if ((recordFormat == RecordFormat.FIXED) || (recordFormat == RecordFormat.VARIABLE)) {
-            blockSize = recordSize;
-        }
+    public static long computeVirtualFileSize(long unitCount) {
 
         // avoid dividing zero or division by zero
-        if (unitCount == 0 || blockSize == 0)
+        if (unitCount == 0)
             return 0;
 
-        long recordCount = (unitCount / blockSize);
-        if ((unitCount % blockSize) > 0) {
-            recordCount++;
+        long fileSize = (unitCount / DEFAULT_RECORD_SIZE);
+        if ((unitCount % DEFAULT_RECORD_SIZE) > 0) {
+            fileSize++;
         }
 
-        return recordCount;
+        return fileSize;
     }
 
     public static long computeVirtualFileRecordCount(long unitCount, RecordFormat recordFormat, int recordSize) {

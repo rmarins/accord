@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Client extends BaseService {
 
+	public static final int DEFAULT_CONNECT_TIMEOUT = 45000;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
 
     private OftpletFactory oftpletFactory;
@@ -93,6 +95,11 @@ public abstract class Client extends BaseService {
         ChannelPipelineFactory pipelineFactory = getPipelineFactory(oftpletFactory, timer);
 
         ClientBootstrap bootstrap = new ClientBootstrap(factory);
+
+        if (!clientOptions.containsKey("connectTimeoutMillis")) {
+        	clientOptions.put("connectTimeoutMillis", DEFAULT_CONNECT_TIMEOUT);
+        }
+
         bootstrap.setOptions(clientOptions);
         bootstrap.setPipelineFactory(pipelineFactory);
 

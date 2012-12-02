@@ -74,7 +74,11 @@ public class ProtocolLoggingHandler extends SimpleChannelHandler {
             LOGGER.debug(marker, "[{}]     <---------  {}  ----------", channelId, cmd);
         }
         if (LOGGER.isTraceEnabled(marker)) {
-            traceData(oeb);
+            if (CommandIdentifier.DATA == oeb.getIdentifier()) {
+                LOGGER.trace(marker, "          length: {}", oeb.getSize());         
+            } else {
+                traceCommand((CommandExchangeBuffer) oeb);
+            }
         }
 
         super.messageReceived(ctx, e);
@@ -93,17 +97,25 @@ public class ProtocolLoggingHandler extends SimpleChannelHandler {
         }
 
         final OdetteFtpExchangeBuffer oeb = (OdetteFtpExchangeBuffer) e.getMessage();
+        final CommandIdentifier commandIdentifier = oeb.getIdentifier();
         final String channelId = toHexString(ctx.getChannel().getId()).toUpperCase();
+        final int size = oeb.getSize();
+//        final String data = new String(oeb.getRawBuffer().array(), "US-ASCII");
 
         ChannelFutureListener messageSentListener = new ChannelFutureListener() {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     if (LOGGER.isDebugEnabled(marker)) {
-                        String cmd = paddCmdName(oeb.getIdentifier().name());
+                        String cmd = paddCmdName(commandIdentifier.name());
                         LOGGER.debug(marker, "[{}]     ----------  {}  --------->", channelId, cmd);
                     }
                     if (LOGGER.isTraceEnabled(marker)) {
-                        traceData(oeb);
+                    	if (CommandIdentifier.DATA == commandIdentifier) {
+                            LOGGER.trace(marker, "          length: {}", size);
+                            //LOGGER.trace(marker, "          data  :     {}", data);  
+                        } else {
+                            traceCommand((CommandExchangeBuffer) oeb);
+                        }
                     }
                 } else {
                     if (LOGGER.isTraceEnabled(marker) && future.getCause() != null) {
@@ -117,14 +129,6 @@ public class ProtocolLoggingHandler extends SimpleChannelHandler {
         e.getFuture().addListener(messageSentListener);
 
         super.writeRequested(ctx, e);
-    }
-
-    private void traceData(OdetteFtpExchangeBuffer oeb) throws Exception {
-        if (CommandIdentifier.DATA == oeb.getIdentifier()) {
-            LOGGER.trace(marker, "          length: {}", oeb.getSize());
-        } else {
-            traceCommand((CommandExchangeBuffer) oeb);
-        }
     }
 
     private void traceCommand(CommandExchangeBuffer cmd) {

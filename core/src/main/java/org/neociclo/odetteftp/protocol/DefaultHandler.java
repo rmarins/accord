@@ -401,30 +401,17 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         FileChannel fileChannel = getSessionFileChannel(session);
 
-        long fileUnitCount;
+        long fileUnitCount = 0;
+
+        // Get the total octets count from the Virtual File received
+        try {
+            fileUnitCount = fileChannel.size();
+        } catch (IOException e) {
+        	// ignore
+        }
 
         // close output stream file channel
-        try {
-            // Get the total octets count from the Virtual File received
-            fileUnitCount = fileChannel.size();
-            fileChannel.force(true);
-            fileChannel.close();
-        } catch (IOException e) {
-
-            LOGGER.error("[" + session + "] EFID received. Error closing output file channel: " + virtualFile, e);
-
-            String errorClosingText = "Failed to close the output file.";
-
-            CommandExchangeBuffer efnaErrorClosing = buildEndFileNegativeAnswerCommand(ACCESS_METHOD_FAILURE,
-                    errorClosingText);
-            session.write(efnaErrorClosing);
-
-            oftpletListener.onReceiveFileError(virtualFile, new AnswerReasonInfo(AnswerReason.ACCESS_METHOD_FAILURE,
-                    errorClosingText));
-
-            return;
-
-        }
+        closeIoChannelOnEndFileAnswer(fileChannel, "EFID", virtualFile, session);
 
         // calculate the Virtual File record/block count based on recordFormat and recordSize
         long fileRecordCount = computeVirtualFileRecordCount(fileUnitCount, virtualFile.getRecordFormat(), virtualFile
@@ -829,6 +816,13 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         /* Construct and send the End File indication command. */
         CommandExchangeBuffer efid = buildEndFileCommand(recordCount, unitCount);
+
+        try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         session.write(efid);
 
     }
@@ -837,6 +831,10 @@ public abstract class DefaultHandler implements ProtocolHandler {
             throws OdetteFtpException {
 
     	NormalizedVirtualFile normalizedVirtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
+
+    	// Close file channel
+        FileChannel fileChannel = getSessionFileChannel(session);
+        closeIoChannelOnEndFileAnswer(fileChannel, "EFNA", normalizedVirtualFile, session);
 
         // Clear current odette-ftp outgoing exchange request
         setSessionCurrentRequest(session, null);
@@ -859,10 +857,39 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
     }
 
-    public void endFilePositiveAnswerReceived(OdetteFtpSession session, CommandExchangeBuffer efpa)
+	private void closeIoChannelOnEndFileAnswer(FileChannel fileChannel, String commandName, VirtualFile virtualFile, OdetteFtpSession session) {
+
+        Oftplet oftplet = getSessionOftplet(session);
+        OftpletListener oftpletListener = oftplet.getListener();
+
+		try {
+			fileChannel.force(true);
+			fileChannel.close();
+		} catch (IOException e) {
+            LOGGER.error("[" + session + "] " +  commandName + " received. Error closing output file channel: " + 
+            		virtualFile, e);
+
+            String errorClosingText = "Failed to close the output file.";
+
+            CommandExchangeBuffer efnaErrorClosing = buildEndFileNegativeAnswerCommand(ACCESS_METHOD_FAILURE,
+                    errorClosingText);
+            session.write(efnaErrorClosing);
+
+            oftpletListener.onReceiveFileError(virtualFile, new AnswerReasonInfo(AnswerReason.ACCESS_METHOD_FAILURE,
+                    errorClosingText));
+
+            return;
+		}
+	}
+
+	public void endFilePositiveAnswerReceived(OdetteFtpSession session, CommandExchangeBuffer efpa)
             throws OdetteFtpException {
 
     	NormalizedVirtualFile normalizedVirtualFile = (NormalizedVirtualFile) getSessionCurrentRequest(session);
+
+    	// Close file channel
+        FileChannel fileChannel = getSessionFileChannel(session);
+        closeIoChannelOnEndFileAnswer(fileChannel, "EFPA", normalizedVirtualFile, session);
 
         // Indicate that the outgoing file transfer has neded to the Oftplet
         Oftplet oftplet = getSessionOftplet(session);

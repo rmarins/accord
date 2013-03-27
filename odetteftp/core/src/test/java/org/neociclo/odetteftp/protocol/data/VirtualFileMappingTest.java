@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
+ * $Id: VirtualFileMappingTest.java 923 2012-11-08 06:43:16Z rmarins $
  */
 package org.neociclo.odetteftp.protocol.data;
 
@@ -39,13 +39,14 @@ import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.protocol.DataExchangeBuffer;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.RecordFormat;
+import org.neociclo.odetteftp.protocol.DataExchangeBuffer.SubrecordHeader;
 import org.neociclo.odetteftp.util.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Rafael Marins
- * @version $Rev$ $Date$
+ * @version $Rev: 923 $ $Date: 2012-11-08 07:43:16 +0100 (jeu., 08 nov. 2012) $
  */
 public class VirtualFileMappingTest {
 
@@ -75,18 +76,16 @@ public class VirtualFileMappingTest {
         boolean eof;
 
         long t0 = System.currentTimeMillis();
+        
+       
 
-        do {
-
+        do {	 
             /* Read data buffer from the stream. */
             eof = mapping.readData(virtualFile, inFileChannel, deb);
-
-            
             ByteBuffer dataBuffer = deb.getRawBuffer();
-            writeDataToFile(outFileChannel, dataBuffer, virtualFile.getRecordFormat());
-            
-
-        } while (!eof);
+            DataExchangeBuffer outBuffer = new DataExchangeBuffer(dataBuffer);
+            mapping.writeData(virtualFile, outBuffer, outFileChannel);
+        } while (!eof);   
 
         long t1 = System.currentTimeMillis();
 
@@ -117,7 +116,6 @@ public class VirtualFileMappingTest {
 
     @Test
     public void testReadingDataFixed() throws Exception {
-
         mappingRead("data/AGPLV3", RecordFormat.FIXED, 400, 217, false, "testReadingDataFixed");
         mappingRead("data/AGPLV3", RecordFormat.FIXED, 400, 217, true, "testReadingDataFixed");
 
@@ -125,15 +123,24 @@ public class VirtualFileMappingTest {
 
     @Test
     public void testReadingDataFixedPayload() throws Exception {
+//       mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 128, false, "testReadingDataFixedPayload");
+//        mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 128, true, "testReadingDataFixedPayload");
+//        
+//        
+//        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.FIXED, 128, 256, false, "testReadingDataFixedPayload");
+//        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.FIXED, 128, 256, true, "testReadingDataFixedPayload");      
+//        
 
-        mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 256, false, "testReadingDataFixedPayload");
-        mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 256, true, "testReadingDataFixedPayload");
+//      mappingRead("data/FIXED_PAYLOAD_2048", RecordFormat.FIXED, 128, 128, false, "testReadingDataFixedPayload");
+//      mappingRead("data/FIXED_PAYLOAD_2048", RecordFormat.FIXED, 128, 128, true, "testReadingDataFixedPayload");      
+
+        mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.FIXED, 128, 128, false, "testReadingDataFixedPayload");
+        mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.FIXED, 128, 128, true, "testReadingDataFixedPayload");       
 
     }
 
     @Test
     public void testReadingDataVariable() throws Exception {
-
         mappingRead("data/AGPLV3", RecordFormat.VARIABLE, 250, 217, false, "testReadingDataVariable");
         mappingRead("data/AGPLV3", RecordFormat.VARIABLE, 250, 217, true, "testReadingDataVariable");
 
@@ -141,7 +148,6 @@ public class VirtualFileMappingTest {
 
     @Test
     public void testReadingDataTextfile() throws Exception {
-
         mappingRead("data/AGPLV3", RecordFormat.TEXTFILE, 0, 217, false, "testReadingDataTextfile");
         mappingRead("data/AGPLV3", RecordFormat.TEXTFILE, 0, 217, true, "testReadingDataTextfile");
 
@@ -149,46 +155,9 @@ public class VirtualFileMappingTest {
 
     @Test
     public void testReadingDataUnstructure() throws Exception {
-    
         mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, false, "testReadingDataUnstructured");
         mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, true, "testReadingDataUnstructured");
-        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.UNSTRUCTURED, 0, 1920, false, "testReadingDataUnstructured");
+        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.UNSTRUCTURED, 0, 1920, true, "testReadingDataUnstructured");
     
-    }
-
-    private void writeDataToFile(FileChannel out, ByteBuffer data, RecordFormat recordFormat) throws IOException {
-
-        data.position(1);
-        while (data.hasRemaining()) {
-
-            short subrecordHeader = (short) (data.get() & 0xff);
-
-            int count = getSubrecordCount(subrecordHeader);
-            boolean compressed = isCompressed(subrecordHeader);
-            boolean endOfRecord = isEndOfRecord(subrecordHeader);
-
-            byte[] subrecord = new byte[(compressed ? 1 : count)];
-            try {
-                data.get(subrecord);
-            } catch (BufferUnderflowException bue) {
-                fail("BufferUnderflowException: " + bue.getMessage());
-            }
-
-            ByteBuffer bb = ByteBuffer.wrap(subrecord);
-            if (compressed) {
-                for (int i=0; i<count; i++) {
-                    bb.rewind();
-                    out.write(bb);
-                }
-            } else {
-                out.write(bb);
-            }
-
-            if (endOfRecord && recordFormat == RecordFormat.TEXTFILE) {
-                out.write(ByteBuffer.wrap(LINE_SEPARATOR));
-            }
-
-        }
-        
     }
 }

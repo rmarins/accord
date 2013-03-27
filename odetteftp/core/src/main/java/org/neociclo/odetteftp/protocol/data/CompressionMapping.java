@@ -19,7 +19,9 @@
  */
 package org.neociclo.odetteftp.protocol.data;
 
-import static org.neociclo.odetteftp.protocol.RecordFormat.*;
+import static org.neociclo.odetteftp.protocol.RecordFormat.FIXED;
+import static org.neociclo.odetteftp.protocol.RecordFormat.TEXTFILE;
+import static org.neociclo.odetteftp.protocol.RecordFormat.UNSTRUCTURED;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,11 +30,11 @@ import java.util.Iterator;
 
 import org.neociclo.odetteftp.OdetteFtpException;
 import org.neociclo.odetteftp.protocol.DataExchangeBuffer;
-import org.neociclo.odetteftp.protocol.VirtualFile;
-import org.neociclo.odetteftp.protocol.RecordFormat;
-import org.neociclo.odetteftp.protocol.VirtualFileMappingException;
 import org.neociclo.odetteftp.protocol.DataExchangeBuffer.SubrecordHeader;
 import org.neociclo.odetteftp.protocol.DataExchangeBuffer.SubrecordHeaderIterator;
+import org.neociclo.odetteftp.protocol.RecordFormat;
+import org.neociclo.odetteftp.protocol.VirtualFile;
+import org.neociclo.odetteftp.protocol.VirtualFileMappingException;
 import org.neociclo.odetteftp.util.BufferUtil;
 import org.neociclo.odetteftp.util.ByteBufferFactory;
 import org.neociclo.odetteftp.util.ProtocolUtil;
@@ -184,62 +186,70 @@ public class CompressionMapping extends AbstractMapping {
     @Override
     public long writeData(VirtualFile virtualFile, DataExchangeBuffer deb, FileChannel out)
             throws OdetteFtpException {
-
-        int bytesWritten = 0;
-
-        if (out == null) {
-            throw new NullPointerException("fileChannel");
-        }
-
-        ByteBuffer data = deb.getRawBuffer();
-        Iterator<SubrecordHeader> subrecordHeaders = new SubrecordHeaderIterator(data);
-
-        try {
-            while (subrecordHeaders.hasNext()) {
-    
-                SubrecordHeader header = subrecordHeaders.next();
-    
-                if (header.getCount() > 0) {
-
-                    // read the subrecord
-                    byte[] subrecord = new byte[header.getCount()];
-                    data.get(subrecord);
-
-                    // write down to the output file channel
-                    ByteBuffer buf = ByteBuffer.wrap(subrecord);
-
-                    if (header.isCompressed()) {
-                        for (;; header.getCount()) {
-                            buf.rewind();
-                            out.write(buf);
-                        }
-                    } else {
-                        out.write(buf);
-                    }
-
-                    bytesWritten += header.getCount();
-
-                }
-    
-                /*
-                 * Handle the endOfRecord flag when Virtual File is TEXTFILE format
-                 * to add line separator at the end of each line/record.
-                 */
-                if (header.isEndOfRecord() && virtualFile.getRecordFormat() == TEXTFILE) {
-                    out.write(ByteBuffer.wrap(LINE_SEPARATOR));
-                    bytesWritten += LINE_SEPARATOR.length;
-                }
-    
-            }
-    
-            out.force(false);
-        } catch (IOException e) {
-            throw new VirtualFileMappingException("Write data operation failed.", e);
-        }
-
-        deb.setUnitCount(bytesWritten);
-
-        return bytesWritten;
-    }
-
-}
+    	
+          int bytesWritten = 0;
+  
+          if (out == null) {
+              throw new NullPointerException("fileChannel");
+          }
+          
+  
+          ByteBuffer data = deb.readData();
+          Iterator<SubrecordHeader> subrecordHeaders = new SubrecordHeaderIterator(data);
+  
+          try {
+              while (subrecordHeaders.hasNext()) {
+      
+                  SubrecordHeader header = subrecordHeaders.next();
+      
+                  if (header.getCount() > 0) {
+                  	int count = header.getCount();
+                  	boolean compressed = header.isCompressed();
+  
+                      byte[] subrecord = new byte[(compressed ? 1 : count)];
+  
+                      // read the subrecord
+                      data.get(subrecord);
+  
+                      // write down to the output file channel
+                      bytesWritten += count;
+                      //LOGGER.debug("subrecordHeader: "+subrecordHeader + " * endOfRecord: " + endOfRecord + " * compressed: " + compressed + " * Count: " + count + " * total: " + total);
+                      
+                      ByteBuffer bb = ByteBuffer.wrap(subrecord);
+                      if (compressed) {
+                          for (int i=0; i<count; i++) {
+                              bb.rewind();
+                              out.write(bb);
+                          }
+                      } else {
+                          out.write(bb);
+                      }
+                      
+                      bytesWritten += count;
+  
+                  }
+      
+                  /*
+                   * Handle the endOfRecord flag when Virtual File is TEXTFILE format
+                   * to add line separator at the end of each line/record.
+                   */
+                  if (header.isEndOfRecord() && virtualFile.getRecordFormat() == TEXTFILE) {
+                      out.write(ByteBuffer.wrap(LINE_SEPARATOR));
+                      bytesWritten += LINE_SEPARATOR.length;
+                  }
+      
+              }
+      
+              out.force(false);
+          } catch (IOException e) {
+              throw new VirtualFileMappingException("Write data operation failed.", e);
+          }
+  
+          deb.setUnitCount(bytesWritten);
+  
+          return bytesWritten;
+  
+      }
+  
+  }
+  

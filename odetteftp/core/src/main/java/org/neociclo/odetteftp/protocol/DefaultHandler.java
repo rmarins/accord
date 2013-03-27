@@ -1324,15 +1324,13 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         LOGGER.trace("[{}] handled authenticator callback = {}", session, pwdAuthCallback);
 
-        if (!pwdAuthCallback.isSuccess() && mandatory) {
+        if (!pwdAuthCallback.isSuccess()) {
         	// has failed
         	EndSessionReason cause = pwdAuthCallback.getCause();
         	if (cause == null) {
         		cause = EndSessionReason.UNSPECIFIED_ABORT;
         	}
-
-    		abort(session, cause, "Authentication error: " + cause.getDescription());
-    		return false;
+        	abnormalRelease(session, cause, "Error in session password authentication");
         }
 
         // authentication succeed

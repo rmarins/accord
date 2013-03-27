@@ -152,7 +152,7 @@ public class VirtualFileMappingTest {
     
         mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, false, "testReadingDataUnstructured");
         mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, true, "testReadingDataUnstructured");
-        mappingRead("data/LAB-WABCO-7.txt", RecordFormat.UNSTRUCTURED, 0, 1920, false, "testReadingDataUnstructured");
+        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.UNSTRUCTURED, 0, 1920, false, "testReadingDataUnstructured");
     
     }
 

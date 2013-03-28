@@ -362,7 +362,7 @@
   <properties>
 
     <!-- compile dependencies version -->
-    <netty.version>3.3.1.Final</netty.version>
+    <netty.version>3.5.11.Final</netty.version>
     <bouncycastle.version>1.45</bouncycastle.version>
     <slf4j.version>1.5.11</slf4j.version>
 

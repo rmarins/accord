@@ -71,7 +71,7 @@ public class VirtualFileMappingTest {
 
         DataExchangeBuffer deb = new DataExchangeBuffer(debSize);
 
-        AbstractMapping mapping = AbstractMapping.getInstance(OdetteFtpVersion.OFTP_V14, useCompression, format);
+        AbstractMapping mapping = AbstractMapping.getInstance(OdetteFtpVersion.OFTP_V12, useCompression, format);
 
         boolean eof;
 
@@ -106,9 +106,9 @@ public class VirtualFileMappingTest {
         byte[] payloadHash = SecurityUtil.computeFileHash(payload, "MD5");
         byte[] copiedHash = SecurityUtil.computeFileHash(copyTo, "MD5");
 
-        if (copyTo.exists()) {
-            copyTo.delete();
-        }
+//        if (copyTo.exists()) {
+//            copyTo.delete();
+//        }
 
         assertTrue(Arrays.equals(payloadHash, copiedHash));
 
@@ -122,18 +122,7 @@ public class VirtualFileMappingTest {
     }
 
     @Test
-    public void testReadingDataFixedPayload() throws Exception {
-//       mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 128, false, "testReadingDataFixedPayload");
-//        mappingRead("data/FIXED_PAYLOAD", RecordFormat.FIXED, 128, 128, true, "testReadingDataFixedPayload");
-//        
-//        
-//        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.FIXED, 128, 256, false, "testReadingDataFixedPayload");
-//        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.FIXED, 128, 256, true, "testReadingDataFixedPayload");      
-//        
-
-//      mappingRead("data/FIXED_PAYLOAD_2048", RecordFormat.FIXED, 128, 128, false, "testReadingDataFixedPayload");
-//      mappingRead("data/FIXED_PAYLOAD_2048", RecordFormat.FIXED, 128, 128, true, "testReadingDataFixedPayload");      
-
+    public void testReadingDataFixedPayload() throws Exception {    
         mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.FIXED, 128, 128, false, "testReadingDataFixedPayload");
         mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.FIXED, 128, 128, true, "testReadingDataFixedPayload");       
 
@@ -150,6 +139,8 @@ public class VirtualFileMappingTest {
     public void testReadingDataTextfile() throws Exception {
         mappingRead("data/AGPLV3", RecordFormat.TEXTFILE, 0, 217, false, "testReadingDataTextfile");
         mappingRead("data/AGPLV3", RecordFormat.TEXTFILE, 0, 217, true, "testReadingDataTextfile");
+        mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.TEXTFILE, 0, 512, false, "testReadingDataTextfile");
+        mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.TEXTFILE, 0, 217, true, "testReadingDataTextfile");   
 
     }
 
@@ -157,7 +148,7 @@ public class VirtualFileMappingTest {
     public void testReadingDataUnstructure() throws Exception {
         mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, false, "testReadingDataUnstructured");
         mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, true, "testReadingDataUnstructured");
-        mappingRead("data/FIXED_PAYLOAD_1920", RecordFormat.UNSTRUCTURED, 0, 1920, true, "testReadingDataUnstructured");
-    
+        mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.UNSTRUCTURED, 0, 1920, false, "testReadingDataUnstructured");
+        mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.UNSTRUCTURED, 0, 1920, true, "testReadingDataUnstructured");   
     }
 }

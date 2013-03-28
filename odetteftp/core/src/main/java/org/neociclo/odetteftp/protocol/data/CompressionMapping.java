@@ -201,20 +201,15 @@ public class CompressionMapping extends AbstractMapping {
               while (subrecordHeaders.hasNext()) {
       
                   SubrecordHeader header = subrecordHeaders.next();
-      
-                  if (header.getCount() > 0) {
-                  	int count = header.getCount();
-                  	boolean compressed = header.isCompressed();
-  
+                  int count = header.getCount();
+                  boolean compressed = header.isCompressed();  
+                  
+                  if (count > 0 ) {
                       byte[] subrecord = new byte[(compressed ? 1 : count)];
-  
                       // read the subrecord
                       data.get(subrecord);
   
-                      // write down to the output file channel
-                      bytesWritten += count;
-                      //LOGGER.debug("subrecordHeader: "+subrecordHeader + " * endOfRecord: " + endOfRecord + " * compressed: " + compressed + " * Count: " + count + " * total: " + total);
-                      
+                      // write down to the output file channel                      
                       ByteBuffer bb = ByteBuffer.wrap(subrecord);
                       if (compressed) {
                           for (int i=0; i<count; i++) {

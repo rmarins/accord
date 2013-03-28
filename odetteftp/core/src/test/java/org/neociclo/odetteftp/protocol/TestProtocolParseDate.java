@@ -1,16 +1,16 @@
 package org.neociclo.odetteftp.protocol;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Calendar;
 import java.util.Date;
-
-import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.neociclo.odetteftp.protocol.v13.OdetteFtpVer13Handler;
 import org.neociclo.odetteftp.protocol.v14.OdetteFtpVer14Handler;
 import org.neociclo.odetteftp.protocol.v20.OdetteFtpVer20Handler;
 
-public class TestProtocolParseDate extends TestCase {
+public class TestProtocolParseDate {
 
     @Test
     public void testVer13() {
@@ -45,8 +45,8 @@ public class TestProtocolParseDate extends TestCase {
 
         assertEquals(calendar.get(Calendar.HOUR_OF_DAY), 10);
         assertEquals(calendar.get(Calendar.MINUTE), 10);
-        assertEquals(calendar.get(Calendar.SECOND), 11);
-        assertEquals(calendar.get(Calendar.MILLISECOND), 10);
+        assertEquals(calendar.get(Calendar.SECOND), 10);
+        assertEquals(calendar.get(Calendar.MILLISECOND), 00);
     }
 
     @Test
@@ -64,8 +64,8 @@ public class TestProtocolParseDate extends TestCase {
 
         assertEquals(calendar.get(Calendar.HOUR_OF_DAY), 10);
         assertEquals(calendar.get(Calendar.MINUTE), 10);
-        assertEquals(calendar.get(Calendar.SECOND), 11);
-        assertEquals(calendar.get(Calendar.MILLISECOND), 10);
+        assertEquals(calendar.get(Calendar.SECOND), 10);
+        assertEquals(calendar.get(Calendar.MILLISECOND), 00);
     }
 
 }

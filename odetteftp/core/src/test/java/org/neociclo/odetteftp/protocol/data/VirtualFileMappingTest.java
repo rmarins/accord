@@ -19,16 +19,13 @@
  */
 package org.neociclo.odetteftp.protocol.data;
 
-import static org.junit.Assert.*;
-import static org.neociclo.odetteftp.protocol.data.AbstractMapping.LINE_SEPARATOR;
-import static org.neociclo.odetteftp.util.OftpTestUtil.*;
-import static org.neociclo.odetteftp.protocol.DataExchangeBuffer.SubrecordHeader.*;
+import static org.junit.Assert.assertTrue;
+import static org.neociclo.odetteftp.util.OftpTestUtil.getOutputDir;
+import static org.neociclo.odetteftp.util.OftpTestUtil.getResourceFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -39,7 +36,6 @@ import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.protocol.DataExchangeBuffer;
 import org.neociclo.odetteftp.protocol.DefaultVirtualFile;
 import org.neociclo.odetteftp.protocol.RecordFormat;
-import org.neociclo.odetteftp.protocol.DataExchangeBuffer.SubrecordHeader;
 import org.neociclo.odetteftp.util.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

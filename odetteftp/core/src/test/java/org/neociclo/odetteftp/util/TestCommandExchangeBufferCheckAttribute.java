@@ -1,12 +1,15 @@
 package org.neociclo.odetteftp.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
 import org.neociclo.odetteftp.protocol.CommandExchangeBuffer;
 import org.neociclo.odetteftp.protocol.CommandFormat.Field;
 
-public class TestCommandExchangeBufferCheckAttribute extends TestCase {
+public class TestCommandExchangeBufferCheckAttribute {
 
+	@Test
     public void testCheckAttribute() {
         assertTrue(CommandExchangeBuffer.checkAttribute(Field.ALPHANUMERIC_TYPE, "ALPHA12345"));
         assertTrue(CommandExchangeBuffer.checkAttribute(Field.NUMERIC_TYPE, "12345"));

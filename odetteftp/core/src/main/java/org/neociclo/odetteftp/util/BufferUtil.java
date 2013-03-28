@@ -165,7 +165,7 @@ public class BufferUtil {
                 break;
 
             counter++;
-        } while (buffer.limit() > currentPos && counter <= limitCount);
+        } while (buffer.limit() > currentPos + 1 && limitCount > counter );
 
         return counter;
 

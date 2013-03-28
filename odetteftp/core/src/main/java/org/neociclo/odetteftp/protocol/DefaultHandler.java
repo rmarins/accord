@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
+ * $Id: DefaultHandler.java 926 2012-12-02 13:16:51Z rmarins $
  */
 package org.neociclo.odetteftp.protocol;
 
@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Rafael Marins
- * @version $Rev$ $Date$
+ * @version $Rev: 926 $ $Date: 2012-12-02 14:16:51 +0100 (Sun, 02 Dec 2012) $
  */
 public abstract class DefaultHandler implements ProtocolHandler {
 
@@ -816,13 +816,6 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
         /* Construct and send the End File indication command. */
         CommandExchangeBuffer efid = buildEndFileCommand(recordCount, unitCount);
-
-        try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
         session.write(efid);
 
     }

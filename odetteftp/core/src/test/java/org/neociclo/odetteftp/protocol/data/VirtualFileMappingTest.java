@@ -106,9 +106,9 @@ public class VirtualFileMappingTest {
         byte[] payloadHash = SecurityUtil.computeFileHash(payload, "MD5");
         byte[] copiedHash = SecurityUtil.computeFileHash(copyTo, "MD5");
 
-//        if (copyTo.exists()) {
-//            copyTo.delete();
-//        }
+        if (copyTo.exists()) {
+            copyTo.delete();
+        }
 
         assertTrue(Arrays.equals(payloadHash, copiedHash));
 

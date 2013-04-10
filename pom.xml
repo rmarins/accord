@@ -1,0 +1,439 @@
+<!--
+  The Accord Project, http://accordproject.org
+  Copyright (C) 2005-2013 Rafael Marins, http://rafaelmarins.com
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+      <groupId>org.sonatype.oss</groupId>
+      <artifactId>oss-parent</artifactId>
+      <version>7</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.accordproject</groupId>
+  <artifactId>accord-pom</artifactId>
+  <packaging>pom</packaging>
+  <inceptionYear>2005</inceptionYear>
+
+  <url>http://accordproject.org</url>
+
+  <name>${project.artifactId}</name>
+  <description>The Accord Project</description>
+
+  <version>1-master-SNAPSHOT</version>
+
+  <organization>
+    <name>The Accord Project</name>
+    <url>http://accordproject.org</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>http://github.com/rmarins/accord/issues</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:git:git@github.com:rmarins/accord.git</connection>
+    <developerConnection>scm:git:git@github.com:rmarins/accord.git</developerConnection>
+    <url>http://github.com/rmarins/accord</url>
+  </scm>
+
+  <properties>
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+
+    <!-- maven plugins versions -->
+    <compiler-plugin.version>3.0</compiler-plugin.version>
+    <assembly-plugin.version>2.4</assembly-plugin.version>
+    <release-plugin.version>2.4</release-plugin.version>
+    <deploy-plugin.version>2.7</deploy-plugin.version>
+    <javadoc-plugin.version>2.9</javadoc-plugin.version>
+    <resources-plugin.version>2.6</resources-plugin.version>
+    <clean-plugin.version>2.5</clean-plugin.version>
+    <install-plugin.version>2.4</install-plugin.version>
+    <jar-plugin.version>2.4</jar-plugin.version>
+    <dependency-plugin.version>2.7</dependency-plugin.version>
+    <site-plugin.version>3.2</site-plugin.version>
+    <surefire-plugin.version>2.14</surefire-plugin.version>
+    <checkstyle-plugin.version>2.10</checkstyle-plugin.version>
+    <source-plugin.version>2.2.1</source-plugin.version>
+    <eclipse-plugin.version>2.9</eclipse-plugin.version>
+    <pmd-plugin.version>3.0.1</pmd-plugin.version>
+
+  </properties>
+
+  <prerequisites>
+    <maven>3.0.3</maven>
+  </prerequisites>
+
+  <build>
+
+    <defaultGoal>install</defaultGoal>
+
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
+    <outputDirectory>target/classes</outputDirectory>
+    <testOutputDirectory>target/test-classes</testOutputDirectory>
+
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+      </testResource>
+    </testResources>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${assembly-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${compiler-plugin.version}</version>
+<!-- 
+          <configuration>
+            <source>${java-source-version}</source>
+            <target>${java-runtime-version}</target>
+            <encoding>${source-encoding}</encoding>
+            <maxmem>256M</maxmem>
+          </configuration>
+ -->
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <version>${eclipse-plugin.version}</version>
+          <configuration>
+            <downloadSources>true</downloadSources>
+            <downloadJavadocs>true</downloadJavadocs>
+          </configuration>
+        </plugin>
+<!--   
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-idea-plugin</artifactId>
+          <version>${idea-plugin.version}</version>
+          <configuration>
+            <downloadSources>true</downloadSources>
+            <downloadJavadocs>true</downloadJavadocs>
+          </configuration>
+        </plugin>
+   -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${javadoc-plugin.version}</version>
+          <configuration>
+            <attach>true</attach>
+            <source>${maven.compiler.source}</source>
+            <quiet>true</quiet>
+            <bottom>Accord Project</bottom>
+            <javadocVersion>${maven.compiler.source}</javadocVersion>
+            <encoding>${maven.compiler.encoding}</encoding>
+          </configuration>
+        </plugin>
+  
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${release-plugin.version}</version>
+          <configuration>
+            <passphrase>${gpg.passphrase}</passphrase>
+            <!-- use the mavenExecutorId is to get over a known gpg plugin hanging issue. -->
+            <mavenExecutorId>forked-path</mavenExecutorId>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire-plugin.version}</version>
+          <configuration>
+            <!--forkMode>pertest</forkMode-->
+            <childDelegation>false</childDelegation>
+            <useFile>true</useFile>
+            <failIfNoTests>false</failIfNoTests>
+            <includes>
+               <include>**/*Test.java</include>             
+            </includes>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${deploy-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${clean-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${install-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${jar-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${resources-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${dependency-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${site-plugin.version}</version> 
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${checkstyle-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${source-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-report-plugin</artifactId>
+          <version>${surefire-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <version>${pmd-plugin.version}</version>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+
+  </build>
+
+  <repositories>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>warn</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+        <checksumPolicy>warn</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
+<!-- 
+  <distributionManagement>
+    <site>
+      <id>accord-website</id>
+      <name>The Accord Project site at GitHub Pages</name>
+      <url>${site-repo.url}</url>
+    </site>
+  </distributionManagement>
+ -->
+<!-- 
+  <mailingLists>
+    <mailingList>
+      <name>ACCORD User Group</name>
+      <subscribe>accord-users-subscribe@ow2.org</subscribe>
+      <unsubscribe>accord-users-unsubscribe@ow2.org</unsubscribe>
+      <archive>http://mail-archive.ow2.org/accord-users/index.html</archive>
+    </mailingList>
+
+    <mailingList>
+      <name>ACCORD Developer Group</name>
+      <subscribe>accord-dev-subscribe@ow2.org</subscribe>
+      <unsubscribe>accord-dev-unsubscribe@ow2.org</unsubscribe>
+      <archive>http://mail-archive.ow2.org/accord-dev/index.html</archive>
+    </mailingList>
+
+    <mailingList>
+      <name>ACCORD Issues Logs</name>
+      <subscribe>accord-issues-subscribe@ow2.org</subscribe>
+      <unsubscribe>accord-issues-unsubscribe@ow2.org</unsubscribe>
+      <archive>http://mail-archive.ow2.org/accord-issues/index.html</archive>
+    </mailingList>
+
+    <mailingList>
+      <name>ACCORD Source Commit Logs</name>
+      <subscribe>accord-commits-subscribe@ow2.org</subscribe>
+      <unsubscribe>accord-commits-unsubscribe@ow2.org</unsubscribe>
+      <archive>http://mail-archive.ow2.org/accord-commits/index.html</archive>
+    </mailingList>
+  </mailingLists>
+ -->
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.2</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <minmemory>128m</minmemory>
+          <maxmemory>512m</maxmemory>
+        </configuration>
+        <version>${javadoc-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>${surefire-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle-plugin.version}</version>
+      </plugin>
+    </plugins>
+
+  </reporting>
+
+  <profiles>
+    <!--+
+      | release-profile: Set of tasks activated on 'release:perform' goal.
+      |
+      | Attach sources and javadocs on artifacts deployment. Add artifacts
+      | signature using PGP (required by Sonatype distribution).
+      +-->
+    <profile>
+      <id>release-profile</id>
+
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${javadoc-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <updateReleaseInfo>true</updateReleaseInfo>
+            </configuration>
+          </plugin>
+          <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

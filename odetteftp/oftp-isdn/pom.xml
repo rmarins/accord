@@ -1,52 +1,33 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Neociclo Accord, Open Source B2Bi Middleware
-    Copyright (c) 2005-2011 Neociclo, http://www.neociclo.com
-  
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as
-    published by the Free Software Foundation, either version 3 of the
-    License, or (at your option) any later version.
+  The Accord Project, http://accordproject.org
+  Copyright (C) 2005-2013 Rafael Marins, http://rafaelmarins.com
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses />.
+     http://www.apache.org/licenses/LICENSE-2.0
 
-    $Id$
-
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/pom/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-  <parent>
-    <groupId>org.neociclo.accord.odetteftp</groupId>
-    <artifactId>odetteftp-parent</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
-  </parent>
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/pom/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>oftp-isdn</artifactId>
-  <packaging>bundle</packaging>
-  <name>Accord Odette FTP :: ISDN/CAPI20 support</name>
-  <description>Accord Odette FTP Library</description>
 
-  <properties>
-    <odetteftp.osgi.export.pkg>
-        org.neociclo.odetteftp.*
-    </odetteftp.osgi.export.pkg>
-    <odetteftp.osgi.import>
-        !org.neociclo.odetteftp.*,
-        org.jboss.netty.*;version="[3.2.5,4)",
-        org.bouncycastle.*;version="[1.39.0,2)",
-        *
-    </odetteftp.osgi.import>
-    <odetteftp.osgi.private.pkg>
-        org.neociclo.odetteftp.netty.*
-    </odetteftp.osgi.private.pkg>
-  </properties>
+  <parent>
+    <groupId>org.accordproject.odetteftp</groupId>
+    <artifactId>oftp-project</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>oftp-isdn</artifactId>
+  <packaging>jar</packaging>
+  <name>Accord OFTP :: CAPI20-based ISDN extension</name>
 
   <build>
     <plugins>
@@ -97,13 +78,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>oftp-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.neociclo.accord.odetteftp</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>oftp-core</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
@@ -111,8 +92,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.neociclo.accord.components</groupId>
-      <artifactId>accord-isdn-netty</artifactId>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-isdn-transport</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
 
@@ -123,18 +104,6 @@
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
       <version>${netty.version}</version>
-    </dependency>
-
-    <!--+
-      | ========  OSGi  ========
-      +-->
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi_R4_core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>osgi_R4_compendium</artifactId>
     </dependency>
 
   </dependencies>

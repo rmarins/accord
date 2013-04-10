@@ -34,7 +34,7 @@ import org.junit.Test;
  */
 public class SecurityUtilTest {
 
-    private static final String TEST_FILE_PATH = "data/BR0307108.REM";
+    private static final String TEST_FILE_PATH = "data/TEXTFILE";
 
     private static final String KS_PATH = "keystores/client-bogus.p12";
 

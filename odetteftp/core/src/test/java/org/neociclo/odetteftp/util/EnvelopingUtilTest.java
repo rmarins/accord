@@ -53,7 +53,7 @@ import org.neociclo.odetteftp.protocol.v20.CipherSuite;
  */
 public class EnvelopingUtilTest {
 
-    private static final String TEST_FILE_PATH = "data/BR0307108.REM";
+    private static final String TEST_FILE_PATH = "data/TEXTFILE";
 
     private static final String MY_CERT_PATH = "certificates/o0055partnera-public.cer";
 

@@ -82,8 +82,8 @@ public class RemoteCapiProxy {
 			public ChannelBuffer process(ChannelHandlerContext ctx, MessageEvent e) {
 				ChannelBuffer msg = (ChannelBuffer) e.getMessage();
 
-				bufferReplaceBy(msg, "O094200005562851534TARNFO", "O01770000000000X0B5SHARED", ISO_8859_1);
-				bufferReplaceBy(msg, "ODEXSVR ", "BABELWAY", ISO_8859_1);
+				bufferReplaceBy(msg, "O0055INNER", "O0055OUTER", ISO_8859_1);
+				bufferReplaceBy(msg, "BENTOSVR", "CHICOSVR", ISO_8859_1);
 				
 				return msg;
 			}
@@ -98,9 +98,9 @@ public class RemoteCapiProxy {
 			public ChannelBuffer process(ChannelHandlerContext ctx, MessageEvent e) {
 				ChannelBuffer msg = (ChannelBuffer) e.getMessage();
 
-				bufferReplaceBy(msg, "O0013004468WABCOGRP000001", "DINET                    ", ISO_8859_1);
-				bufferReplaceBy(msg, "WABCO   ", "NEOCICLO", ISO_8859_1);
-				bufferReplaceBy(msg, "O01770000000000X0B5026134", "DINET                    ", ISO_8859_1);
+				bufferReplaceBy(msg, "O0055INNER", "CHICO                    ", ISO_8859_1);
+				bufferReplaceBy(msg, "COMPANY ", "ACCORD  ", ISO_8859_1);
+				bufferReplaceBy(msg, "O0055OUTER", "CHICO                    ", ISO_8859_1);
 
 				return msg;
 			}

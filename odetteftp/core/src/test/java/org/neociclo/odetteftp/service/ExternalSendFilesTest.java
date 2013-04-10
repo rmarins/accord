@@ -63,7 +63,7 @@ public class ExternalSendFilesTest extends AbstractTcpClientExternal {
             return;
         }
 
-        VirtualFile fileToSend = createVirtualFile(getResourceFile("data/AGPLV3"));
+        VirtualFile fileToSend = createVirtualFile(getResourceFile("data/TEXTFILE"));
 
         sendFileTest(null, true, false, 4096, 64, fileToSend);
     }

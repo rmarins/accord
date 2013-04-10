@@ -108,8 +108,8 @@ public class VirtualFileMappingTest {
 
     @Test
     public void testReadingDataFixed() throws Exception {
-        mappingRead("data/AGPLV3", RecordFormat.FIXED, 400, 217, false, "testReadingDataFixed");
-        mappingRead("data/AGPLV3", RecordFormat.FIXED, 400, 217, true, "testReadingDataFixed");
+        mappingRead("data/TEXTFILE", RecordFormat.FIXED, 400, 217, false, "testReadingDataFixed");
+        mappingRead("data/TEXTFILE", RecordFormat.FIXED, 400, 217, true, "testReadingDataFixed");
 
     }
 
@@ -122,15 +122,15 @@ public class VirtualFileMappingTest {
 
     @Test
     public void testReadingDataVariable() throws Exception {
-        mappingRead("data/AGPLV3", RecordFormat.VARIABLE, 250, 217, false, "testReadingDataVariable");
-        mappingRead("data/AGPLV3", RecordFormat.VARIABLE, 250, 217, true, "testReadingDataVariable");
+        mappingRead("data/TEXTFILE", RecordFormat.VARIABLE, 250, 217, false, "testReadingDataVariable");
+        mappingRead("data/TEXTFILE", RecordFormat.VARIABLE, 250, 217, true, "testReadingDataVariable");
 
     }
 
     @Test
     public void testReadingDataTextfile() throws Exception {
-        mappingRead("data/AGPLV3", RecordFormat.TEXTFILE, 0, 217, false, "testReadingDataTextfile");
-        mappingRead("data/AGPLV3", RecordFormat.TEXTFILE, 0, 217, true, "testReadingDataTextfile");
+        mappingRead("data/TEXTFILE", RecordFormat.TEXTFILE, 0, 217, false, "testReadingDataTextfile");
+        mappingRead("data/TEXTFILE", RecordFormat.TEXTFILE, 0, 217, true, "testReadingDataTextfile");
         mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.TEXTFILE, 0, 512, false, "testReadingDataTextfile");
         mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.TEXTFILE, 0, 217, true, "testReadingDataTextfile");   
 
@@ -138,8 +138,8 @@ public class VirtualFileMappingTest {
 
     @Test
     public void testReadingDataUnstructure() throws Exception {
-        mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, false, "testReadingDataUnstructured");
-        mappingRead("data/AGPLV3", RecordFormat.UNSTRUCTURED, 0, 217, true, "testReadingDataUnstructured");
+        mappingRead("data/TEXTFILE", RecordFormat.UNSTRUCTURED, 0, 217, false, "testReadingDataUnstructured");
+        mappingRead("data/TEXTFILE", RecordFormat.UNSTRUCTURED, 0, 217, true, "testReadingDataUnstructured");
         mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.UNSTRUCTURED, 0, 1920, false, "testReadingDataUnstructured");
         mappingRead("data/FIXED_PAYLOAD_2176", RecordFormat.UNSTRUCTURED, 0, 1920, true, "testReadingDataUnstructured");   
     }

@@ -259,8 +259,8 @@ public class CommandExchangeBufferTest {
     	c.set(2010, 7, 17, 10, 16, 34);
     	c.set(Calendar.MILLISECOND, 0);
 
-		CommandExchangeBuffer sfid = startFile("compressed-7104544892109052014-AGPLV3", c.getTime(), (short) 1, null,
-				"DINET", "DINET", RecordFormat.UNSTRUCTURED, 0, 12, 34, 0, SecurityLevel.NO_SECURITY_SERVICES,
+		CommandExchangeBuffer sfid = startFile("compressed-7104544892109052014-TEXTFILE", c.getTime(), (short) 1, null,
+				"O0055ORIG", "O0055DEST", RecordFormat.UNSTRUCTURED, 0, 12, 34, 0, SecurityLevel.NO_SECURITY_SERVICES,
 				CipherSuite.NO_CIPHER_SUITE_SELECTION, FileCompression.ZLIB, FileEnveloping.CMS, false, null);
 
     	ByteBuffer buffer = sfid.getRawBuffer();

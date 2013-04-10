@@ -1,6 +1,6 @@
 /**
- * Neociclo Accord, Open Source B2Bi Middleware
- * Copyright (C) 2005-2009 Neociclo, http://www.neociclo.com
+ * The Accord Project, http://accordproject.org
+ * Copyright (C) 2005-2013 Rafael Marins, http://rafaelmarins.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * $Id: ProtocolHandler.java 94 2009-03-24 11:50:13Z rafael.marins $
  */
 package org.neociclo.odetteftp;
 
@@ -25,7 +23,6 @@ import org.neociclo.odetteftp.protocol.EndSessionReason;
 
 /**
  * @author Rafael Marins
- * @version $Rev: 94 $ $Date: 2009-03-24 08:50:13 -0300 (Tue, 24 Mar 2009) $
  */
 public interface ProtocolHandler {
 

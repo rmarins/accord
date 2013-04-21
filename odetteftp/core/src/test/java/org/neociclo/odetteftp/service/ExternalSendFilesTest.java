@@ -22,6 +22,7 @@ import static org.neociclo.odetteftp.util.OftpTestUtil.getResourceFile;
 
 import java.util.Calendar;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.neociclo.odetteftp.OdetteFtpVersion;
 import org.neociclo.odetteftp.TransferMode;
@@ -36,6 +37,15 @@ import org.neociclo.odetteftp.support.OdetteFtpConfiguration;
 public class ExternalSendFilesTest extends AbstractTcpClientExternal {
 
     private OdetteFtpConfiguration sessionConfig;
+    private String testFile = "data/TEXTFILE";
+
+    @Before
+    public void initialize() {
+    	String s = System.getProperty("oftp.file");
+    	if (s != null && !"".equals(s.trim())) {
+    		testFile = s;
+    	}
+    }
 
     @Override
     protected OdetteFtpConfiguration createSessionConfig() {
@@ -51,7 +61,7 @@ public class ExternalSendFilesTest extends AbstractTcpClientExternal {
             return;
         }
 
-        VirtualFile fileToSend = createVirtualFile(getResourceFile("data/TEXTFILE"));
+        VirtualFile fileToSend = createVirtualFile(getResourceFile(testFile));
 
         sendFileTest(null, false, false, 256, 64, fileToSend);
     }
@@ -63,7 +73,7 @@ public class ExternalSendFilesTest extends AbstractTcpClientExternal {
             return;
         }
 
-        VirtualFile fileToSend = createVirtualFile(getResourceFile("data/TEXTFILE"));
+        VirtualFile fileToSend = createVirtualFile(getResourceFile(testFile));
 
         sendFileTest(null, true, false, 4096, 64, fileToSend);
     }

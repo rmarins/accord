@@ -1,11 +1,11 @@
-The Accord Project - Copyright 2005-2013 Neociclo Informatica Ltda., and is
+Copyright (c) 2005-2013 The Accord Project, http://accordproject.org, and is
 licensed under the Apache License, version 2.0 as published by the Apache
 Software Foundation.
 
 A summary of the individual contributors is given below. Any omission should be
 sent to Rafael Marins <rafael.marins@me.com>.
 
-SVN Login(s)            Name
+GitHub Login(s)            Name
 -------------------------------------------------------------------------------
 brunoborges             Bruno Borges
 rmarins                 Rafael Marins

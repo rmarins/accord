@@ -64,7 +64,7 @@ public class IsdnExternalSendFilesTest extends AbstractIsdnClientExternal {
 //            return;
 //        }
 //
-//        VirtualFile fileToSend = createVirtualFile(getResourceFile("data/AGPLV3"));
+//        VirtualFile fileToSend = createVirtualFile(getResourceFile("data/TEST"));
 //
 //        sendFileTest(null, true, false, 4096, 64, fileToSend);
 //    }

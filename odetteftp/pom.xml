@@ -40,11 +40,12 @@
 
   <modules>
     <module>core</module>
+    <module>oftp-isdn</module>
   </modules>
 
   <properties>
     <!-- dependencies versions -->
-    <netty.version>3.6.3.Final</netty.version>
+    <netty.version>3.6.5.Final</netty.version>
     <bouncycastle.version>1.45</bouncycastle.version>
     <log4j.version>1.2.17</log4j.version>
     <slf4j.version>1.7.4</slf4j.version>

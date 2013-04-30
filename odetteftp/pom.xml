@@ -109,4 +109,13 @@
     </dependency>
   </dependencies>
 
+  <developers>
+    <developer>
+      <id>rmarins</id>
+      <name>Rafael Marins</name>
+      <email>rafa.marins@gmail.com</email>
+      <url>http://rafaelmarins.com</url>
+      <timezone>BRST</timezone>
+    </developer>
+  </developers>
 </project>

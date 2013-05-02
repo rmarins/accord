@@ -32,8 +32,9 @@
 
    <dependencies>
       <dependency>
-         <groupId>org.neociclo.accord.odetteftp</groupId>
+         <groupId>org.accordproject.odetteftp</groupId>
          <artifactId>oftp-core</artifactId>
+         <version>${project.version}</version>
       </dependency>
       <dependency>
          <groupId>commons-cli</groupId>

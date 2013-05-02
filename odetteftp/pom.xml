@@ -46,7 +46,7 @@
   <properties>
     <!-- dependencies versions -->
     <netty.version>3.6.5.Final</netty.version>
-    <bouncycastle.version>1.45</bouncycastle.version>
+    <bouncycastle.version>1.46</bouncycastle.version>
     <log4j.version>1.2.17</log4j.version>
     <slf4j.version>1.7.4</slf4j.version>
     <junit.version>4.11</junit.version>
@@ -106,6 +106,11 @@
       <artifactId>easymock</artifactId>
       <version>${easymock.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcmail-jdk16</artifactId>
+      <version>1.46</version>
     </dependency>
   </dependencies>
 

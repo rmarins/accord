@@ -40,7 +40,7 @@
 
   <modules>
     <module>core</module>
-    <module>oftp-isdn</module>
+<!--     <module>oftp-isdn</module> -->
   </modules>
 
   <properties>

@@ -48,7 +48,7 @@
     <netty.version>3.6.5.Final</netty.version>
     <bouncycastle.version>1.46</bouncycastle.version>
     <log4j.version>1.2.17</log4j.version>
-    <slf4j.version>1.7.4</slf4j.version>
+    <slf4j.version>1.6.4</slf4j.version>
     <junit.version>4.11</junit.version>
     <easymock.version>3.1</easymock.version>
   </properties>

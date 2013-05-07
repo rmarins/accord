@@ -175,6 +175,8 @@ public abstract class BaseClientExternalTestCase {
 
         if (recordSize <= 0 && (vf.getRecordFormat() == FIXED || vf.getRecordFormat() == VARIABLE)) {
             vf.setRecordSize(DEFAULT_RECORD_SIZE);
+        } else {
+        	vf.setRecordSize(recordSize);
         }
 
         if (originator != null) {

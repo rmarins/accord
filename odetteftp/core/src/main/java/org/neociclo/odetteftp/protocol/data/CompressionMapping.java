@@ -104,7 +104,7 @@ public class CompressionMapping extends AbstractMapping {
                 long currentOffset = ProtocolUtil.computeVirtualFileOffset(entryPosition, virtualFile.getRecordFormat(), virtualFile.getRecordSize());
                 long recordLimit = virtualFile.getRecordSize() * (currentOffset + 1);
 
-                if (entryPosition + subrecordSize > recordLimit) {
+                if (entryPosition + subrecordSize >= recordLimit) {
                     subrecordSize = (int) (subrecordSize - (entryPosition + subrecordSize - recordLimit));
                     endOfRecord = true;
                 }

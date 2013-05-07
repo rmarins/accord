@@ -60,15 +60,15 @@ public abstract class AbstractIsdnClientExternal extends BaseClientExternalTestC
                 IsdnChannelConfig config = channel.getConfig();
 
 				config.setMaxLogicalConnection(1);
-				config.setMaxBDataBlocks(7);
-				config.setMaxBDataLen(4096);
+				config.setMaxBDataBlocks(2);
+				config.setMaxBDataLen(512);
 
-				config.setCompatibilityInformationProfile(CompatibilityInformationProfile.SPEECH);
-				config.setB3(B3Protocol.TRANSPARENT);
+				config.setCompatibilityInformationProfile(CompatibilityInformationProfile.UNRESTRICTED_DIGITAL);
+				config.setB3(B3Protocol.X25_DTE_DTE);
 
 				B3Configuration b3config = new B3Configuration(B3Protocol.TRANSPARENT.getBitField());
-//				b3config.setModuloMode(B3Configuration.MODULOMODE_NORMAL);
-//				b3config.setWindowSize(7);
+				b3config.setModuloMode(B3Configuration.MODULOMODE_NORMAL);
+				b3config.setWindowSize(2);
 				config.setB3Config(b3config);
 
 				AdditionalInfo info = new AdditionalInfo();

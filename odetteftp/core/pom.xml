@@ -92,8 +92,6 @@ limitations under the License.
                             !com.google.protobuf,
                             *
                         </Import-Package>
-                        <Embed-Dependency>netty</Embed-Dependency>
-                        <!--<Bundle-Activator>com.apogado.oftp2.oftplet.Activator</Bundle-Activator>-->
                     </instructions>
                 </configuration>
             </plugin>

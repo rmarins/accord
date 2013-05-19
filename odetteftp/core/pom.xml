@@ -8,154 +8,116 @@
 
      http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/pom/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/pom/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>org.accordproject.odetteftp</groupId>
-        <artifactId>oftp-project</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>oftp-core</artifactId>
-    <packaging>bundle</packaging>
-
-    <name>Accord OFTP :: Core API</name>
-    <description>Open Source Java Odette FTP Libraries from The Accord Project</description>
-
-    <!-- 
-     <properties>
-       <oftp-core.osgi.export.pkg>
-           org.neociclo.odetteftp.*
-       </oftp-core.osgi.export.pkg>
-       <oftp-core.osgi.import>
-           !org.neociclo.odetteftp.*,
-           org.jboss.netty.*;version="[3.3.1,4)",
-           org.bouncycastle.*;version="[1.46.0,2)",
-           *
-       </oftp-core.osgi.import>
-       <oftp-core.osgi.private.pkg>
-           org.neociclo.odetteftp.netty.*
-       </oftp-core.osgi.private.pkg>
-     </properties>
-    -->
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>copy-legal-info</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/target/license/META-INF</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}</directory>
-                                    <filtering>false</filtering>
-                                    <includes>
-                                        <include>COPYRIGHT.txt</include>
-                                        <include>LICENSE.txt</include>
-                                        <include>NOTICE.txt</include>
-                                        <include>license/*.txt</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.2.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                            !org.jboss.logging,
-                            !org.jboss.marshalling,
-                            !com.google.protobuf,
-                            *
-                        </Import-Package>
-                        <Embed-Dependency>netty</Embed-Dependency>
-                        <!--<Bundle-Activator>com.apogado.oftp2.oftplet.Activator</Bundle-Activator>-->
-                    </instructions>
-                </configuration>
-            </plugin>
-            <!--  this create jar file of code from src/test/java so modules with tests can share code -->
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-
-    </build>
-
-    <repositories>
-        <repository>
-            <id>repository.jboss.org</id>
-            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <dependencies>
-        <!--+
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>org.accordproject.odetteftp</groupId>
+    <artifactId>oftp-project</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+  </parent>
+  
+  <artifactId>oftp-core</artifactId>
+  <packaging>bundle</packaging>
+  
+  <name>Accord OFTP :: Core API</name>
+  <description>Open Source Java Odette FTP Libraries from The Accord Project</description>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+            <encoding>UTF-8</encoding>
+        </configuration>
+        <executions>
+          <execution>
+            <id>copy-legal-info</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/license/META-INF</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}</directory>
+                  <filtering>false</filtering>
+                  <includes>
+                    <include>COPYRIGHT.txt</include>
+                    <include>LICENSE.txt</include>
+                    <include>NOTICE.txt</include>
+                    <include>license/*.txt</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.2.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+                *
+            </Import-Package>
+            <Embed-Dependency>netty</Embed-Dependency>
+          </instructions>
+        </configuration>
+      </plugin>
+      <!--  this create jar file of code from src/test/java so modules with tests can share code -->
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <repositories>
+    <repository>
+      <id>repository.jboss.org</id>
+      <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  
+  <dependencies>
+    <!--+
         | ========  JBoss Netty  ========
         +-->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty</artifactId>
+      <version>${netty.version}</version>
+    </dependency>
 
-        <!--+
+    <!--+
         | ========  BouncyCastle  ========
         +-->
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <!--       <artifactId>bcmail-jdk15on</artifactId> -->
-            <artifactId>bcmail-jdk16</artifactId>
-            <version>${bouncycastle.version}</version>
-            <!--       <scope>provided</scope> -->
-        </dependency>
-
-        <!--+
-        | ========  OSGi  ========
-        +-->
-        <!-- 
-           <dependency>
-             <groupId>org.osgi</groupId>
-             <artifactId>osgi_R4_core</artifactId>
-           </dependency>
-           <dependency>
-             <groupId>org.osgi</groupId>
-             <artifactId>osgi_R4_compendium</artifactId>
-           </dependency>
-        -->
-    </dependencies>
-
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcmail-jdk16</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
+  </dependencies>
 </project>

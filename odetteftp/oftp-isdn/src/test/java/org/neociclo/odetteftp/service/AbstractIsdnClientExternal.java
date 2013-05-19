@@ -66,7 +66,7 @@ public abstract class AbstractIsdnClientExternal extends BaseClientExternalTestC
 				config.setCompatibilityInformationProfile(CompatibilityInformationProfile.UNRESTRICTED_DIGITAL);
 				config.setB3(B3Protocol.X25_DTE_DTE);
 
-				B3Configuration b3config = new B3Configuration(B3Protocol.TRANSPARENT.getBitField());
+				B3Configuration b3config = new B3Configuration(B3Protocol.X25_DTE_DTE.getBitField());
 				b3config.setModuloMode(B3Configuration.MODULOMODE_NORMAL);
 				b3config.setWindowSize(2);
 				config.setB3Config(b3config);

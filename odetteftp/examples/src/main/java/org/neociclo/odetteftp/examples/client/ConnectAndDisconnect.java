@@ -61,25 +61,8 @@ public class ConnectAndDisconnect {
 		oftp.setTimer(timer);
 
 		try {
-			for (int i=0; i<1000; i++) {
-				long t0 = System.currentTimeMillis();
-	
-				try {
-					oftp.setOftpletFactory(factory);
-					oftp.connect(server, port, true);
-				} catch (Exception e) {
-					continue;
-				}
-	
-				long t1 = System.currentTimeMillis();
-				long delta = t1 - t0;
-				if (delta < 1000) {
-					Thread.sleep(1000 - delta);
-				}
-
-				System.gc();
-
-			}
+			oftp.setOftpletFactory(factory);
+			oftp.connect(server, port, true);
 		} finally {
 			timer.stop();
 			ExecutorUtil.terminate(bossExecutor, workerExecutor);

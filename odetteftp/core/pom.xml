@@ -73,7 +73,6 @@
             <Import-Package>
                 *
             </Import-Package>
-            <Embed-Dependency>netty</Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

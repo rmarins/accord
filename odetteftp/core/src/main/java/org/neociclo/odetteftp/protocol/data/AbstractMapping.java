@@ -81,7 +81,7 @@ public abstract class AbstractMapping implements MappingStrategy {
         }
     }
 
-    protected void skip(FileChannel in, int bytes) throws VirtualFileMappingException {
+/*    protected void skip(FileChannel in, int bytes) throws VirtualFileMappingException {
 
         try {
             long entryPos = in.position();
@@ -91,7 +91,7 @@ public abstract class AbstractMapping implements MappingStrategy {
                     + bytes, e);
         }
 
-    }
+    }*/
 
     protected void discardReadBytes(FileChannel in, int discardedBytes) throws VirtualFileMappingException {
 

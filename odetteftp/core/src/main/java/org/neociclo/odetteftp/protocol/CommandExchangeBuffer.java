@@ -85,6 +85,7 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
         		LOGGER.debug("Padding numeric field [{}] with length value of [{}] lower than {}.",
         				new Object[] { field.getName(), value, length });
         	}
+        	// pad with zeroes
         	result = ProtocolUtil.padd(value, length, true, '0');
         } else if (type == Field.ENCODED_TYPE) {
         	result = value;

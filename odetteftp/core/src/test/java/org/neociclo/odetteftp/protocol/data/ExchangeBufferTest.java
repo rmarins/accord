@@ -100,7 +100,7 @@ public class ExchangeBufferTest {
 		if (hexDataExchangeBuffer.endsWith("0D0A")) {
 			assertEquals("6F729B65646174610D0A6D6F7265646174610D0A6D6F7265646174610D0A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 30));
 		} else {
-			assertEquals("610A6D6F729B65646174610A6D6F7265646174610A6D6F7265646174610A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 30));
+			assertEquals("74610A6D6F7265646174610A6D6F7265646174610A6D6F7265646174610A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 30));
 		}
 	}
 	

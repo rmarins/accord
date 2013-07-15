@@ -62,37 +62,39 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
         checkAttribute(field.getType(), value);
 
         if (type == Field.ALPHANUMERIC_TYPE) {
-            if (value != null && value.length() > length) {
-                // truncate
-                LOGGER.warn("Truncating field [{}] with length value of [{}] greater than {}.",
-                        new Object[] { field.getName(), value, length });
-                result = value.substring(0, length);
-            } else {
-                LOGGER.warn("Padding field [{}] with length value of [{}] lower than {}.",
-                        new Object[] { field.getName(), value, length });
-                // padd with whitespace
-                result = ProtocolUtil.padd(value, length, false, ' ');
-            }
-            
-            String upperResult = result.toUpperCase();
-            if (!upperResult.equals(result)) {
-                LOGGER.warn("Value [{}] has lower case characters. Original value not being changed.");
-            }
+        	if (value != null) {
+        		if (value.length() > length) {
+        			// truncate
+        			LOGGER.warn("Truncating field [{}] with value of [{}] longer than {}.",
+        					new Object[] { field.getName(), value, length });
+        			result = value.substring(0, length);
+        		} else if (value.length() < length) {
+        			LOGGER.debug("Padding field [{}] with value of [{}] shorter than {}.",
+        					new Object[] { field.getName(), value, length });
+        			// padd with whitespace
+        			result = ProtocolUtil.padd(value, length, false, ' ');
+        		}
+        	}
+
+        	String upperResult = result.toUpperCase();
+        	if (!upperResult.equals(result)) {
+        		LOGGER.warn("Value [{}] has lower case characters. Original value not being changed.");
+        	}
         } else if (type == Field.NUMERIC_TYPE) {
-            if (value.length() < length) {
-                LOGGER.warn("Padding numeric field [{}] with length value of [{}] lower than {}.",
-                        new Object[] { field.getName(), value, length });
-            }
-            result = ProtocolUtil.padd(value, length, true, '0');
+        	if (value.length() < length) {
+        		LOGGER.debug("Padding numeric field [{}] with length value of [{}] lower than {}.",
+        				new Object[] { field.getName(), value, length });
+        	}
+        	result = ProtocolUtil.padd(value, length, true, '0');
         } else if (type == Field.ENCODED_TYPE) {
-            result = value;
+        	result = value;
         }
 
         return result;
     }
 
     public static boolean checkAttribute(char type, String value) {
-        if (value == null) {
+        if (value == null || value.equals("")) {
             return true;
         }
 

@@ -98,9 +98,9 @@ public class ExchangeBufferTest {
 		hexDataExchangeBuffer = mappingRead("data/TEXTFILE_10x32", RecordFormat.UNSTRUCTURED, 5, 128, false);
 		System.out.println("buffer [" + hexDataExchangeBuffer);
 		if (hexDataExchangeBuffer.endsWith("0D0A")) {
-			assertEquals("6F729B65646174610D0A6D6F7265646174610D0A6D6F7265646174610D0A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 30));
+			assertEquals("6F729B65646174610D0A6D6F7265646174610D0A6D6F7265646174610D0A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 60));
 		} else {
-			assertEquals("74610A6D6F7265646174610A6D6F7265646174610A6D6F7265646174610A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 30));
+			assertEquals("74610A6D6F7265646174610A6D6F7265646174610A6D6F7265646174610A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 60));
 		}
 	}
 	

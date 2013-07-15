@@ -62,26 +62,26 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
         checkAttribute(field.getType(), value);
 
         if (type == Field.ALPHANUMERIC_TYPE) {
-        	if (value != null) {
-        		if (value.length() > length) {
-        			// truncate
-        			LOGGER.warn("Truncating field [{}] with value of [{}] longer than {}.",
-        					new Object[] { field.getName(), value, length });
-        			result = value.substring(0, length);
-        		} else if (value.length() < length) {
-        			LOGGER.debug("Padding field [{}] with value of [{}] shorter than {}.",
-        					new Object[] { field.getName(), value, length });
-        			// padd with whitespace
-        			result = ProtocolUtil.padd(value, length, false, ' ');
-        		}
-        	}
+        	if (value != null && value.length() > length) {
+                // truncate
+                LOGGER.warn("Truncating field [{}] with length value of [{}] greater than {}.",
+                        new Object[] { field.getName(), value, length });
+                result = value.substring(0, length);
+            } else {
+            	if (value != null && value.length() < length) {
+            		LOGGER.info("Padding field [{}] with length value of [{}] lower than {}.",
+            				new Object[] { field.getName(), value, length });
+            	}
+                // pad with whitespace
+                result = ProtocolUtil.padd(value, length, false, ' ');
+            }
 
         	String upperResult = result.toUpperCase();
         	if (!upperResult.equals(result)) {
         		LOGGER.warn("Value [{}] has lower case characters. Original value not being changed.");
         	}
         } else if (type == Field.NUMERIC_TYPE) {
-        	if (value.length() < length) {
+        	if (value == null || value.length() < length) {
         		LOGGER.debug("Padding numeric field [{}] with length value of [{}] lower than {}.",
         				new Object[] { field.getName(), value, length });
         	}

@@ -96,7 +96,12 @@ public class ExchangeBufferTest {
 		String hexDataExchangeBuffer = mappingRead("data/TEXTFILE_small", RecordFormat.UNSTRUCTURED, 5, 217, false);
 		assertEquals("449931323334353132333435353535353535353535353535353536", hexDataExchangeBuffer);
 		hexDataExchangeBuffer = mappingRead("data/TEXTFILE_10x32", RecordFormat.UNSTRUCTURED, 5, 128, false);
-		assertEquals("8765646174610D0A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 16));
+		System.out.println("buffer [" + hexDataExchangeBuffer);
+		if (hexDataExchangeBuffer.endsWith("0D0A")) {
+			assertEquals("6F729B65646174610D0A6D6F7265646174610D0A6D6F7265646174610D0A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 30));
+		} else {
+			assertEquals("610A6D6F729B65646174610A6D6F7265646174610A6D6F7265646174610A", hexDataExchangeBuffer.substring(hexDataExchangeBuffer.length() - 30));
+		}
 	}
 	
 	@Test
@@ -126,7 +131,13 @@ public class ExchangeBufferTest {
 	@Test
 	public void testTextUncompressed() throws Exception {
 		String hexDataExchangeBuffer = mappingRead("data/TEXTFILE_lineseperators", RecordFormat.TEXTFILE, 0, 10, false);
-		assertEquals("4408310D0A320D0A330D44080A340D0A350D0A3644080D0A370D0A380D0A4408390D0A0D0A0D0A0D44840A300D0A", hexDataExchangeBuffer);
+		if (hexDataExchangeBuffer.startsWith("4408310D0A")) {
+			// using 0D0A as line feeds
+			assertEquals("4408310D0A320D0A330D44080A340D0A350D0A3644080D0A370D0A380D0A4408390D0A0D0A0D0A0D44840A300D0A", hexDataExchangeBuffer);
+		} else {
+			// using 0A as line feeds
+			assertEquals("4408310A320A330A340A4408350A360A370A380A4487390A0A0A0A300A", hexDataExchangeBuffer);
+		}
 		hexDataExchangeBuffer = mappingRead("data/TEXTFILE_small", RecordFormat.TEXTFILE, 0, 217, false);
 		assertEquals("449931323334353132333435353535353535353535353535353536", hexDataExchangeBuffer);
 	}

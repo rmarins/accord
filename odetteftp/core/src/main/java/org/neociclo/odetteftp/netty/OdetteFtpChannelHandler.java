@@ -400,5 +400,7 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
         Oftplet oftplet = getSessionOftplet(session);
 
         oftplet.onExceptionCaught(e.getCause());
+        
+        ctx.getChannel().close();
     }
 }

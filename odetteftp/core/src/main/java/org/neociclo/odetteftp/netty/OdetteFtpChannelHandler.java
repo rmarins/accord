@@ -382,7 +382,7 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 
-        OdetteFtpSession session = ChannelContext.SESSION.get(ctx.getChannel());
+        OdetteFtpSession session = ChannelContext.SESSION.remove(ctx.getChannel());
 
         Oftplet oftplet = getSessionOftplet(session);
         oftplet.destroy();

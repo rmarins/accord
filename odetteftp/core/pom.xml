@@ -76,6 +76,22 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.2.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              !org.jboss.logging,
+              !org.jboss.marshalling,
+              !com.google.protobuf,
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
       <!--  this create jar file of code from src/test/java so modules with tests can share code -->
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
@@ -99,7 +115,7 @@
       </snapshots>
     </repository>
   </repositories>
-  
+
   <dependencies>
     <!--+
         | ========  JBoss Netty  ========

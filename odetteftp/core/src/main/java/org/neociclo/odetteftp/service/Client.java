@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Client extends BaseService {
 
-	public static final int DEFAULT_CONNECT_TIMEOUT = 45000;
+    public static final int DEFAULT_CONNECT_TIMEOUT = 45000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
 
@@ -52,21 +52,21 @@ public abstract class Client extends BaseService {
 
     protected Runnable disconnectListener;
 
-	private SocketAddress remoteAddress;
+    private SocketAddress remoteAddress;
 
-	private SocketAddress localAddress;
+    private SocketAddress localAddress;
 
-	private ChannelFactory channelFactory;
+    private ChannelFactory channelFactory;
 
-	private Map<String, Object> clientOptions = new HashMap<String, Object>();
+    private Map<String, Object> clientOptions = new HashMap<String, Object>();
 
     public Client() {
-    	super();
+        super();
     }
 
     public Client(OftpletFactory oftpletFactory) {
-    	super();
-    	setOftpletFactory(oftpletFactory);
+        super();
+        setOftpletFactory(oftpletFactory);
     }
 
     public synchronized void connect(SocketAddress remoteAddress) throws Exception {
@@ -78,7 +78,7 @@ public abstract class Client extends BaseService {
     }
 
     public synchronized void connect(SocketAddress remoteAddress, SocketAddress localAddress, boolean await)
-    		throws Exception {
+            throws Exception {
 
         ChannelFactory factory = getChannelFactory();
 
@@ -93,7 +93,7 @@ public abstract class Client extends BaseService {
         ClientBootstrap bootstrap = new ClientBootstrap(factory);
 
         if (!clientOptions.containsKey("connectTimeoutMillis")) {
-        	clientOptions.put("connectTimeoutMillis", DEFAULT_CONNECT_TIMEOUT);
+            clientOptions.put("connectTimeoutMillis", DEFAULT_CONNECT_TIMEOUT);
         }
 
         bootstrap.setOptions(clientOptions);
@@ -126,21 +126,21 @@ public abstract class Client extends BaseService {
 
         Channel c = connectFuture.getChannel();
         if (!c.isConnected()) {
-        	releaseExternalResources();
+            releaseExternalResources();
             LOGGER.info("Connection failed. Channel is not connected: {} ", c);
             throw new Exception("Channel is not connected.");
         }
 
         this.channel = c;
 
-        // setup disconnect on close listener 
+        // setup disconnect on close listener
         ChannelFuture closeFuture = c.getCloseFuture();
         ChannelFutureListener setDisconnectedOnClose = new ChannelFutureListener() {
             public void operationComplete(ChannelFuture future) throws Exception {
-                setDisconnected();
-                LOGGER.info("Disconnected.");
+                // setDisconnected();
+                LOGGER.debug("Call DisconnectListener");
                 if (getDisconnectListener() != null) {
-                	getDisconnectListener().run();
+                    getDisconnectListener().run();
                 }
             }
         };
@@ -149,19 +149,45 @@ public abstract class Client extends BaseService {
         // need await disconnect
         if (await) {
             awaitDisconnect();
+        } else {
+            closeOnDisconnect();
         }
 
     }
 
+    /**
+     * Close on disconnect.
+     */
+    public synchronized void closeOnDisconnect() {
+        Thread closer = new Thread(new Runnable() {
+
+            /**
+             * @see java.lang.Runnable#run()
+             */
+            @Override
+            public void run() {
+                awaitDisconnect();
+            }
+        }, "ShutdownOnDisconnect");
+
+        closer.start();
+    }
+
+    /**
+     * Await disconnect.
+     */
     public synchronized void awaitDisconnect() {
         if (channel == null) {
-//            throw new IllegalStateException("The connect() method were not invoked.");
-        	return;
+            throw new IllegalStateException("The connect() method were not invoked.");
         }
+        LOGGER.info("Await disconnect ...");
         ChannelFuture closeFuture = channel.getCloseFuture();
         closeFuture.awaitUninterruptibly();
-
+        LOGGER.info("Release external resources");
+        getChannelFactory().releaseExternalResources();
         releaseExternalResources();
+        setDisconnected();
+        LOGGER.info("Disconntected.");
     }
 
     public boolean isConnected() {
@@ -191,16 +217,16 @@ public abstract class Client extends BaseService {
 
     }
 
-	public OftpletFactory getOftpletFactory() {
-		return oftpletFactory;
-	}
+    public OftpletFactory getOftpletFactory() {
+        return oftpletFactory;
+    }
 
-	public void setOftpletFactory(OftpletFactory oftpletFactory) {
-		this.oftpletFactory = oftpletFactory;
-	}
+    public void setOftpletFactory(OftpletFactory oftpletFactory) {
+        this.oftpletFactory = oftpletFactory;
+    }
 
     protected SocketAddress getRemoteAddress() {
-    	return remoteAddress;
+        return remoteAddress;
     }
 
     protected SocketAddress getLocalAddress() {
@@ -215,12 +241,12 @@ public abstract class Client extends BaseService {
             Timer timer);
 
     public ChannelFactory getChannelFactory() {
-    	return channelFactory;
+        return channelFactory;
     }
 
-	public void setChannelFactory(ChannelFactory channelFactory) {
-		this.channelFactory = channelFactory;
-	}
+    public void setChannelFactory(ChannelFactory channelFactory) {
+        this.channelFactory = channelFactory;
+    }
 
     public Runnable getDisconnectListener() {
         return disconnectListener;
@@ -238,36 +264,36 @@ public abstract class Client extends BaseService {
         return timer;
     }
 
-	/**
-	 * The Timer which was specified should be stopped manually by calling
-	 * {@link Timer#stop()} when your application shuts down.
+    /**
+     * The Timer which was specified should be stopped manually by calling
+     * {@link Timer#stop()} when your application shuts down.
 	 * 
-	 * @param timer
-	 */
+     * @param timer
+     */
     public void setTimer(Timer timer) {
         this.timer = timer;
     }
 
     public void setOption(String key, Object value) {
-    	clientOptions.put(key, value);
+        clientOptions.put(key, value);
     }
 
-	public void setOptions(Map<String, Object> clientOptions) {
-		this.clientOptions = clientOptions;
-	}
+    public void setOptions(Map<String, Object> clientOptions) {
+        this.clientOptions = clientOptions;
+    }
 
-	public Map<String, Object> getOptions() {
-		return clientOptions;
-	}
+    public Map<String, Object> getOptions() {
+        return clientOptions;
+    }
 
-	public Object getOption(String key) {
-		return clientOptions.get(key);
-	}
+    public Object getOption(String key) {
+        return clientOptions.get(key);
+    }
 
     protected void releaseExternalResources() {
-    	if (isManaged(timer)) {
-    		LOGGER.trace("Releasing acquired timer: {}", timer);
-    		timer.stop();
-    	}
+        if (isManaged(timer)) {
+            LOGGER.trace("Releasing acquired timer: {}", timer);
+            timer.stop();
+        }
     }
 }

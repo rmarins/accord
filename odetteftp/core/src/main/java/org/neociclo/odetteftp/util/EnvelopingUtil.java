@@ -63,6 +63,7 @@ import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.DefaultCMSSignatureAlgorithmNameGenerator;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
@@ -78,6 +79,7 @@ import org.bouncycastle.cms.jcajce.ZlibCompressor;
 import org.bouncycastle.cms.jcajce.ZlibExpanderProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -227,17 +229,19 @@ public class EnvelopingUtil {
 	}
 
 	public static InputStream openSignedDataParser(InputStream sigData, final X509Certificate checkCert)
-			throws CMSException {
+			throws CMSException, OperatorCreationException {
 		return openSignedDataParser(sigData, checkCert, null);
 	}
 
 	public static InputStream openSignedDataParser(InputStream sigData, final X509Certificate checkCert,
-			final SignatureVerifyResult checkResult) throws CMSException {
+			final SignatureVerifyResult checkResult) throws CMSException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
 
         // set up the parser
-        final CMSSignedDataParser sp = new CMSSignedDataParser(sigData);
+        final CMSSignedDataParser sp = new CMSSignedDataParser(
+                new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(),
+                sigData);
 
 		// TODO what to do? the validity of the certificate isn't verified here
 
@@ -272,6 +276,8 @@ public class EnvelopingUtil {
 						//
 			            if (signer.verify(
 			                    new BcRSASignerInfoVerifierBuilder(
+			                            new DefaultCMSSignatureAlgorithmNameGenerator(),
+			                            new DefaultSignatureAlgorithmIdentifierFinder(),
 			                            new DefaultDigestAlgorithmIdentifierFinder(), 
 			                            new BcDigestCalculatorProvider())
 			                    .build(new JcaX509CertificateHolder(checkCert)))) {
@@ -593,7 +599,7 @@ public class EnvelopingUtil {
         return content;
     }
 
-    public static byte[] parseSignedData(byte[] encoded, X509Certificate checkCert, SignatureVerifyResult checkResult) throws CMSException, IOException {
+    public static byte[] parseSignedData(byte[] encoded, X509Certificate checkCert, SignatureVerifyResult checkResult) throws CMSException, IOException, OperatorCreationException {
 
     	installBouncyCastleProviderIfNecessary();
 
@@ -607,12 +613,14 @@ public class EnvelopingUtil {
     }
 
     public static void parseSignedDataContentStream(InputStream signedStream, OutputStream outStream,
-            X509Certificate cert) throws CMSException, IOException {
+            X509Certificate cert) throws CMSException, IOException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
 
         // use the CMS parser to unwrap signature from the SignedData
-        CMSSignedDataParser parser = new CMSSignedDataParser(signedStream);
+        CMSSignedDataParser parser = new CMSSignedDataParser(
+                new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(),
+                signedStream);
 
         // TODO do verify the signature
 
@@ -789,7 +797,7 @@ public class EnvelopingUtil {
     }
 
     public static void createFileFromSignedData(File signedData, File output, X509Certificate cert)
-            throws CMSException, IOException {
+            throws CMSException, IOException, OperatorCreationException {
 
         // open compressed data input stream
         FileInputStream in = null;

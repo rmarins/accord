@@ -20,7 +20,9 @@ import org.neociclo.odetteftp.oftplet.EndFileResponse;
 
 public class DefaultEndFileResponse implements EndFileResponse {
 
-	public static EndFileResponse positiveEndFileAnswer() {
+    private static final long serialVersionUID = 8275980742439986266L;
+
+    public static EndFileResponse positiveEndFileAnswer() {
 		return positiveEndFileAnswer(true);
 	}
 

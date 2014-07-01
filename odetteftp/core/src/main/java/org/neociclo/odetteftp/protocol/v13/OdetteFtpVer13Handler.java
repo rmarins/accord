@@ -239,9 +239,9 @@ public class OdetteFtpVer13Handler extends DefaultHandler {
         case EFNA:
             AnswerReason efnaReason = AnswerReason.parse(Integer.parseInt(response.getStringAttribute(EFNAREAS_FIELD)));
             return new AnswerReasonInfo(efnaReason);
+        default:
+            return null;
         }
-        
-        return null;
     }
 
     @Override

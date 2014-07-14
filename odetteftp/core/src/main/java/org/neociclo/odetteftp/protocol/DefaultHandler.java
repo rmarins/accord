@@ -645,6 +645,8 @@ public abstract class DefaultHandler implements ProtocolHandler {
         FileChannel fileChannel = null;
         try {
             fileChannel = (new FileInputStream(normalizedVirtualFile.getFile())).getChannel();
+            //PS: setting the channel in the session immediately. So the channel can also be closed from outside in case of exception.
+            setSessionFileChannel(session, fileChannel);
         } catch (FileNotFoundException e) {
 
             LOGGER.error("[" + session + "] Send File failed. Cannot open file specified in the Virtual File: "
@@ -670,12 +672,19 @@ public abstract class DefaultHandler implements ProtocolHandler {
 
             if (fileOffset > 0) {
                 try {
-                    if (fileChannel.size() > fileOffset) {
-                        fileChannel.truncate(fileOffset);
-                    } else {
-                        fileChannel.position(fileOffset);
-                    }
-                } catch (IOException e) {
+                    //PS: Only setting the position here. Truncate makes no sense in case of reading
+                    fileChannel.position(fileOffset);
+//                    if (fileChannel.size() > fileOffset) {
+//                        fileChannel.truncate(fileOffset);
+//                    } else {
+//                        fileChannel.position(fileOffset);
+//                    }
+
+                    //PS: we have to set those bytes as already transfered, so that our EFIDUCNT is correct!!!
+                    session.setOutgoingBytesTransfered(fileOffset);
+                    
+                    //PS: Catching all Exceptions. fileChannel.positions() throws three kinds of exceptions!
+                } catch (Exception e) {
     
                     String restartFailedText = "Cannot truncate/position file to restart at: " + fileOffset;
                     LOGGER.error("[" + session + "] SFPA received. Send File failed. " + restartFailedText, e);
@@ -689,8 +698,6 @@ public abstract class DefaultHandler implements ProtocolHandler {
             }
 
         }
-
-        setSessionFileChannel(session, fileChannel);
 
         // Allocate data buffer in memory to keep in session
         DataExchangeBuffer dataBuffer = new DataExchangeBuffer(session.getDataBufferSize());

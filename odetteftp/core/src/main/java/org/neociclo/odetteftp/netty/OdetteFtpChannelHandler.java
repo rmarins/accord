@@ -404,6 +404,6 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
 			// channel already disconnected
 		}
 		
-		ctx.getChannel().close();
+		//ctx.getChannel().close();
 	}
 }

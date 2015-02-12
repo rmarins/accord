@@ -72,6 +72,8 @@ import org.neociclo.odetteftp.protocol.DataExchangeBuffer;
 import org.neociclo.odetteftp.protocol.EndSessionReason;
 import org.neociclo.odetteftp.protocol.OdetteFtpExchangeBuffer;
 import org.neociclo.odetteftp.util.OdetteFtpConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link Timer} which was specified when the {@link ReadTimeoutHandler} is
@@ -82,6 +84,8 @@ import org.neociclo.odetteftp.util.OdetteFtpConstants;
  */
 @Sharable
 public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(OdetteFtpChannelHandler.class);
 
     /**
      * Implement interface to provide in OdetteFtpSession to allow writing
@@ -170,7 +174,7 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
 
     @Override
     public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-
+    	LOGGER.debug("Channel open");
         OdetteFtpSession session = new OdetteFtpSession(entityType);
         ChannelContext.SESSION.set(e.getChannel(), session);
 
@@ -201,7 +205,7 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
 
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-
+    	LOGGER.debug("Channel connected");
         OdetteFtpSession session = ChannelContext.SESSION.get(ctx.getChannel());
 
         /* Get handler implementation for the correct protocol version. */
@@ -367,6 +371,7 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
      */
     @Override
     public void channelIdle(ChannelHandlerContext ctx, IdleStateEvent e) throws Exception {
+    	LOGGER.debug("Channel timed out");
         OdetteFtpSession session = ChannelContext.SESSION.get(ctx.getChannel());
 
         // session is terminated by timeout
@@ -381,11 +386,7 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
 
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-
-        OdetteFtpSession session = ChannelContext.SESSION.remove(ctx.getChannel());
-
-        Oftplet oftplet = getSessionOftplet(session);
-        oftplet.destroy();
+    	LOGGER.debug("Channel disconnected " + e.getState());
 
         super.channelDisconnected(ctx, e);
     }
@@ -396,14 +397,31 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+		LOGGER.debug("Channel exception " + e.getCause().getClass().getName());
+		
 		OdetteFtpSession session = ChannelContext.SESSION.get(ctx.getChannel());
 		if (session != null) {
 			Oftplet oftplet = getSessionOftplet(session);
 			oftplet.onExceptionCaught(e.getCause());
+			session.close();
 		} else {
 			// channel already disconnected
 		}
-		
-		//ctx.getChannel().close();
 	}
+	
+	@Override
+    public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+		LOGGER.debug("Channel closed");
+		OdetteFtpSession session = ChannelContext.SESSION.remove(ctx.getChannel());
+
+		if (session != null) {
+			Oftplet oftplet = getSessionOftplet(session);
+			oftplet.destroy();
+			session.close();
+		} else {
+			// channel already disconnected
+		}
+
+        super.channelClosed(ctx, e);
+    }
 }

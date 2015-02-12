@@ -1018,19 +1018,20 @@ public abstract class DefaultHandler implements ProtocolHandler {
         LOGGER.debug("[{}] ESID received. Invoking method onSessionEnd() on the Oftplet object: {}", session, oftplet);
         oftplet.onSessionEnd();
 
-        // close communication channel on flush
-        session.closeImmediately();
-
         EndSessionReasonInfo reasonInfo = buildEndSessionReasonInfoObject(esid);
 
         /* Raise exception when it's not normal termination. */
         EndSessionReason reason = reasonInfo.getEndSessionReason();
         if (reason != EndSessionReason.NORMAL_TERMINATION) {
+        	// exceptionHandler will close the session after handling exception
             String reasonText = reasonInfo.getReasonText();
             if (reasonText == null) {
                 reasonText = "Abnormal session end received: " + reason.name();
             }
             throw new EndSessionException(reason, reasonText);
+        } else {
+        	//close the session immediately
+        	session.close();
         }
 
     }

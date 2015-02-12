@@ -127,7 +127,7 @@ public abstract class Client extends BaseService {
         Channel c = connectFuture.getChannel();
         if (!c.isConnected()) {
         	LOGGER.debug("Release external resources");
-        	getChannelFactory().releaseExternalResources();
+        	//getChannelFactory().releaseExternalResources();
         	releaseExternalResources();
         	setDisconnected();
             LOGGER.info("Connection failed. Channel is not connected: {} ", c);
@@ -187,7 +187,7 @@ public abstract class Client extends BaseService {
         ChannelFuture closeFuture = channel.getCloseFuture();
         closeFuture.awaitUninterruptibly();
         LOGGER.debug("Release external resources");
-        getChannelFactory().releaseExternalResources();
+        //getChannelFactory().releaseExternalResources();
         releaseExternalResources();
         setDisconnected();
         LOGGER.info("Disconnected.");

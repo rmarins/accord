@@ -57,10 +57,7 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.jboss.netty.handler.timeout.ReadTimeoutHandler;
 import org.jboss.netty.util.Timer;
-import org.neociclo.odetteftp.EntityType;
-import org.neociclo.odetteftp.OdetteFtpSession;
-import org.neociclo.odetteftp.OdetteFtpVersion;
-import org.neociclo.odetteftp.ProtocolHandler;
+import org.neociclo.odetteftp.*;
 import org.neociclo.odetteftp.netty.codec.SpecialLogicDecoder;
 import org.neociclo.odetteftp.netty.codec.SpecialLogicEncoder;
 import org.neociclo.odetteftp.oftplet.ChannelCallback;
@@ -403,7 +400,11 @@ public class OdetteFtpChannelHandler extends IdleStateAwareChannelHandler {
 		if (session != null) {
 			Oftplet oftplet = getSessionOftplet(session);
 			oftplet.onExceptionCaught(e.getCause());
-			session.close();
+			if (e.getCause() instanceof OdetteFtpException) {
+				session.close();
+			} else {
+				session.closeImmediately();
+			}
 		} else {
 			// channel already disconnected
 		}

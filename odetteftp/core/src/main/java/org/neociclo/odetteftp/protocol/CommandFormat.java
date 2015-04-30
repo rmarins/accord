@@ -47,6 +47,11 @@ public interface CommandFormat {
          */
         public static final char ALPHANUMERIC_TYPE = 'X';
 
+        /** 
+         *  A carriage return (0x0D or 0x8D)
+         */
+        public static final char CR_TYPE = 'C';
+        
         /**
          * A binary field of length n octets.
          * <p>

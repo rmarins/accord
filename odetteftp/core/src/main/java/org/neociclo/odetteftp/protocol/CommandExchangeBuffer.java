@@ -19,7 +19,9 @@ package org.neociclo.odetteftp.protocol;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.neociclo.odetteftp.protocol.CommandFormat.Field;
@@ -61,7 +63,7 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
 
         checkAttribute(field.getType(), value);
 
-        if (type == Field.ALPHANUMERIC_TYPE) {
+        if (type == Field.ALPHANUMERIC_TYPE || type == Field.CR_TYPE) {
         	if (value != null && value.length() > length) {
                 // truncate
                 LOGGER.warn("Truncating field [{}] with length value of [{}] greater than {}.",
@@ -115,6 +117,12 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
             }
 
             return true;
+        } else if (type == Field.CR_TYPE) {
+        	int length = value.length();
+            if (length != 1 || ! CR_BYTES.contains(value.charAt(0))) {
+                LOGGER.warn("Value [{}] is neither an ASCII nor EBCDIC carriage return", value);
+                return false;
+            }
         }
 
         return false;
@@ -123,6 +131,10 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
     private Map<String, Object> attributes;
     private Integer size = null;
     private final CommandFormat commandFormat;
+
+    // valid values for the SSRM CR field
+	private static final List<Character> CR_BYTES = 
+			Arrays.asList(new Character[] { 0x0d, 0x8d} );
 
     public CommandExchangeBuffer(CommandFormat commandFormat) {
         super();

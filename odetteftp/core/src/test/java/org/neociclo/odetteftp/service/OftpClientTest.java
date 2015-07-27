@@ -82,7 +82,7 @@ public class OftpClientTest {
         sp.addLast("stb-encoder", new StbEncoder());
         sp.addLast("oftp-decoder", new OdetteFtpDecoder());
         sp.addLast("oftp-encoder", new OdetteFtpEncoder());
-//        sp.addLast("OdetteFtp-HANDLER", new OdetteFtpChannelHandler(EntityType.RESPONDER, createServerOftpletFactory(), timer, null));
+//      sp.addLast("OdetteFtp-HANDLER", new OdetteFtpChannelHandler(EntityType.RESPONDER, createServerOftpletFactory(), timer, null));
 
         sc = (ServerChannel) sb.bind(portOne);
 

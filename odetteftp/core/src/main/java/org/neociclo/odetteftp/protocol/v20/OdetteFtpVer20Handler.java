@@ -305,9 +305,9 @@ public class OdetteFtpVer20Handler extends OdetteFtpVer14Handler {
             AnswerReason efnaReason = AnswerReason.parse(Integer.parseInt(response.getStringAttribute(EFNAREAS_FIELD)));
             String efnaReasonText = response.getStringAttribute(EFNAREAST_FIELD);
             return new AnswerReasonInfo(efnaReason, efnaReasonText);
+        default:
+            return null;
         }
-        
-        return null;
     }
 
     @Override

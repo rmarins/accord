@@ -38,12 +38,16 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import org.bouncycastle.asn1.cms.KeyTransRecipientInfo;
-import org.bouncycastle.asn1.cms.SignerIdentifier;
-import org.bouncycastle.asn1.x500.X500Name;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.bouncycastle.cms.CMSCompressedDataGenerator;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSCompressedDataParser;
 import org.bouncycastle.cms.CMSCompressedDataStreamGenerator;
 import org.bouncycastle.cms.CMSEnvelopedData;
@@ -52,21 +56,35 @@ import org.bouncycastle.cms.CMSEnvelopedDataParser;
 import org.bouncycastle.cms.CMSEnvelopedDataStreamGenerator;
 import org.bouncycastle.cms.CMSEnvelopedGenerator;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedDataParser;
 import org.bouncycastle.cms.CMSSignedDataStreamGenerator;
 import org.bouncycastle.cms.CMSSignedGenerator;
+import org.bouncycastle.cms.CMSTypedData;
+import org.bouncycastle.cms.DefaultCMSSignatureAlgorithmNameGenerator;
 import org.bouncycastle.cms.RecipientId;
 import org.bouncycastle.cms.RecipientInformation;
 import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerId;
-import org.bouncycastle.cms.SignerInfoGenerator;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.cms.bc.BcRSASignerInfoVerifierBuilder;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
+import org.bouncycastle.cms.jcajce.ZlibCompressor;
+import org.bouncycastle.cms.jcajce.ZlibExpanderProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle.util.Store;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 import org.neociclo.odetteftp.protocol.v20.DefaultSignedDeliveryNotification;
 import org.neociclo.odetteftp.protocol.v20.SignedDeliveryNotification;
@@ -97,29 +115,30 @@ public class EnvelopingUtil {
      * @throws IOException
      */
     public static byte[] createEnvelopedData(byte[] content, CipherSuite cipherSel, X509Certificate cert)
-            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
+            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
-
-        byte[] encoded = null;
 
         // set up the generator
         CMSEnvelopedDataGenerator gen = new CMSEnvelopedDataGenerator();
 
-        gen.addKeyTransRecipient(cert);
+        // gen.addKeyTransRecipient(cert);
+        gen.addRecipientInfoGenerator(
+                new JceKeyTransRecipientInfoGenerator(cert)
+                .setProvider(BC_PROVIDER));
 
         // create the enveloped-data object
-        CMSProcessable data = new CMSProcessableByteArray(content);
+        CMSEnvelopedData enveloped = gen.generate(
+                new CMSProcessableByteArray(content), 
+                new JceCMSContentEncryptorBuilder(asCMSAlgorithm(cipherSel))
+                .setProvider(BC_PROVIDER)
+                .build());
 
-        String algorithm = asEncryptionAlgorithm(cipherSel);
-        CMSEnvelopedData enveloped = gen.generate(data, algorithm, BC_PROVIDER);
-        encoded = enveloped.getEncoded();
-
-        return encoded;
+        return enveloped.getEncoded();
     }
 
     public static void createEnvelopedData(InputStream dataStream, OutputStream outStream, CipherSuite cipherSel,
-            X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
+            X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         OutputStream enveloped = openEnvelopedDataStreamGenerator(outStream, cipherSel, cert);
         IoUtil.copyStream(dataStream, enveloped);
@@ -127,19 +146,20 @@ public class EnvelopingUtil {
     }
 
     public static OutputStream openEnvelopedDataStreamGenerator(OutputStream outStream, CipherSuite cipherSel,
-            X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
+            X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
 
         // set up the generator
         CMSEnvelopedDataStreamGenerator gen = new CMSEnvelopedDataStreamGenerator();
 
-        gen.addKeyTransRecipient(cert);
-
-        String algorithm = asEncryptionAlgorithm(cipherSel);
+        gen.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(cert).setProvider(BC_PROVIDER));
 
         // create the enveloped-data stream
-        OutputStream enveloped = gen.open(outStream, algorithm, BC_PROVIDER);
+        OutputStream enveloped = gen.open(
+                outStream, 
+                new JceCMSContentEncryptorBuilder(asCMSAlgorithm(cipherSel))
+                .setProvider(BC_PROVIDER).build());
 
         return enveloped;
     }
@@ -178,7 +198,10 @@ public class EnvelopingUtil {
 
         if (recipient != null) {
             // return the decrypting parser InputStream
-            InputStream parserStream = recipient.getContentStream(key, BC_PROVIDER).getContentStream();
+            InputStream parserStream = recipient.getContentStream(
+                    new JceKeyTransEnvelopedRecipient(key)
+                    .setProvider(BC_PROVIDER))
+                    .getContentStream();
             return parserStream;
         }
 
@@ -200,23 +223,25 @@ public class EnvelopingUtil {
 
 		// set up the parser and retrieve the original data stream
 		CMSCompressedDataParser cp = new CMSCompressedDataParser(compressedData);
-		InputStream contentStream = cp.getContent().getContentStream();
+		InputStream contentStream = cp.getContent(new ZlibExpanderProvider()).getContentStream();
 
 		return contentStream;
 	}
 
 	public static InputStream openSignedDataParser(InputStream sigData, final X509Certificate checkCert)
-			throws CMSException {
+			throws CMSException, OperatorCreationException {
 		return openSignedDataParser(sigData, checkCert, null);
 	}
 
 	public static InputStream openSignedDataParser(InputStream sigData, final X509Certificate checkCert,
-			final SignatureVerifyResult checkResult) throws CMSException {
+			final SignatureVerifyResult checkResult) throws CMSException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
 
         // set up the parser
-        final CMSSignedDataParser sp = new CMSSignedDataParser(sigData);
+        final CMSSignedDataParser sp = new CMSSignedDataParser(
+                new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(),
+                sigData);
 
 		// TODO what to do? the validity of the certificate isn't verified here
 
@@ -237,8 +262,8 @@ public class EnvelopingUtil {
 					// lookup signer by matching with the given certificate
 
 					SignerId sigId = new SignerId( 
-                                                new X500Name(checkCert.getIssuerX500Principal().getName()),
-                                                checkCert.getSerialNumber());
+					        new X500Name(checkCert.getIssuerX500Principal().getName()),
+					        checkCert.getSerialNumber());
 
 			        SignerInformation signer = signers.get(sigId);
 
@@ -249,7 +274,13 @@ public class EnvelopingUtil {
 						// verify that the signature is correct and that it was generated
 						// when the certificate was current
 						//
-						if (signer.verify(checkCert, BC_PROVIDER)) {
+			            if (signer.verify(
+			                    new BcRSASignerInfoVerifierBuilder(
+			                            new DefaultCMSSignatureAlgorithmNameGenerator(),
+			                            new DefaultSignatureAlgorithmIdentifierFinder(),
+			                            new DefaultDigestAlgorithmIdentifierFinder(), 
+			                            new BcDigestCalculatorProvider())
+			                    .build(new JcaX509CertificateHolder(checkCert)))) {
 							// signature verified
 							if (checkResult != null) {
 								checkResult.setSuccess();
@@ -312,7 +343,7 @@ public class EnvelopingUtil {
 	}
 
     public static void createSignedData(File data, File output, CipherSuite cipherSuite, X509Certificate cert, PrivateKey key)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
+            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         // open compressed data stream
         FileOutputStream outStream = null;
@@ -348,7 +379,7 @@ public class EnvelopingUtil {
 
     public static void createSignedData(InputStream dataStream, CipherSuite cipherSuite, OutputStream outStream, X509Certificate cert,
             PrivateKey key) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException,
-            CMSException, IOException {
+            CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         OutputStream signed = openSignedDataStreamGenerator(outStream, cipherSuite, cert, key);
         IoUtil.copyStream(dataStream, signed);
@@ -356,23 +387,38 @@ public class EnvelopingUtil {
     }
 
     public static OutputStream openSignedDataStreamGenerator(OutputStream outStream, CipherSuite cipherSuite, X509Certificate cert, PrivateKey key)
-            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, InvalidKeyException {
+            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, InvalidKeyException, CertificateEncodingException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
 
         // set up the generator
         CMSSignedDataStreamGenerator gen = new CMSSignedDataStreamGenerator();
-
-        gen.addSigner(key, cert, asDigestAlgorithm(cipherSuite), BC_PROVIDER);
-
+        configureGenerator(gen, cipherSuite, cert, key);
+        
         // create the signed-data stream
         OutputStream signed = gen.open(outStream, true);
 
         return signed;
     }
 
+    private static void configureGenerator(CMSSignedGenerator gen,
+            CipherSuite cipherSuite, X509Certificate cert, PrivateKey key)
+            throws CertificateEncodingException, CMSException,
+            OperatorCreationException {
+        List<X509Certificate> certList = new ArrayList<X509Certificate>();
+        certList.add(cert);
+        Store certStore = new JcaCertStore(certList);
+        gen.addCertificates(certStore);
+        
+        ContentSigner signer = new JcaContentSignerBuilder(asSignatureAlgorithm(cipherSuite)).setProvider(BC_PROVIDER).build(key);
+        gen.addSignerInfoGenerator(
+                new JcaSignerInfoGeneratorBuilder(
+                     new JcaDigestCalculatorProviderBuilder().setProvider(BC_PROVIDER).build())
+                     .build(signer, cert));
+    }
+
     public static void createEnvelopedData(File data, File output, CipherSuite cipherSel, X509Certificate cert)
-            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
+            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         // open compressed data stream
         FileOutputStream outStream = null;
@@ -408,7 +454,7 @@ public class EnvelopingUtil {
     }
 
     public static void createEnvelopedData(String dataPath, String outputPath, CipherSuite cipherSel,
-            X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
+            X509Certificate cert) throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         // create input and output file objects
         File input = new File(dataPath);
@@ -433,20 +479,22 @@ public class EnvelopingUtil {
      * @throws NoSuchProviderException
      * @throws CMSException
      * @throws IOException
+     * @throws CertificateEncodingException 
+     * @throws OperatorCreationException 
      */
     public static byte[] createSignedData(byte[] content, CipherSuite cipherSuite, X509Certificate cert, PrivateKey key)
-            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException {
+            throws NoSuchAlgorithmException, NoSuchProviderException, CMSException, IOException, CertificateEncodingException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
 
         // set up the generator
         CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
 
-        gen.addSigner(key, cert, asDigestAlgorithm(cipherSuite));
+        configureGenerator(gen, cipherSuite, cert, key);
 
         // create the signed-data object
-        CMSProcessable data = new CMSProcessableByteArray(content);
-        CMSSignedData signed = gen.generate(data, BC_PROVIDER);
+        CMSTypedData data = new CMSProcessableByteArray(content);
+        CMSSignedData signed = gen.generate(data, true);
 
         return signed.getEncoded();
     }
@@ -469,8 +517,6 @@ public class EnvelopingUtil {
 
         installBouncyCastleProviderIfNecessary();
 
-        byte[] data = null;
-
         CMSEnvelopedData enveloped = new CMSEnvelopedData(encoded);
 
         // TODO validate the receiving enveloped-data against supported
@@ -486,10 +532,12 @@ public class EnvelopingUtil {
 
         if (recipient != null) {
             // decrypt the data
-            data = recipient.getContent(key, BC_PROVIDER);
+            return recipient.getContent(
+                    new JceKeyTransEnvelopedRecipient(key)
+                    .setProvider(BC_PROVIDER));
+        } else {
+            return null;
         }
-
-        return data;
 
     }
 
@@ -514,7 +562,9 @@ public class EnvelopingUtil {
 
         if (recipient != null) {
             // decrypt the data
-            InputStream unenveloped = recipient.getContentStream(key, BC_PROVIDER).getContentStream();
+            InputStream unenveloped = recipient.getContentStream(
+                    new JceKeyTransEnvelopedRecipient(key).setProvider(BC_PROVIDER))
+                    .getContentStream();
             IoUtil.copyStream(unenveloped, outStream);
         }
 
@@ -549,7 +599,7 @@ public class EnvelopingUtil {
         return content;
     }
 
-    public static byte[] parseSignedData(byte[] encoded, X509Certificate checkCert, SignatureVerifyResult checkResult) throws CMSException, IOException {
+    public static byte[] parseSignedData(byte[] encoded, X509Certificate checkCert, SignatureVerifyResult checkResult) throws CMSException, IOException, OperatorCreationException {
 
     	installBouncyCastleProviderIfNecessary();
 
@@ -563,12 +613,14 @@ public class EnvelopingUtil {
     }
 
     public static void parseSignedDataContentStream(InputStream signedStream, OutputStream outStream,
-            X509Certificate cert) throws CMSException, IOException {
+            X509Certificate cert) throws CMSException, IOException, OperatorCreationException {
 
         installBouncyCastleProviderIfNecessary();
 
         // use the CMS parser to unwrap signature from the SignedData
-        CMSSignedDataParser parser = new CMSSignedDataParser(signedStream);
+        CMSSignedDataParser parser = new CMSSignedDataParser(
+                new JcaDigestCalculatorProviderBuilder().setProvider("BC").build(),
+                signedStream);
 
         // TODO do verify the signature
 
@@ -634,7 +686,7 @@ public class EnvelopingUtil {
 
         CMSCompressedDataStreamGenerator gen = new CMSCompressedDataStreamGenerator();
 
-        OutputStream compressed = gen.open(outStream, CMSCompressedDataGenerator.ZLIB);
+        OutputStream compressed = gen.open(outStream, new ZlibCompressor());
         return compressed;
 
     }
@@ -738,14 +790,14 @@ public class EnvelopingUtil {
 
         // use the CMS parser to uncompress the CompressedData
         CMSCompressedDataParser cp = new CMSCompressedDataParser(compressedData);
-        InputStream uncompressed = cp.getContent().getContentStream();
+        InputStream uncompressed = cp.getContent(new ZlibExpanderProvider()).getContentStream();
 
         IoUtil.copyStream(uncompressed, outStream);
 
     }
 
     public static void createFileFromSignedData(File signedData, File output, X509Certificate cert)
-            throws CMSException, IOException {
+            throws CMSException, IOException, OperatorCreationException {
 
         // open compressed data input stream
         FileInputStream in = null;
@@ -781,7 +833,7 @@ public class EnvelopingUtil {
     }
 
     public static void addNotifSignature(DefaultSignedDeliveryNotification notif, CipherSuite cipherSuite,
-            X509Certificate userCert, PrivateKey userPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, CMSException {
+            X509Certificate userCert, PrivateKey userPrivateKey) throws NoSuchAlgorithmException, NoSuchProviderException, IOException, CMSException, CertificateEncodingException, OperatorCreationException {
 
         if (notif == null) throw new NullPointerException("notif");
         if (notif.getDatasetName() == null) throw new IllegalArgumentException("Delivery Notification object's DatasetName is null.");
@@ -856,5 +908,23 @@ public class EnvelopingUtil {
             return null;
         }
     }
+    
+    public static ASN1ObjectIdentifier asCMSAlgorithm(CipherSuite cipherSuite) {
+        if (cipherSuite == CipherSuite.TRIPLEDES_RSA_SHA1)
+            return CMSAlgorithm.DES_EDE3_CBC;
+        else if (cipherSuite == CipherSuite.AES_RSA_SHA1)
+            return CMSAlgorithm.AES256_CBC;
+        else
+            return null;
+    }
+    
+    private static String asSignatureAlgorithm(CipherSuite cipherSuite) {
+        if (cipherSuite == CipherSuite.TRIPLEDES_RSA_SHA1 || cipherSuite == CipherSuite.AES_RSA_SHA1) {
+            return "SHA1withRSA";
+        } else {
+            return null;
+        }
+    }
+
 
 }

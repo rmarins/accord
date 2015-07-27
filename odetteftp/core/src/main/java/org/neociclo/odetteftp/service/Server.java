@@ -152,15 +152,15 @@ public abstract class Server extends BaseService {
 
                 // TODO send Emergency Close Down End Session to all channels open
 
-                // TODO maybe safe to include a timeout argument here
-                closeActiveChannels.awaitUninterruptibly();
+                // MPA : add 1 minute timeout 
+                closeActiveChannels.awaitUninterruptibly(60*1000);
 
             } else {
     
                 ChannelGroupFuture activeChannelsCloseFuture = getChannelGroupCloseFuture(activeChildChannels);
 
-                // TODO maybe safe to include a timeout argument here
-                activeChannelsCloseFuture.awaitUninterruptibly();
+                // MPA : add 1 minute timeout 
+                activeChannelsCloseFuture.awaitUninterruptibly(60*1000);
 
             }
 

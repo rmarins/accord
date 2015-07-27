@@ -16,24 +16,10 @@
  */
 package org.neociclo.odetteftp.util;
 
-import static org.junit.Assert.assertTrue;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createCompressedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createEnvelopedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromCompressedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromEnvelopedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createFileFromSignedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.createSignedData;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.openCompressedDataStreamGenerator;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.openEnvelopedDataStreamGenerator;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.openSignedDataParser;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.openSignedDataStreamGenerator;
-import static org.neociclo.odetteftp.util.EnvelopingUtil.parseEnvelopedData;
-import static org.neociclo.odetteftp.util.OftpTestUtil.getResourceFile;
-import static org.neociclo.odetteftp.util.OftpTestUtil.getTestDataDir;
-import static org.neociclo.odetteftp.util.SecurityUtil.getCertificateEntry;
-import static org.neociclo.odetteftp.util.SecurityUtil.getPrivateKey;
-import static org.neociclo.odetteftp.util.SecurityUtil.openCertificate;
-import static org.neociclo.odetteftp.util.SecurityUtil.openKeyStore;
+import static org.junit.Assert.*;
+import static org.neociclo.odetteftp.util.EnvelopingUtil.*;
+import static org.neociclo.odetteftp.util.OftpTestUtil.*;
+import static org.neociclo.odetteftp.util.SecurityUtil.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,6 +31,8 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.neociclo.odetteftp.protocol.v20.CipherSuite;
 
@@ -71,11 +59,11 @@ public class EnvelopingUtilTest {
         createCompressedData(input, output);
     }
 
-    public static void uncompress(File input, File output) throws Exception {
+    private static void uncompress(File input, File output) throws Exception {
         createFileFromCompressedData(input, output);
     }
 
-    public static void envelope(File input, File output) throws Exception {
+    private static void envelope(File input, File output) throws Exception {
 
         // load public certificate
         File partnerCertFile = getResourceFile(PARTNER_CERT_PATH);
@@ -85,7 +73,7 @@ public class EnvelopingUtilTest {
 
     }
 
-    public static void unenvelope(File input, File output) throws Exception {
+    private static void unenvelope(File input, File output) throws Exception {
 
         char[] pwd = TEST_KEYSTORE_PASSWORD.toCharArray();
         File recipientKsFile = getResourceFile(PARTNER_KS_PATH);
@@ -96,8 +84,18 @@ public class EnvelopingUtilTest {
         createFileFromEnvelopedData(input, output, recCert, recKey);
 
     }
+    
+    private static void unenvelope2(File input, File output) throws Exception {
+        char[] pwd = TEST_KEYSTORE_PASSWORD.toCharArray();
+        File recipientKsFile = getResourceFile(PARTNER_KS_PATH);
+        KeyStore recKs = openKeyStore(recipientKsFile, pwd);
+        X509Certificate recCert = getCertificateEntry(recKs);
+        PrivateKey recKey = getPrivateKey(recKs, pwd);
+        InputStream is = openEnvelopedDataParser(FileUtils.openInputStream(input), recCert, recKey);
+        FileUtils.copyInputStreamToFile(is, output);
+    }
 
-    public static void addSignature(File input, File output) throws Exception {
+    private static void addSignature(File input, File output) throws Exception {
 
         // load the keystore and the private-key
         char[] pwd = TEST_KEYSTORE_PASSWORD.toCharArray();
@@ -110,7 +108,7 @@ public class EnvelopingUtilTest {
 
     }
 
-    public static void removeSignature(File input, File output) throws Exception {
+    private static void removeSignature(File input, File output) throws Exception {
         // load public certificate
         File myCertFile = getResourceFile(MY_CERT_PATH);
         X509Certificate myCert = (X509Certificate) openCertificate(myCertFile);
@@ -332,5 +330,49 @@ public class EnvelopingUtilTest {
 
         assertTrue("Original file and decompressed data file content are not equal.", Arrays.equals(hash1, hash2));
     }
+    
+    
+    
+    @Test
+    public void testOpenEnvelopedDataParser() throws Exception {
+        File inputData = getResourceFile(TEST_FILE_PATH);
+        File enveloped = new File(getTestDataDir(), inputData.getName() + ".2nd");
+        File unenveloped = new File(getTestDataDir(), inputData.getName() + ".5th");
 
+        envelope(inputData, enveloped);
+        unenvelope2(enveloped, unenveloped);
+        
+        byte[] hash1 = SecurityUtil.computeFileHash(inputData, "MD5");
+        byte[] hash2 = SecurityUtil.computeFileHash(unenveloped, "MD5");
+        assertTrue("Original file and unenveloped data file content are not equal.", Arrays.equals(hash1, hash2));
+        
+        enveloped.delete();
+        unenveloped.delete();
+    }
+    
+    @Test
+    public void testCreateSignedData() throws Exception {
+        File data = getResourceFile(TEST_FILE_PATH);
+        byte[] dataBytes = FileUtils.readFileToByteArray(data);
+
+        // generate a test keystore on the fly
+        KeyStore ks = OnTheFlyHelper.createCredentials();
+        PrivateKey key = getPrivateKey(ks, OnTheFlyHelper.KEY_PASSWD);
+        X509Certificate cert = getCertificateEntry(ks);
+
+        byte[] signedData = createSignedData(
+                dataBytes, 
+                CIPHER_SELECTION,
+                cert,
+                key);
+
+        SignatureVerifyResult svr = new SignatureVerifyResult();
+        byte[] outdata = parseSignedData(signedData, cert, svr);
+
+        assertEquals("Original file and unenveloped data file content are not equal.", 
+                DigestUtils.md5Hex(dataBytes),
+                DigestUtils.md5Hex(outdata));
+    }
+    
+    
 }

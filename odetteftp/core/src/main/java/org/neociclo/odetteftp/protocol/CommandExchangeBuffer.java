@@ -19,7 +19,9 @@ package org.neociclo.odetteftp.protocol;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.neociclo.odetteftp.protocol.CommandFormat.Field;
@@ -61,38 +63,41 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
 
         checkAttribute(field.getType(), value);
 
-        if (type == Field.ALPHANUMERIC_TYPE) {
-            if (value != null && value.length() > length) {
+        if (type == Field.ALPHANUMERIC_TYPE || type == Field.CR_TYPE) {
+        	if (value != null && value.length() > length) {
                 // truncate
                 LOGGER.warn("Truncating field [{}] with length value of [{}] greater than {}.",
                         new Object[] { field.getName(), value, length });
                 result = value.substring(0, length);
             } else {
-                LOGGER.warn("Padding field [{}] with length value of [{}] lower than {}.",
-                        new Object[] { field.getName(), value, length });
-                // padd with whitespace
+            	if (value != null && value.length() < length) {
+            		LOGGER.info("Padding field [{}] with length value of [{}] lower than {}.",
+            				new Object[] { field.getName(), value, length });
+            	}
+                // pad with whitespace
                 result = ProtocolUtil.padd(value, length, false, ' ');
             }
-            
-            String upperResult = result.toUpperCase();
-            if (!upperResult.equals(result)) {
-                LOGGER.warn("Value [{}] has lower case characters. Original value not being changed.");
-            }
+
+        	String upperResult = result.toUpperCase();
+        	if (!upperResult.equals(result)) {
+        		LOGGER.warn("Value [{}] has lower case characters. Original value not being changed.");
+        	}
         } else if (type == Field.NUMERIC_TYPE) {
-            if (value.length() < length) {
-                LOGGER.warn("Padding numeric field [{}] with length value of [{}] lower than {}.",
-                        new Object[] { field.getName(), value, length });
-            }
-            result = ProtocolUtil.padd(value, length, true, '0');
+        	if (value == null || value.length() < length) {
+        		LOGGER.debug("Padding numeric field [{}] with length value of [{}] lower than {}.",
+        				new Object[] { field.getName(), value, length });
+        	}
+        	// pad with zeroes
+        	result = ProtocolUtil.padd(value, length, true, '0');
         } else if (type == Field.ENCODED_TYPE) {
-            result = value;
+        	result = value;
         }
 
         return result;
     }
 
     public static boolean checkAttribute(char type, String value) {
-        if (value == null) {
+        if (value == null || value.equals("")) {
             return true;
         }
 
@@ -112,6 +117,12 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
             }
 
             return true;
+        } else if (type == Field.CR_TYPE) {
+        	int length = value.length();
+            if (length != 1 || ! CR_BYTES.contains(value.charAt(0))) {
+                LOGGER.warn("Value [{}] is neither an ASCII nor EBCDIC carriage return", value);
+                return false;
+            }
         }
 
         return false;
@@ -120,6 +131,10 @@ public class CommandExchangeBuffer implements OdetteFtpExchangeBuffer {
     private Map<String, Object> attributes;
     private Integer size = null;
     private final CommandFormat commandFormat;
+
+    // valid values for the SSRM CR field
+	private static final List<Character> CR_BYTES = 
+			Arrays.asList(new Character[] { 0x0d, 0x8d} );
 
     public CommandExchangeBuffer(CommandFormat commandFormat) {
         super();

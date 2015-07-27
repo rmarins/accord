@@ -126,7 +126,10 @@ public abstract class Client extends BaseService {
 
         Channel c = connectFuture.getChannel();
         if (!c.isConnected()) {
+        	LOGGER.debug("Release external resources");
+        	//getChannelFactory().releaseExternalResources();
         	releaseExternalResources();
+        	setDisconnected();
             LOGGER.info("Connection failed. Channel is not connected: {} ", c);
             throw new Exception("Channel is not connected.");
         }
@@ -137,8 +140,8 @@ public abstract class Client extends BaseService {
         ChannelFuture closeFuture = c.getCloseFuture();
         ChannelFutureListener setDisconnectedOnClose = new ChannelFutureListener() {
             public void operationComplete(ChannelFuture future) throws Exception {
-                setDisconnected();
-                LOGGER.info("Disconnected.");
+                // setDisconnected();
+                LOGGER.debug("Call DisconnectListener");
                 if (getDisconnectListener() != null) {
                 	getDisconnectListener().run();
                 }
@@ -149,19 +152,45 @@ public abstract class Client extends BaseService {
         // need await disconnect
         if (await) {
             awaitDisconnect();
+        } else {
+            closeOnDisconnect();
         }
 
     }
 
+    /**
+     * Close on disconnect.
+     */
+    public synchronized void closeOnDisconnect() {
+        Thread closer = new Thread(new Runnable() {
+
+            /**
+             * @see java.lang.Runnable#run()
+             */
+            @Override
+            public void run() {
+                awaitDisconnect();
+            }
+        }, "ShutdownOnDisconnect");
+
+        closer.start();
+    }
+
+    /**
+     * Await disconnect.
+     */
     public synchronized void awaitDisconnect() {
         if (channel == null) {
-//            throw new IllegalStateException("The connect() method were not invoked.");
-        	return;
+            throw new IllegalStateException("The connect() method were not invoked.");
         }
+        LOGGER.info("Await disconnect ...");
         ChannelFuture closeFuture = channel.getCloseFuture();
         closeFuture.awaitUninterruptibly();
-
+        LOGGER.debug("Release external resources");
+        //getChannelFactory().releaseExternalResources();
         releaseExternalResources();
+        setDisconnected();
+        LOGGER.info("Disconnected.");
     }
 
     public boolean isConnected() {

@@ -19,6 +19,7 @@ package org.neociclo.odetteftp.protocol.v20;
 import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
 
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.ALPHANUMERIC_TYPE;
+import static org.neociclo.odetteftp.protocol.CommandFormat.Field.CR_TYPE;
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.BINARY_TYPE;
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.ENCODED_TYPE;
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.FIXED_FORMAT;
@@ -96,7 +97,7 @@ public enum ReleaseFormatVer20 implements CommandFormat {
             new Field(1, ESIDREAS_FIELD, FIXED_FORMAT, NUMERIC_TYPE, 2),
             new Field(3, ESIDREASL_FIELD, VARIABLE_FORMAT, NUMERIC_TYPE, 3),         // Answer Reason Text Length
             new Field(6, ESIDREAST_FIELD, FIXED_FORMAT, ENCODED_TYPE, ESIDREASL_FIELD),  // Answer Reason Text
-            new Field(ESIDREAST_FIELD, ESIDCR_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1)
+            new Field(ESIDREAST_FIELD, ESIDCR_FIELD, FIXED_FORMAT, CR_TYPE, 1)
     }),
 
     /** Negative End Response command format. */
@@ -170,13 +171,13 @@ public enum ReleaseFormatVer20 implements CommandFormat {
             new Field(47, SSIDAUTH_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1),
             new Field(48, SSIDRSV1_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 4),
             new Field(52, SSIDUSER_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 8),
-            new Field(60, SSIDCR_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1)
+            new Field(60, SSIDCR_FIELD, FIXED_FORMAT, CR_TYPE, 1)
     }),
 
     /** Start Session Ready Message command format. */
     SSRM_V20(SSRM, new Field[] { new Field(0, SSRMCMD_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1),
             new Field(1, SSRMMSG_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 17),
-            new Field(18, SSRMCR_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1)
+            new Field(18, SSRMCR_FIELD, FIXED_FORMAT, CR_TYPE, 1)
     }),
 
     /** Security Change Direction. */

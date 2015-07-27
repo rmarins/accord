@@ -227,7 +227,8 @@ public class SecurityUtil {
 
         MessageDigest hash = MessageDigest.getInstance(algorithm, BC_PROVIDER);
 
-        FileChannel fileChannel = (new FileInputStream(file)).getChannel();
+        FileInputStream fis = new FileInputStream(file);
+        FileChannel fileChannel = fis.getChannel();
         ByteBuffer buf = ByteBuffer.allocateDirect(COMPUTING_HASH_BUFFER_SIZE);
 
         while (fileChannel.read(buf) != -1) {
@@ -237,6 +238,7 @@ public class SecurityUtil {
         }
 
         try {
+            fis.close();
             fileChannel.close();
         } catch (IOException e) {
             // ignore

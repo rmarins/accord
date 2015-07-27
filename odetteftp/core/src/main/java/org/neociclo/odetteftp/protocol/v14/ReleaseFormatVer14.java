@@ -18,6 +18,7 @@ package org.neociclo.odetteftp.protocol.v14;
 
 import static org.neociclo.odetteftp.util.CommandFormatConstants.*;
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.ALPHANUMERIC_TYPE;
+import static org.neociclo.odetteftp.protocol.CommandFormat.Field.CR_TYPE;
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.FIXED_FORMAT;
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.NUMERIC_TYPE;
 import static org.neociclo.odetteftp.protocol.CommandFormat.Field.VARIABLE_FORMAT;
@@ -77,7 +78,7 @@ public enum ReleaseFormatVer14 implements CommandFormat {
     /** End Session command format. */
     ESID_V14(ESID, new Field[] { new Field(0, ESIDCMD_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1),
             new Field(1, ESIDREAS_FIELD, FIXED_FORMAT, NUMERIC_TYPE, 2),
-            new Field(3, ESIDCR_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1) }),
+            new Field(3, ESIDCR_FIELD, FIXED_FORMAT, CR_TYPE, 1) }),
 
     /** Negative End Response command format. */
     NERP_V14(NERP, new Field[] { new Field(0, NERPCMD_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1),
@@ -129,12 +130,12 @@ public enum ReleaseFormatVer14 implements CommandFormat {
             new Field(44, SSIDCRED_FIELD, VARIABLE_FORMAT, NUMERIC_TYPE, 3),
             new Field(47, SSIDRSV1_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 5),
             new Field(52, SSIDUSER_FIELD, VARIABLE_FORMAT, ALPHANUMERIC_TYPE, 8),
-            new Field(60, SSIDCR_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1) }),
+            new Field(60, SSIDCR_FIELD, FIXED_FORMAT, CR_TYPE, 1) }),
 
     /** Start Session Ready Message command format. */
     SSRM_V14(SSRM, new Field[] { new Field(0, SSRMCMD_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1),
             new Field(1, SSRMMSG_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 17),
-            new Field(18, SSRMCR_FIELD, FIXED_FORMAT, ALPHANUMERIC_TYPE, 1) });
+            new Field(18, SSRMCR_FIELD, FIXED_FORMAT, CR_TYPE, 1) });
 
     /**
      * Return the Command Format definition given a specific Command identifier

@@ -29,16 +29,22 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import javax.security.auth.x500.X500Principal;
 import javax.security.auth.x500.X500PrivateCredential;
 
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v1CertificateBuilder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 /**
  * @author Rafael Marins
@@ -106,66 +112,79 @@ public class OnTheFlyHelper {
 	public static X509Certificate generateRootCert(KeyPair pair) throws Exception {
 
 		installBouncyCastleProviderIfNecessary();
-
-		X509V1CertificateGenerator certGen = new X509V1CertificateGenerator();
-
-		certGen.setSerialNumber(BigInteger.valueOf(1));
-		certGen.setIssuerDN(new X500Principal("CN=Test CA Certificate"));
-		certGen.setNotBefore(new Date(System.currentTimeMillis()));
-		certGen.setNotAfter(new Date(System.currentTimeMillis() + VALIDITY_PERIOD));
-		certGen.setSubjectDN(new X500Principal("CN=Test CA Certificate"));
-		certGen.setPublicKey(pair.getPublic());
-		certGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
-
-		return certGen.generate(pair.getPrivate(), BC_PROVIDER);
+		
+		ContentSigner sigGen = new JcaContentSignerBuilder("SHA1WithRSAEncryption").setProvider(BC_PROVIDER).build(pair.getPrivate()); 
+		SubjectPublicKeyInfo subPubKeyInfo = new SubjectPublicKeyInfo(new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA"), pair.getPublic().getEncoded());
+        X509v1CertificateBuilder v1CertGen = new X509v1CertificateBuilder(
+		        new X500Name("CN=Test CA Certificate"),
+		        BigInteger.ONE,
+		        new Date(System.currentTimeMillis()),
+		        new Date(System.currentTimeMillis() + VALIDITY_PERIOD),
+		        new X500Name("CN=Test CA Certificate"),
+		        subPubKeyInfo );
+        X509CertificateHolder certHolder = v1CertGen.build(sigGen);
+		X509Certificate cert = ( new JcaX509CertificateConverter() 
+		        ).getCertificate( certHolder ); 
+		
+		return cert;
 	}
 
 	public static X509Certificate generateIntermediateCert(PublicKey intKey, PrivateKey caKey, X509Certificate caCert)
 			throws Exception {
 
 		installBouncyCastleProviderIfNecessary();
+		
+        ContentSigner sigGen = new JcaContentSignerBuilder("SHA1WithRSAEncryption").setProvider(BC_PROVIDER).build(caKey); 
+        SubjectPublicKeyInfo subPubKeyInfo = new SubjectPublicKeyInfo(new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1withRSA"), intKey.getEncoded());
+        X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(
+                new JcaX509CertificateHolder(caCert).getSubject(),
+                BigInteger.ONE,
+                new Date(System.currentTimeMillis()),
+                new Date(System.currentTimeMillis() + VALIDITY_PERIOD),
+                new X500Name("CN=Test Intermediate Certificate"),
+                subPubKeyInfo );
 
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-
-		certGen.setSerialNumber(BigInteger.valueOf(1));
-		certGen.setIssuerDN(caCert.getSubjectX500Principal());
-		certGen.setNotBefore(new Date(System.currentTimeMillis()));
-		certGen.setNotAfter(new Date(System.currentTimeMillis() + VALIDITY_PERIOD));
-		certGen.setSubjectDN(new X500Principal("CN=Test Intermediate Certificate"));
-		certGen.setPublicKey(intKey);
-		certGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
-
-		certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-		certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(intKey));
-		certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(0));
-		certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature
+        JcaX509ExtensionUtils extensionUtil = new JcaX509ExtensionUtils();
+        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false, extensionUtil.createAuthorityKeyIdentifier(caCert));
+        v3CertGen.addExtension(Extension.subjectKeyIdentifier, false, extensionUtil.createSubjectKeyIdentifier(intKey));
+		v3CertGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(0));
+		v3CertGen.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature
 				| KeyUsage.keyCertSign | KeyUsage.cRLSign));
 
-		return certGen.generate(caKey, BC_PROVIDER);
+        X509CertificateHolder certHolder = v3CertGen.build(sigGen);
+        X509Certificate cert = ( new JcaX509CertificateConverter() 
+                ).getCertificate( certHolder ); 
+        
+        return cert;
 	}
 
 	public static X509Certificate generateEndEntityCert(PublicKey entityKey, PrivateKey caKey, X509Certificate caCert)
 			throws Exception {
 
 		installBouncyCastleProviderIfNecessary();
+ 
+		ContentSigner sigGen = new JcaContentSignerBuilder("SHA1WITHRSA").setProvider(BC_PROVIDER).build(caKey); 
+        SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(entityKey.getEncoded());    
+        X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(
+                new JcaX509CertificateHolder(caCert).getSubject(),
+                BigInteger.ONE,
+                new Date(System.currentTimeMillis()),
+                new Date(System.currentTimeMillis() + VALIDITY_PERIOD),
+                new X500Name("CN=Test End Certificate"),
+                subPubKeyInfo );
 
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+        JcaX509ExtensionUtils extensionUtil = new JcaX509ExtensionUtils();
+        v3CertGen.addExtension(Extension.authorityKeyIdentifier, false, extensionUtil.createAuthorityKeyIdentifier(caCert));
+        v3CertGen.addExtension(Extension.subjectKeyIdentifier, false, extensionUtil.createSubjectKeyIdentifier(entityKey));
+        v3CertGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
+        v3CertGen.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature
+                | KeyUsage.keyEncipherment));
 
-		certGen.setSerialNumber(BigInteger.valueOf(1));
-		certGen.setIssuerDN(caCert.getSubjectX500Principal());
-		certGen.setNotBefore(new Date(System.currentTimeMillis()));
-		certGen.setNotAfter(new Date(System.currentTimeMillis() + VALIDITY_PERIOD));
-		certGen.setSubjectDN(new X500Principal("CN=Test End Certificate"));
-		certGen.setPublicKey(entityKey);
-		certGen.setSignatureAlgorithm("SHA1WithRSAEncryption");
-
-		certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-		certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(entityKey));
-		certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
-		certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature
-				| KeyUsage.keyEncipherment));
-
-		return certGen.generate(caKey, BC_PROVIDER);
+        X509CertificateHolder certHolder = v3CertGen.build(sigGen);
+        X509Certificate cert = ( new JcaX509CertificateConverter() 
+                ).getCertificate( certHolder ); 
+        
+		return cert;
 	}
 
 	public static KeyPair generateRSAKeyPair() throws Exception {

@@ -101,6 +101,9 @@ public class OdetteFtpConfiguration implements Serializable {
 	public Boolean useSecureAuthentication() {
 		return useSecureAuthentication;
 	}
+	public Boolean getUseSecureAuthentication() {
+	        return useSecureAuthentication;
+	}
 
 	public void setUseSecureAuthentication(Boolean useSecureAuthentication) {
 		this.useSecureAuthentication = useSecureAuthentication;

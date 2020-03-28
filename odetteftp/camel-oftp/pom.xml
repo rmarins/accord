@@ -44,7 +44,7 @@
       org.neociclo.odetteftp.netty.*
     </odetteftp.osgi.private.pkg>
   
-    <camel.version>2.5.0</camel.version>
+    <camel.version>3.1.0</camel.version>
     <commons-io.version>1.3.2</commons-io.version>
   </properties>
 
